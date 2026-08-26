@@ -8,12 +8,12 @@ Covers Phase 0 (Foundation), Phase 1 (manufacturer onboarding) and Phase 2
 | Metric | Value |
 | --- | --- |
 | Source files | 88 (`app/`, `components/`, `lib/`, `e2e/`) |
-| Routes | 31 (plus `/_not-found`) |
+| Routes | 32 (plus `/_not-found`) |
 | Onboarding steps | 9, all resumable and deep-linkable |
 | Seeded manufacturers / products | 12 / 72 |
 | Seeded enquiries / campaigns | 50 / 12 |
 | Bundled product photos | 22 across 13 categories (CC / public domain) |
-| End-to-end specs | 19, all passing |
+| End-to-end specs | 21, all passing |
 | TypeScript | `tsc --noEmit` clean |
 | ESLint | 0 errors |
 | Production build | Clean, all routes prerendered as static |
@@ -155,9 +155,26 @@ touch; Escape and mouse-away both close it.
 Because it renders real listings, a category with three products says three. That is more
 useful than a padded grid.
 
+### Card typography
+
+The type scale follows the reference card, because the hierarchy is doing real work in a
+six-across grid:
+
+| Element | Size / weight |
+| --- | --- |
+| Title | 14px / 400, two lines |
+| Price range | 20px / 700 — `KSh 712-745`, tight hyphen, symbol once |
+| MOQ line | 13px, value in foreground, enquiry count muted beside it |
+| Trust line | 12px — `Verified · 17 yrs · Machakos` |
+
+The title is deliberately *regular* weight. Bolding both the name and the price gives the
+eye nowhere to land, and price is what a buyer scans a wholesale grid for. The upper bound
+of a range drops the `KSh` — repeating it is what makes one range read as two numbers.
+
 ### Layout: full-bleed, six across, no sidebar
 
-Results and the home grid run the full width at six columns, with refinement in a
+Containers run to 112rem (1792px) so the grid reaches nearly edge to edge on a 1900px
+display, with a seventh column above 1700px. Results and the home grid run six across, with refinement in a
 horizontal bar that expands into a panel. A permanent left rail would cost roughly two
 columns of listings, and buyers scanning a grid want density far more often than facets.
 The header collapses on scroll into a compact bar carrying the logo and an inline search —

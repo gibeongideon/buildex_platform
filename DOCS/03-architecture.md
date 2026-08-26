@@ -13,9 +13,25 @@
 | Icons | lucide-react | — |
 | E2E tests | Playwright | 1.5x |
 
-Chosen to match the production stack in the stack recommendation
-(`Next.js + TypeScript + PostgreSQL + Drizzle + Odoo API + M-Pesa`) so that mockup
-components survive the backend cutover rather than being thrown away.
+Chosen to match the storefront stack in `requirements_reference/STACK.MD`
+(**Next.js + TypeScript + Tailwind**), so mockup components survive the backend cutover
+rather than being thrown away.
+
+### How the seam maps onto the intended production architecture
+
+`STACK.MD` splits the backend in two, and each repository already sits on the right side of
+that split. This is why the seam was worth building:
+
+| Repository | Production owner |
+| --- | --- |
+| `MarketplaceRepo`, `ProductRepo`, `ManufacturerRepo`, `EnquiryRepo`, `OnboardingRepo` | Next.js API routes → **Odoo JSON-RPC** (transactional, low volume per request) |
+| `InsightsRepo`, `CampaignRepo` | **FastAPI** service reading Odoo's Postgres (or a synced analytics store) — bulk aggregation, never call-by-call RPC |
+| `browsingRepo` | Client-side today; a per-user store (Redis) in production |
+| `parseRequirement` (Ask AI) | The Python **AI layer** the stack note describes — the deterministic matcher is a placeholder with the same signature |
+
+The transactional/analytical split is not cosmetic: pulling analytics through RPC
+call-by-call is exactly the mistake `STACK.MD` warns against, and having `InsightsRepo`
+already separated means that never has to be untangled later.
 
 ---
 

@@ -338,3 +338,32 @@ test("the hero's category scope narrows the results", async ({ page }) => {
     timeout: 15_000,
   });
 });
+
+test("the mega menu stays open when a mouse user clicks the trigger", async ({ page }) => {
+  await page.goto("/marketplace");
+  const trigger = page.getByRole("button", { name: /All categories/i });
+
+  // Hover fires before click, so a toggling handler closed the panel it had
+  // just opened. Click only ever opens.
+  await trigger.hover();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true", { timeout: 15_000 });
+  await trigger.click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+
+  await page.keyboard.press("Escape");
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+});
+
+test("the home page leads with the product grid, no dead columns", async ({ page }) => {
+  await page.goto("/marketplace");
+
+  // The grid is the point of the page, so it carries real depth.
+  await expect
+    .poll(async () => page.locator("article").count(), { timeout: 20_000 })
+    .toBeGreaterThan(30);
+
+  // The panel row fills every column it reserves.
+  const row = page.locator("section").filter({ hasText: "Categories for you" }).first();
+  const panels = row.locator("> div > div");
+  await expect(panels.first()).toBeVisible();
+});

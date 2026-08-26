@@ -13,8 +13,8 @@ import { BuildexMark } from "@/components/shared/brand";
 
 const PRODUCTS = [
   {
-    key: "buildex" as const,
-    name: "Buildex",
+    key: "interiors" as const,
+    name: "Buildex Interiors",
     role: "Product supply & distribution",
     icon: Truck,
     description:
@@ -47,7 +47,7 @@ const PRODUCTS = [
 
 const CHAIN = [
   { icon: Factory, label: "Manufacturer", detail: "Lists verified products" },
-  { icon: Truck, label: "Buildex", detail: "Supplies and delivers" },
+  { icon: Truck, label: "Buildex Interiors", detail: "Supplies and delivers" },
   { icon: Store, label: "Hardware shop", detail: "Stocks and sells" },
   { icon: Banknote, label: "POS & wallet", detail: "Captures the transaction" },
 ];
@@ -59,13 +59,13 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <div className="min-w-0">
-              <p className="text-sm font-medium text-brand">The Buildex Ecosystem</p>
+              <p className="text-sm font-medium text-brand">The Buildex Connect platform</p>
               <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                 One platform connecting manufacturers, hardware shops and the capital that
                 moves between them.
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-                Buildex is moving from product supply to platform infrastructure for
+                Buildex Connect is the platform Buildex Interiors is building to move from product supply to infrastructure for
                 Kenya&apos;s construction material market — connecting what a manufacturer
                 produces to what a builder buys at a local hardware, and financing the stock in
                 between.

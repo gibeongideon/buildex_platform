@@ -1,8 +1,12 @@
 import type { Manufacturer } from "@/lib/schemas/manufacturer";
 import type { Product } from "@/lib/schemas/product";
+import type { Enquiry } from "@/lib/schemas/enquiry";
+import type { Campaign } from "@/lib/schemas/campaign";
 import type { DemoSession, OnboardingDraft } from "@/lib/data/types";
 import { seedManufacturers } from "@/lib/data/fixtures/manufacturers";
 import { seedProducts } from "@/lib/data/fixtures/products";
+import { seedEnquiries } from "@/lib/data/fixtures/enquiries";
+import { seedCampaigns } from "@/lib/data/fixtures/campaigns";
 
 /*
   In-memory database for the mockup, persisted to localStorage so a demo
@@ -13,11 +17,14 @@ import { seedProducts } from "@/lib/data/fixtures/products";
   repositories in lib/data/index.ts.
 */
 
-const STORAGE_KEY = "buildex.mock.v2";
+/* Bump when the shape of seeded data changes, or old persisted data wins. */
+const STORAGE_KEY = "buildex.mock.v3";
 
 export type MockDb = {
   manufacturers: Manufacturer[];
   products: Product[];
+  enquiries: Enquiry[];
+  campaigns: Campaign[];
   draft: OnboardingDraft | null;
   session: DemoSession;
 };
@@ -42,6 +49,8 @@ function seed(): MockDb {
   return {
     manufacturers: seedManufacturers(),
     products: seedProducts(),
+    enquiries: seedEnquiries(),
+    campaigns: seedCampaigns(),
     draft: null,
     session: { role: "guest", manufacturerId: null },
   };

@@ -25,19 +25,18 @@ const SECTIONS: NavSection[] = [
   {
     title: "Selling",
     items: [
-      // Labels stay short: the sidebar is 16rem and the "Soon" badge takes the
-      // tail of the row, so longer names truncate mid-word.
-      { href: "/connect/catalogue", label: "Catalogue", icon: Package, upcoming: true },
-      { href: "/connect/orders", label: "Orders", icon: ShoppingCart, upcoming: true },
-      { href: "/connect/campaigns", label: "Campaigns", icon: Megaphone, upcoming: true },
-      { href: "/connect/insights", label: "Insights", icon: BarChart3, upcoming: true },
+      // Labels stay short: the sidebar is 16rem, so longer names truncate.
+      { href: "/connect/catalogue", label: "Catalogue", icon: Package },
+      { href: "/connect/orders", label: "Enquiries", icon: ShoppingCart },
+      { href: "/connect/campaigns", label: "Campaigns", icon: Megaphone },
+      { href: "/connect/insights", label: "Insights", icon: BarChart3 },
     ],
   },
   {
     title: "Account",
     items: [
       { href: "/connect/subscription", label: "Subscription", icon: CreditCard },
-      { href: "/connect/settings", label: "Settings", icon: Settings, upcoming: true },
+      { href: "/connect/settings", label: "Settings", icon: Settings },
     ],
   },
 ];

@@ -124,6 +124,25 @@ export const manufacturerRepo: ManufacturerRepo = {
       documents: draft.documents,
       checks,
       subscription: null,
+      // A brand-new manufacturer has no trading history, so its storefront
+      // starts honest: no orders fulfilled, no response record. Those fill in
+      // as it trades rather than being invented at sign-up.
+      storefront: {
+        tagline: `${company.categories[0]} manufacturer in ${company.county}`,
+        about: `${company.legalName} manufactures ${company.categories
+          .join(", ")
+          .toLowerCase()} in ${company.county}, supplying hardware retailers across ${company.distributionRegions.join(
+          ", ",
+        )}.`,
+        responseRatePercent: 0,
+        avgResponseHours: 0,
+        certifications: [],
+        paymentTerms: ["M-Pesa", "Bank transfer"],
+        deliveryPolicy: "Delivery terms to be confirmed per order.",
+        minOrderPolicy:
+          "Minimum order quantity is set per product and shown on each listing.",
+        ordersFulfilled: 0,
+      },
       submittedAt: now(),
       verifiedAt: null,
       reviewNotes: [],

@@ -1,30 +1,13 @@
 # 05 — Next Steps
 
-## Recommended next slice: Phase 2 + 3 together
+## Recommended next slice: Phase 3
 
-Phases 2 and 3 are worth doing as one push, because together they close the Buildex
-Connect loop end to end — a manufacturer signs up, ops verifies them, they list a
-catalogue, and a hardware shop can see it. Phase 2 alone leaves verification advancing only
-through demo buttons.
+Phase 2 shipped the marketplace and the manufacturer portal. The gap it leaves is the
+other side of the counter: verification still advances only through demo buttons, so the
+Buildex Connect loop is not yet closed by a real actor.
 
-### Phase 2 — Manufacturer portal
-
-| Screen | Scope |
-| --- | --- |
-| `/connect/catalogue` | Create, edit, archive listings. Reuse `listingDraftSchema` and its price-band validation from the onboarding step |
-| `/connect/catalogue/import` | CSV price-list import with a preview table and per-row error report |
-| `/connect/orders` | Enquiry inbox: shop region, order size, requested delivery date; quote back or accept at list |
-| `/connect/campaigns` | Regional targeting builder with live reach estimates and pricing derived from hardware coverage per region |
-| `/connect/campaigns/[id]` | Impressions, product views, enquiries, orders, estimated conversion |
-| `/connect/insights` | Category demand by region, price positioning, regions that view but do not enquire |
-| `/connect/settings` | Company profile editing, team invitations with roles, settlement details, notification preferences |
-
-**New repositories needed:** `CampaignRepo`, `EnquiryRepo`. Add the interfaces to
-`lib/data/types.ts` first, then implement in `lib/data/mock/repos.ts`.
-
-**Gating to respect:** `productLimit(package)` caps listings at 10 on Free and 50 on Basic;
-`hasRegionalTargeting(package)` gates campaigns to Premium and VIP. Both already exist in
-`lib/schemas/subscription.ts`.
+Phase 3 closes it — a manufacturer signs up, **ops verifies them**, their listings go
+live, and a hardware shop can find them.
 
 ### Phase 3 — Ops & verification console
 
@@ -44,8 +27,14 @@ surface over existing operations, plus an `AuditRepo`.
 This is also where the demo scenario buttons get retired — the console becomes the real way
 to move an application.
 
-**Rough order:** new repository interfaces → ops console shell and queue → decision actions
-→ catalogue CRUD → campaigns → insights → retire demo scenario controls.
+**Rough order:** `AuditRepo` interface → console shell and queue → document reviewer →
+decision actions → directories → retire the demo scenario controls.
+
+### Also outstanding from Phase 2
+
+Bulk CSV price-list import (`/connect/catalogue/import`) — a preview table with a per-row
+error report. Deferred because it is a self-contained addition to a page that already
+works.
 
 ---
 
@@ -53,7 +42,7 @@ to move an application.
 
 | Phase | Scope | Depends on |
 | --- | --- | --- |
-| 4 | Hardware shop portal, marketplace, ordering, inventory | Phase 2 catalogue (something to buy) |
+| 4 | Hardware shop accounts, cart, ordering, fulfilment, inventory | Phase 2 marketplace (done — there is now something to buy) |
 | 5 | Wallet, credit eligibility, application, loan tracker, repayment | Phase 4 (transaction history to score on) |
 | 6 | Credit scoring engine, underwriting queue, portfolio, collections | Phase 5 |
 | 7 | Remaining marketing pages (Buildex, Capital, hardware acquisition) | Independent — can be pulled forward any time |

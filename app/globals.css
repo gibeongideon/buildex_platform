@@ -89,18 +89,17 @@
   --color-neutral-soft: var(--neutral-soft);
 
   /*
-    Brand typography, in the guideline's own order of prominence:
-    NEXA (primary) · ARIAL (secondary) · MONTSERAT (tertiary).
+    Brand typography: NEXA (primary) · ARIAL · MONTSERAT.
 
-    Nexa is a commercial licence and is not bundled here. Montserrat — also
-    on the brand's approved list, and likewise a geometric sans — stands in
-    for display type until a Nexa licence is in place; swap --font-display
-    when it is. Body, UI and data type use Arial, the brand's second face,
-    which is a system font (so no download) and whose digits are natively
-    monospaced — exactly what dense financial tables need.
+    Nexa is a commercial licence and is not bundled. Montserrat carries display
+    type as the faithful geometric stand-in; swap --font-display when a Nexa
+    licence exists. UI, body and data type use Inter — Arial's skeleton redrawn
+    for screens, with a taller x-height and true tabular figures for the
+    12–14px table sizes this product lives at. Arial remains in the fallback
+    stack so a failed webfont degrades to a brand-approved face.
   */
-  --font-sans: Arial, "Helvetica Neue", Helvetica, ui-sans-serif, system-ui,
-    sans-serif;
+  --font-sans: var(--font-inter), Arial, "Helvetica Neue", Helvetica,
+    ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-montserrat), Arial, "Helvetica Neue", Helvetica,
     sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;

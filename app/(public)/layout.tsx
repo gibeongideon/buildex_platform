@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 const FOOTER_SECTIONS = [
   {
-    title: "Buildex",
+    title: "Buildex Interiors",
     links: [
       { label: "Product supply", href: "/" },
       { label: "For hardware shops", href: "/" },
@@ -21,6 +21,7 @@ const FOOTER_SECTIONS = [
   {
     title: "Buildex Connect",
     links: [
+      { label: "Marketplace", href: "/marketplace" },
       { label: "For manufacturers", href: "/manufacturers" },
       { label: "Packages", href: "/manufacturers#packages" },
       { label: "Start onboarding", href: "/connect/onboarding/account" },
@@ -45,15 +46,29 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             <Wordmark size="sm" className="sm:hidden" />
             <Wordmark className="hidden sm:inline-flex" />
           </Link>
+          <nav aria-label="Main" className="ml-auto mr-1 hidden items-center gap-1 md:flex">
+            <Link
+              href="/marketplace"
+              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
+            >
+              Marketplace
+            </Link>
+            <Link
+              href="/manufacturers"
+              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
+            >
+              For manufacturers
+            </Link>
+          </nav>
           <div className="flex items-center gap-2">
             <ThemeToggle className="hidden lg:inline-flex" />
             <Button variant="secondary" size="sm" className="hidden sm:inline-flex" asChild>
               <Link href="/connect/dashboard">Sign in</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/manufacturers">
-                <span className="sm:hidden">Manufacturers</span>
-                <span className="hidden sm:inline">For manufacturers</span>
+              <Link href="/connect/onboarding/account">
+                <span className="sm:hidden">Sell</span>
+                <span className="hidden sm:inline">Start selling</span>
               </Link>
             </Button>
           </div>

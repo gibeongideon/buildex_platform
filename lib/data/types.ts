@@ -3,6 +3,8 @@ import type { Product } from "@/lib/schemas/product";
 import type { UploadedDocument } from "@/lib/schemas/document";
 import type { CheckStatus, VerificationCheckKey } from "@/lib/schemas/verification";
 import type { BillingCycle, PackageKey } from "@/lib/schemas/subscription";
+import type { Enquiry } from "@/lib/schemas/enquiry";
+import type { Campaign } from "@/lib/schemas/campaign";
 
 /*
   ===========================================================================
@@ -136,4 +138,131 @@ export interface OnboardingRepo {
 export interface SessionRepo {
   get(): Promise<DemoSession>;
   set(patch: Partial<DemoSession>): Promise<DemoSession>;
+}
+
+// ---------------------------------------------------------------------------
+// Marketplace
+// ---------------------------------------------------------------------------
+
+export type MarketplaceSort =
+  | "relevance"
+  | "price-asc"
+  | "price-desc"
+  | "lead-time"
+  | "newest";
+
+export type MarketplaceFilter = {
+  query?: string;
+  categories?: string[];
+  regions?: string[];
+  manufacturerId?: string;
+  /** Upper bound on the product's cheapest band. */
+  maxUnitPrice?: number;
+  maxLeadTimeDays?: number;
+  verifiedOnly?: boolean;
+  sort?: MarketplaceSort;
+};
+
+/** A listing joined to the manufacturer that sells it — what a card needs. */
+export type MarketplaceListing = {
+  product: Product;
+  manufacturer: Manufacturer;
+};
+
+export type MarketplaceFacets = {
+  categories: { value: string; count: number }[];
+  regions: { value: string; count: number }[];
+  manufacturers: { id: string; name: string; count: number }[];
+  priceRange: { min: number; max: number };
+  total: number;
+};
+
+/**
+ * The public marketplace: the central Buildex Connect catalogue, plus each
+ * manufacturer's own storefront.
+ *
+ * Only manufacturers cleared to list appear here, and only their active
+ * listings — so verification status governs public visibility in one place
+ * rather than being re-checked on every page.
+ */
+export interface MarketplaceRepo {
+  search(
+    filter: MarketplaceFilter,
+  ): Promise<{ listings: MarketplaceListing[]; facets: MarketplaceFacets }>;
+  getListing(productId: string): Promise<MarketplaceListing | null>;
+  /** A manufacturer's storefront: the company plus its public catalogue. */
+  getStorefront(
+    manufacturerId: string,
+  ): Promise<{ manufacturer: Manufacturer; products: Product[] } | null>;
+  listStorefronts(): Promise<
+    { manufacturer: Manufacturer; productCount: number }[]
+  >;
+  /** Other listings from the same manufacturer, for cross-sell on a product page. */
+  relatedFromManufacturer(productId: string, limit?: number): Promise<Product[]>;
+  /** Comparable listings from other manufacturers in the same category. */
+  similarFromOthers(productId: string, limit?: number): Promise<MarketplaceListing[]>;
+}
+
+export type EnquiryFilter = {
+  manufacturerId?: string;
+  status?: Enquiry["status"][];
+  query?: string;
+};
+
+export interface EnquiryRepo {
+  list(filter?: EnquiryFilter): Promise<Enquiry[]>;
+  getById(id: string): Promise<Enquiry | null>;
+  create(
+    input: Omit<Enquiry, "id" | "createdAt" | "status" | "respondedAt" | "quotedUnitPrice" | "quotedLeadTimeDays" | "quoteNote">,
+  ): Promise<Enquiry>;
+  /** Manufacturer answers with a price and lead time. */
+  quote(
+    id: string,
+    quote: { unitPrice: number; leadTimeDays: number; note?: string },
+  ): Promise<Enquiry>;
+  setStatus(id: string, status: Enquiry["status"]): Promise<Enquiry>;
+}
+
+export interface CampaignRepo {
+  listByManufacturer(manufacturerId: string): Promise<Campaign[]>;
+  getById(id: string): Promise<Campaign | null>;
+  create(
+    input: Omit<Campaign, "id" | "spentKsh" | "metrics">,
+  ): Promise<Campaign>;
+  update(id: string, patch: Partial<Campaign>): Promise<Campaign>;
+  setStatus(id: string, status: Campaign["status"]): Promise<Campaign>;
+}
+
+/**
+ * Listing performance, derived from campaigns and enquiries rather than stored
+ * separately, so the numbers on the insights page always reconcile with the
+ * inbox and the campaign list.
+ */
+export type ProductPerformance = {
+  product: Product;
+  views: number;
+  enquiries: number;
+  orders: number;
+  conversionPercent: number;
+};
+
+export type RegionDemand = {
+  region: string;
+  enquiries: number;
+  orders: number;
+  shareOfEnquiriesPercent: number;
+};
+
+export interface InsightsRepo {
+  productPerformance(manufacturerId: string): Promise<ProductPerformance[]>;
+  regionDemand(manufacturerId: string): Promise<RegionDemand[]>;
+  summary(manufacturerId: string): Promise<{
+    views: number;
+    enquiries: number;
+    orders: number;
+    quotedValueKsh: number;
+    acceptedValueKsh: number;
+    responseRatePercent: number;
+    avgResponseHours: number;
+  }>;
 }

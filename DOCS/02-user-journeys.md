@@ -77,11 +77,15 @@ plant.
 
 ## Journey B — Manufacturer Growth (Phase 2)
 
-Sign in → catalogue → bulk-import price list from CSV (preview and per-row error report)
-→ review product-view insights → notice a region with demand but no enquiries → upgrade
-Free → Premium → build a Kakamega + Kisumu targeting campaign with priced regional reach
-→ monitor impressions, views, enquiries and orders → receive and respond to a hardware
-shop enquiry.
+Sign in → `/connect/catalogue` → add a listing with quantity price bands (same form and
+same buyer preview as onboarding) → `/connect/insights` shows which listings draw views
+but no enquiries → `/connect/campaigns` builds a Kakamega + Kisumu campaign, showing shop
+coverage, blended CPM and projected enquiries *before* committing budget → enquiries
+arrive in `/connect/orders` → quote one against the buyer's own quantity band → mark it
+accepted.
+
+Gating is real throughout: listing caps come from the package (10 on Free, 50 on Basic),
+and regional targeting is Premium-and-above. Bulk CSV import is the one piece deferred.
 
 ---
 
@@ -95,12 +99,17 @@ updates and an SMS goes out.
 
 ---
 
-## Journey D — Hardware Shop Sourcing (Phase 4)
+## Journey D — Hardware Shop Sourcing 🟡 Partly built *(Phases 2 and 4)*
 
-Register the shop → KYB and owner ID verification → browse the marketplace filtered by
-county and category → compare tiered prices and MOQs across manufacturers at the shop's
-actual order size → add to cart → place a cash order → track fulfilment → receive
-delivery → stock lands in inventory and begins feeding stock-velocity data.
+**Built now (browse and enquire):** `/marketplace` → search or filter by category and
+delivery region → open a listing → type the quantity actually wanted and watch the
+price-band table highlight the band it falls into, with the line total → compare against
+comparable listings from other suppliers, shown cheapest-first → **Visit store** for the
+supplier's full range, terms and trading record → send a quote request.
+
+**Phase 4 adds (account and ordering):** shop registration with KYB and owner ID
+verification, cart, order placement, fulfilment tracking, delivery notes, and inventory
+that begins feeding stock-velocity data.
 
 ---
 

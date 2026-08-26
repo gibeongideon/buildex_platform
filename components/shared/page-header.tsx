@@ -2,7 +2,6 @@ import * as React from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Card, CardBody, EmptyState } from "@/components/ui/primitives";
 
 export function PageHeader({
   title,
@@ -50,53 +49,5 @@ export function PageHeader({
         {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
       </div>
     </div>
-  );
-}
-
-/**
- * Placeholder for routes that are scaffolded but belong to a later phase.
- *
- * Shipping these instead of dead links means a stakeholder walking the demo
- * sees the roadmap rather than a 404, and the navigation reflects the finished
- * information architecture from day one.
- */
-export function PhasePlaceholder({
-  phase,
-  title,
-  summary,
-  capabilities,
-}: {
-  phase: string;
-  title: string;
-  summary: string;
-  capabilities: string[];
-}) {
-  return (
-    <Card>
-      <CardBody className="p-0">
-        <EmptyState
-          title={title}
-          description={summary}
-          action={
-            <div className="mx-auto max-w-md text-left">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-subtle-foreground">
-                {phase} will add
-              </p>
-              <ul className="space-y-1.5">
-                {capabilities.map((capability) => (
-                  <li
-                    key={capability}
-                    className="flex gap-2 text-sm text-muted-foreground"
-                  >
-                    <span aria-hidden="true" className="mt-1.5 size-1 shrink-0 rounded-full bg-subtle-foreground" />
-                    {capability}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          }
-        />
-      </CardBody>
-    </Card>
   );
 }

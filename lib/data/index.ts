@@ -26,21 +26,39 @@ export {
 } from "./mock/repos";
 
 export {
+  marketplaceRepo,
+  enquiryRepo,
+  campaignRepo,
+  insightsRepo,
+} from "./mock/marketplace";
+
+export {
   subscribe as subscribeToData,
   getVersion as getDataVersion,
   resetDb as resetDemoData,
 } from "./mock/db";
 
 export type {
+  CampaignRepo,
   DemoSession,
   DraftPatch,
+  EnquiryFilter,
+  EnquiryRepo,
   FirstListingDraft,
+  InsightsRepo,
   ManufacturerFilter,
   ManufacturerRepo,
+  MarketplaceFacets,
+  MarketplaceFilter,
+  MarketplaceListing,
+  MarketplaceRepo,
+  MarketplaceSort,
   OnboardingDraft,
   OnboardingRepo,
   OnboardingStepId,
+  ProductPerformance,
   ProductRepo,
+  RegionDemand,
   Role,
   SessionRepo,
 } from "./types";

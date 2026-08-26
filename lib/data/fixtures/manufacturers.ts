@@ -97,7 +97,42 @@ type Seed = {
   reviewNotes?: string[];
   checkSpec?: Parameters<typeof buildChecks>[0];
   docOverrides?: Parameters<typeof buildDocuments>[1];
+  /** Public storefront content. Derived where omitted. */
+  store?: Partial<Manufacturer["storefront"]>;
 };
+
+/**
+ * Storefront defaults, scaled off how long the manufacturer has traded and how
+ * much it declares it produces. Better-established suppliers answer faster and
+ * have fulfilled more orders, which is what buyers actually filter on.
+ */
+function buildStorefront(s: Seed): Manufacturer["storefront"] {
+  const years = new Date().getFullYear() - s.yearEstablished;
+  const large = s.capacityBand === "over_100m" || s.capacityBand === "20m_100m";
+
+  return {
+    tagline: `${s.categories[0]} manufacturer in ${s.county}`,
+    about: `${s.legalName} has manufactured ${s.categories
+      .join(", ")
+      .toLowerCase()} in ${s.county} since ${s.yearEstablished}, supplying hardware retailers across ${s.distributionRegions.join(
+      ", ",
+    )}. Orders are quoted against published quantity bands, and delivery is arranged from the plant.`,
+    responseRatePercent: Math.min(98, 62 + years * 2 + (large ? 8 : 0)),
+    avgResponseHours: large ? 3 : years > 6 ? 6 : 12,
+    certifications: large
+      ? ["KEBS Standardisation Mark", "ISO 9001:2015"]
+      : ["KEBS Standardisation Mark"],
+    paymentTerms: large
+      ? ["M-Pesa", "Bank transfer", "30-day credit (approved accounts)"]
+      : ["M-Pesa", "Bank transfer"],
+    deliveryPolicy: large
+      ? "Free delivery on orders above KSh 250,000 within declared regions. Otherwise charged at cost."
+      : "Delivery charged at cost. Buyer collection welcome at the plant.",
+    minOrderPolicy: "Minimum order quantity is set per product and shown on each listing.",
+    ordersFulfilled: Math.max(0, years * (large ? 260 : 95) + (large ? 180 : 40)),
+    ...s.store,
+  };
+}
 
 const SEEDS: Seed[] = [
   {
@@ -121,6 +156,12 @@ const SEEDS: Seed[] = [
       { name: "Grace Wanjiru", id: "22458901", role: "Managing Director", own: 60, phone: "+254722145880" },
       { name: "Peter Mwangi", id: "19883412", role: "Director", own: 40, phone: "+254733901255" },
     ],
+    store: {
+      tagline: "Cement and concrete products at scale, from Athi River",
+      about:
+        "Savannah Cement Works has milled cement at Athi River since 2009 and is one of the larger independent producers serving the Nairobi metro. The plant runs two grinding lines and holds finished stock for same-week dispatch, which is why most orders ship within 48 hours. Blocks are cured a full 28 days before they leave the yard.",
+      certifications: ["KEBS Standardisation Mark", "ISO 9001:2015", "ISO 14001:2015"],
+    },
     submittedDaysAgo: 240,
     subscription: { package: "vip", billingCycle: "annual" },
   },
@@ -145,6 +186,12 @@ const SEEDS: Seed[] = [
       { name: "Daniel Kiprotich", id: "24110987", role: "Managing Director", own: 55, phone: "+254711330204" },
       { name: "Esther Chelagat", id: "26773401", role: "Director", own: 45, phone: "+254720884411" },
     ],
+    store: {
+      tagline: "BS4449 grade 500 reinforcement, rolled in Nakuru",
+      about:
+        "Rift Valley Steel Mills rolls deformed reinforcement bar and cold-forms roofing profiles at its Nakuru works. Every batch ships with a mill test certificate, and bar is cut to length on request at no extra charge. The mill serves the Rift Valley, Western and Nyanza corridors on its own fleet.",
+      certifications: ["KEBS Standardisation Mark", "ISO 9001:2015"],
+    },
     submittedDaysAgo: 190,
     subscription: { package: "premium", billingCycle: "annual" },
   },
@@ -193,6 +240,13 @@ const SEEDS: Seed[] = [
       { name: "Fatuma Hassan", id: "25667812", role: "Managing Director", own: 50, phone: "+254733118877" },
       { name: "Ali Hassan", id: "21004556", role: "Director", own: 50, phone: "+254722667788" },
     ],
+    store: {
+      tagline: "Interior and exterior coatings, tinted to order",
+      about:
+        "Equator Paints manufactures water- and solvent-based coatings at Ruaraka, supplying hardware retailers across four regions. Tinting is done in-house to any of 1,200 shades, and orders above 400 litres are matched from a retained batch so repeat work stays consistent. Technical data sheets accompany every delivery.",
+      certifications: ["KEBS Standardisation Mark", "ISO 9001:2015"],
+      paymentTerms: ["M-Pesa", "Bank transfer", "30-day credit (approved accounts)", "Letter of credit"],
+    },
     submittedDaysAgo: 210,
     subscription: { package: "vip", billingCycle: "annual" },
   },
@@ -216,6 +270,14 @@ const SEEDS: Seed[] = [
     directors: [
       { name: "Samuel Njoroge", id: "29887100", role: "Managing Director", own: 100, phone: "+254720441093" },
     ],
+    store: {
+      tagline: "Pre-painted roofing profiles, cut to length in Nyeri",
+      about:
+        "Mount Kenya Roofing Systems profiles pre-painted coil into IBR and box profile sheet at Kamakwa, Nyeri. Sheets are cut to the exact length ordered, so there is no site wastage. A newer operation, and currently completing Buildex verification.",
+      certifications: [],
+      responseRatePercent: 71,
+      avgResponseHours: 14,
+    },
     submittedDaysAgo: 9,
     subscription: { package: "basic", billingCycle: "monthly" },
     riskFlagged: true,
@@ -507,6 +569,7 @@ export function seedManufacturers(): Manufacturer[] {
                 : daysAhead(s.subscription.billingCycle === "annual" ? 300 : 20),
           }
         : null,
+      storefront: buildStorefront(s),
       submittedAt: daysAgo(s.submittedDaysAgo),
       verifiedAt: s.status === "approved" ? daysAgo(Math.max(s.submittedDaysAgo - 3, 0)) : null,
       reviewNotes: s.reviewNotes ?? [],

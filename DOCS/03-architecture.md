@@ -23,10 +23,16 @@ components survive the backend cutover rather than being thrown away.
 
 ```text
 app/
-  (public)/               Public front door — /, /manufacturers
+  (public)/               Public site
+    /                     Platform overview
+    /manufacturers        Supplier acquisition
+    /marketplace          Central Buildex Connect catalogue (tier 1)
+      product/[id]        Listing detail, price-band calculator, enquiry form
+      manufacturer/[id]   A supplier's own branded storefront (tier 2)
   connect/
     onboarding/           The nine-step wizard, with its own focused layout
-    (portal)/             Manufacturer portal — dashboard, verification, subscription, …
+    (portal)/             Manufacturer portal — dashboard, verification, catalogue,
+                          enquiries, campaigns, insights, subscription, settings
   globals.css             Design tokens. The only file that hard-codes a colour.
   layout.tsx              Root layout, font, theme script, demo panel
 
@@ -91,8 +97,26 @@ Component  ──►  lib/data (repository interface)  ──►  mock implement
 | --- | --- |
 | `ManufacturerRepo` | List, fetch, create from draft, update, duplicate-PIN lookup, check transitions, document replacement, subscription |
 | `ProductRepo` | Catalogue CRUD per manufacturer |
+| `MarketplaceRepo` | Faceted search, listing detail, storefronts, related and comparable listings |
+| `EnquiryRepo` | Quote requests: create, list, quote, status transitions |
+| `CampaignRepo` | Regional visibility campaigns |
+| `InsightsRepo` | Derived performance — see below |
 | `OnboardingRepo` | Load, save and clear the in-progress application draft |
 | `SessionRepo` | Which demo role and manufacturer is "signed in" |
+
+### Two rules the marketplace depends on
+
+**Public visibility is decided in one place.** `publicListings()` in
+`lib/data/mock/marketplace.ts` is the only function that decides what reaches the
+marketplace: a listing must be `active` *and* its manufacturer must be cleared to list.
+Search, storefronts, related products and comparables all build on it, so a verification
+state can never leak a listing by accident. An unverified manufacturer has no public
+storefront at all.
+
+**Insights are derived, never stored.** Views come from the campaigns that carried a
+listing; enquiries and orders come from the enquiry records themselves. There is no
+metrics table, so the insights page can never disagree with the inbox or the campaign
+list — a class of bug that plagues dashboards built on their own aggregation.
 
 ### Enforcement
 
@@ -251,7 +275,11 @@ The guideline lists three faces in order of prominence: **NEXA** (primary), **AR
 | Role | Face | Why |
 | --- | --- | --- |
 | Display (`h1`–`h3`, wordmark) | Montserrat | Nexa is a commercial licence and is not bundled. Montserrat is also on the brand's approved list and is likewise a geometric sans, so it stands in until a Nexa licence is in place — swap `--font-display` when it is |
-| Body, UI, data | Arial | The brand's second face. A system font, so no download, and its digits are natively monospaced — exactly what dense financial tables need |
+| Body, UI, data | Inter | Arial is the brand's second face — a neo-grotesque. Inter is the same skeleton drawn for screens: taller x-height, open apertures, wider default spacing, all of which lift legibility at the 12–14px sizes these tables live at. It ships true tabular figures and covers Latin Extended, so Kenyan county and company names render correctly. **Arial stays in the fallback stack**, so a failed webfont degrades to a brand-approved face rather than an arbitrary one |
+
+The pairing — geometric display over neo-grotesque UI — is the most widely adopted
+convention in current enterprise software, which is why it reads as credible to the
+broadest audience without being conspicuous.
 
 Scale: 12 / 14 / 16 / 20 / 24 / 30 / 38.
 

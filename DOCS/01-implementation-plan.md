@@ -7,7 +7,7 @@ integrated platform ecosystem built on three complementary businesses:
 
 | Business | Primary role | Strategic asset |
 | --- | --- | --- |
-| **Buildex** | Product supply and distribution | Supply relationships, inventory, hardware network |
+| **Buildex Interiors** | Product supply and distribution | Supply relationships, inventory, hardware network |
 | **Buildex Capital** | Credit, financing and collections | Credit data, repayment history, financial products |
 | **Buildex Connect** | Manufacturer marketplace | Manufacturer network, catalogue, market intelligence |
 
@@ -77,12 +77,15 @@ registration, expired document and conditional-approval edge states.
 first listing → dashboard, can resume mid-wizard after a refresh, and the rejection path
 is walkable.
 
-### Phase 2 — Buildex Connect: Manufacturer Portal
+### Phase 2 — Buildex Connect: Marketplace & Manufacturer Portal ✅ Done
 
-Catalogue CRUD with price bands and MOQ, bulk CSV price-list import with preview and
-per-row error report, subscription management and upgrade flow, regional targeting
-campaign builder with priced regions, campaign metrics (impressions / views / enquiries /
-orders), product-view insights, team members, enquiries inbox.
+The two-tier marketplace — a central catalogue of every published listing, and a branded
+storefront per manufacturer carrying only their range — plus the portal a manufacturer
+runs it from: catalogue CRUD with price bands and MOQ, enquiry inbox with quoting,
+regional targeting campaigns with priced reach, derived performance insights, and
+editable company settings.
+
+Deferred from this phase: bulk CSV price-list import.
 
 ### Phase 3 — Buildex Console: Ops & Verification
 
@@ -93,7 +96,7 @@ manufacturer and hardware directories, subscription administration, audit trail.
 Closes the Connect loop end-to-end against Phase 1: a manufacturer submits, ops decides,
 the manufacturer's tracker updates.
 
-### Phase 4 — Buildex: Hardware Shop Portal & Supply
+### Phase 4 — Buildex Interiors: Hardware Shop Portal & Supply
 
 Hardware onboarding (KYB plus owner ID verification), marketplace browse/search/filter by
 region and category, product detail with tiered pricing, cart and order placement, order
@@ -166,7 +169,7 @@ Where each prioritised module from the requirements lands in this build.
 | P0 | Wallet & Payments | 5 | Not started |
 | P0 | POS / Transaction Data | 4–5 | Not started |
 | P1 | Hardware Portal | 4 | Not started |
-| P1 | Manufacturer Portal | 1–2 | **Onboarding done**, portal in Phase 2 |
+| P1 | Manufacturer Portal | 1–2 | **Done** — onboarding, marketplace, catalogue, enquiries, campaigns, insights |
 | P1 | Admin / Risk Dashboard | 3, 6 | Not started |
 | P2 | Consumer Intelligence | 8 | Not started |
 

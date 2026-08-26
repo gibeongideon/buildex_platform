@@ -1,7 +1,18 @@
 # Buildex Ecosystem — Documentation
 
-Working documentation for the Buildex platform mockup: **Buildex** (product supply),
-**Buildex Capital** (financing) and **Buildex Connect** (manufacturer marketplace).
+Working documentation for the **Buildex Connect** platform mockup.
+
+Buildex Connect is the platform. Inside it sit three businesses:
+
+| Business | Role |
+| --- | --- |
+| **Buildex Interiors** | Product supply and distribution (the parent company, *Buildex Interiors Co. Ltd.*) |
+| **Buildex Capital** | Credit, financing and collections |
+| **Buildex Connect** | The manufacturer marketplace |
+
+"Buildex Connect" therefore names both the platform and the marketplace inside it, the way
+a company and its flagship product often share a name. Where the distinction matters, the
+copy says "the Buildex Connect marketplace".
 
 | Document | What it covers |
 | --- | --- |
@@ -25,9 +36,9 @@ Source requirements live in [`requirements_reference/`](../requirements_referenc
 | --- | --- | --- |
 | 0 | Foundation — design system, app shell, data seam, fixtures | **Done** |
 | 1 | Buildex Connect — manufacturer onboarding | **Done** |
-| 2 | Buildex Connect — manufacturer portal | Not started |
+| 2 | Buildex Connect — marketplace & manufacturer portal | **Done** |
 | 3 | Buildex Console — ops & verification queue | Not started |
-| 4 | Buildex — hardware shop portal & supply | Not started |
+| 4 | Buildex Interiors — hardware shop portal & supply | Not started |
 | 5 | Buildex Capital — hardware-facing credit | Not started |
 | 6 | Buildex Capital — internal credit & risk console | Not started |
 | 7 | Public marketing site (entry pages already exist) | Partial |
@@ -70,12 +81,24 @@ the documents step. Set `NEXT_PUBLIC_DEMO_MODE=false` to hide the global panel.
 
 ### Walking the demo
 
-1. `/` — ecosystem overview
-2. `/manufacturers` — the acquisition page a manufacturer lands on
-3. `/connect/onboarding/account` — start the nine-step onboarding journey
-4. On the verification step, use **Demo scenarios** to approve, reject or conditionally
-   approve the application
-5. `/connect/dashboard` — the manufacturer portal after onboarding
+**As a buyer (hardware shop):**
+
+1. `/marketplace` — the central catalogue. Search, filter by category and delivery
+   region, sort by price or lead time.
+2. Open any listing — the price-band table highlights the band your quantity falls into,
+   and the calculator shows the line total.
+3. **Visit store** — that manufacturer's own storefront, carrying only their range.
+4. Send a quote request from a listing.
+
+**As a manufacturer:**
+
+5. `/connect/onboarding/account` — the nine-step onboarding journey. On the verification
+   step, use **Demo scenarios** to approve, reject or conditionally approve.
+6. `/connect/catalogue` — add, edit and archive listings.
+7. `/connect/orders` — the enquiry you sent above is in the inbox. Quote it.
+8. `/connect/campaigns` and `/connect/insights` — regional targeting and performance.
 
 To see the duplicate-registration path, enter KRA PIN `P051234567M` at the company
-step — it already belongs to a seeded manufacturer.
+step — it already belongs to a seeded manufacturer. To see visibility gating, try
+`/marketplace/manufacturer/mfr_kakamega_hardware` — still in verification, so no public
+store.

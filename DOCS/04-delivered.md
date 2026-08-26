@@ -1,16 +1,18 @@
 # 04 — Delivered
 
-Covers Phase 0 (Foundation) and Phase 1 (Buildex Connect manufacturer onboarding).
+Covers Phase 0 (Foundation), Phase 1 (manufacturer onboarding) and Phase 2
+(the marketplace and manufacturer portal).
 
 ## Summary
 
 | Metric | Value |
 | --- | --- |
-| Source files | 63 (`app/`, `components/`, `lib/`, `e2e/`) |
-| Routes | 20 (plus `/_not-found`) |
+| Source files | 77 (`app/`, `components/`, `lib/`, `e2e/`) |
+| Routes | 25 (plus `/_not-found`) |
 | Onboarding steps | 9, all resumable and deep-linkable |
-| Seeded manufacturers / products | 12 / 24 |
-| End-to-end specs | 4, all passing |
+| Seeded manufacturers / products | 12 / 72 |
+| Seeded enquiries / campaigns | 50 / 12 |
+| End-to-end specs | 9, all passing |
 | TypeScript | `tsc --noEmit` clean |
 | ESLint | 0 errors |
 | Production build | Clean, all routes prerendered as static |
@@ -67,13 +69,6 @@ that are the intended database contract.
 Repository interfaces, the swap point, the in-memory store with `localStorage` persistence
 and cross-tab sync, and Kenyan seed data.
 
-### Roadmap placeholders
-
-Rather than dead links, the five later-phase routes (`catalogue`, `orders`, `campaigns`,
-`insights`, `settings`) render a `PhasePlaceholder` naming the phase and listing what it
-will add. A stakeholder walking the demo sees the roadmap instead of a 404, and the
-navigation reflects the finished information architecture from day one.
-
 ---
 
 ## Phase 1 — Manufacturer onboarding
@@ -106,8 +101,65 @@ pipeline, so ops actions and demo controls cannot drift out of sync with each ot
 **Targeted resubmission.** A rejected check names the documents blocking it. Only those
 need replacing; re-uploading returns the affected checks to the queue automatically.
 
-**The preview is the real component.** `ProductPreviewCard` is what the marketplace will
-render in Phase 4. A preview that drifts from the real thing is worse than no preview.
+**The preview is the real component.** The buyer preview beside the listing form is the
+same component the marketplace renders. A preview that drifts from the real thing is worse
+than no preview.
+
+---
+
+## Phase 2 — Marketplace and manufacturer portal
+
+### The two-tier marketplace
+
+**Tier 1 — `/marketplace`.** Every published listing across every cleared supplier.
+Faceted search with live counts, category and delivery-region filters, five sort orders,
+and removable filter chips. The default order is **by demand** — how many enquiries each
+listing has attracted — so cement and rebar lead the page rather than whatever happens to
+be alphabetically first.
+
+**Tier 2 — `/marketplace/manufacturer/[id]`.** Each supplier's own branded page carrying
+only their range, with in-store search, category filter and sort; a banner with their
+trading record; and panels for terms, certifications and verification status.
+
+The storefronts use the Buildex Connect palette rather than per-supplier colours. Buyers
+should read a store as a verified page *inside* the platform, not an off-site website —
+and 200 storefronts in 200 colour schemes would turn the marketplace into a riot. What
+differentiates one store from another is substance: range, terms, trading record.
+
+**`/marketplace/product/[id]`** is where the two tiers meet. The price-band table is
+interactive: type the quantity you actually want and it highlights the band you fall
+into, shows the unit price and the line total. From there the navigation goes up to the
+supplier's store and sideways to comparable listings from other suppliers, cheapest first.
+
+### Product imagery without photography
+
+No supplier has uploaded photos, and a grid of grey "no image" boxes makes a marketplace
+look abandoned. `ProductThumb` generates a tile per listing instead: the category's icon
+over one of four geometric patterns, chosen by a stable hash of the product id. The same
+product always draws the same tile, so the grid is stable across reloads and buyers learn
+to recognise a listing by its mark. No network request, and it is replaced wholesale the
+day real photography exists.
+
+### Manufacturer portal
+
+| Page | What it does |
+| --- | --- |
+| `/connect/catalogue` | List, search and filter the range; archive and restore; package listing caps enforced |
+| `/connect/catalogue/new` and `/[id]` | Create and edit, sharing `ListingForm` with the onboarding wizard |
+| `/connect/orders` | Enquiry inbox, newest first, with a quote panel pre-filled from the buyer's own quantity band |
+| `/connect/campaigns` | Regional targeting: pick regions, see shop coverage and blended CPM, and projected enquiries *before* committing budget |
+| `/connect/insights` | Most viewed, most enquired, demand by region, and listings drawing views but no enquiries |
+| `/connect/settings` | Editable storefront copy, categories and regions; verified registry details are read-only |
+
+Every previously-scaffolded route now carries real mock data. There are no "coming soon"
+placeholders left in the product.
+
+### One form, three places
+
+`ListingForm` is used by the onboarding wizard's first listing, catalogue create and
+catalogue edit. One component means the price-band rules, field order and live buyer
+preview are identical wherever a manufacturer lists something — a product added on day
+one looks the same as one added a year later.
 
 ---
 
@@ -116,12 +168,20 @@ render in Phase 4. A preview that drifts from the real thing is worse than no pr
 ### End-to-end (`npm run test:e2e`)
 
 ```text
-✓ a manufacturer can complete onboarding end to end          (8.8s)
-✓ a duplicate KRA PIN blocks the company step                (2.9s)
-✓ an expired document keeps the pack incomplete              (3.5s)
-✓ a draft resumes at the right step and clamps deep links    (3.4s)
+manufacturer-onboarding.spec.ts
+  ✓ a manufacturer can complete onboarding end to end
+  ✓ a duplicate KRA PIN blocks the company step
+  ✓ an expired document keeps the pack incomplete
+  ✓ a draft resumes at the right step and clamps deep links
 
-4 passed
+marketplace.spec.ts
+  ✓ the central marketplace searches, filters and sorts
+  ✓ a listing links through to its manufacturer's own storefront
+  ✓ an enquiry sent from a listing reaches the manufacturer's inbox
+  ✓ an unverified manufacturer has no public storefront
+  ✓ a manufacturer can add a listing from the catalogue
+
+9 passed
 ```
 
 The happy-path spec drives all nine steps, uploads six documents through the real file
@@ -143,9 +203,9 @@ Horizontal page scroll measured on the **production build** by attempting
 
 | Width | Result |
 | --- | --- |
-| 375px | All 7 pages OK |
-| 768px | All 7 pages OK |
-| 1440px | All 7 pages OK |
+| 375px | All 14 pages OK |
+| 768px | All 14 pages OK |
+| 1440px | All 14 pages OK |
 
 Wide tables confirmed to still scroll inside their own container (326px box, 672px
 content, 346px of internal scroll) — the fix clips paint, not content.

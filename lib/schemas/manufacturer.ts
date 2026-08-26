@@ -159,6 +159,35 @@ export const directorsStepSchema = z
 export type DirectorsStep = z.infer<typeof directorsStepSchema>;
 
 // ---------------------------------------------------------------------------
+// Storefront
+// ---------------------------------------------------------------------------
+
+/**
+ * The public-facing side of a manufacturer: what a hardware shop sees on the
+ * manufacturer's own page in the marketplace.
+ *
+ * Buyers in wholesale supply decide on trust before they decide on price —
+ * how long a supplier has traded, whether it answers enquiries, what terms it
+ * offers. Those signals are part of the record rather than marketing copy
+ * bolted on, so the storefront and the ops console read the same data.
+ */
+export const storefrontSchema = z.object({
+  tagline: z.string().trim().max(120),
+  about: z.string().trim().max(1200),
+  /** Share of enquiries answered — a headline trust signal on the storefront. */
+  responseRatePercent: z.number().min(0).max(100),
+  avgResponseHours: z.number().min(0),
+  certifications: z.array(z.string()).default([]),
+  paymentTerms: z.array(z.string()).default([]),
+  deliveryPolicy: z.string().trim().max(300),
+  minOrderPolicy: z.string().trim().max(200),
+  /** Total orders fulfilled through Buildex — depth of trading history. */
+  ordersFulfilled: z.number().int().min(0),
+});
+
+export type Storefront = z.infer<typeof storefrontSchema>;
+
+// ---------------------------------------------------------------------------
 // The stored aggregate
 // ---------------------------------------------------------------------------
 
@@ -187,6 +216,7 @@ export const manufacturerSchema = z.object({
   documents: z.array(uploadedDocumentSchema).default([]),
   checks: z.array(verificationCheckSchema).default([]),
   subscription: subscriptionSchema.nullable().default(null),
+  storefront: storefrontSchema,
 
   submittedAt: z.string().nullable().default(null),
   verifiedAt: z.string().nullable().default(null),

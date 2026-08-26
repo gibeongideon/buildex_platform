@@ -34,31 +34,49 @@ import { cn } from "@/lib/utils";
       (only the two brand colours plus the sanctioned reversal), no shadows.
 */
 
-export type ProductKey = "buildex" | "capital" | "connect";
+/*
+  Naming
+  ------
+  The platform is **Buildex Connect**. Inside it sit three businesses:
+
+    Buildex Interiors  — product supply and distribution (the parent company,
+                         "BUILDEX INTERIORS CO. LTD." in the brand guidelines)
+    Buildex Capital    — credit, financing and collections
+    Buildex Connect    — the manufacturer marketplace
+
+  "Buildex Connect" therefore names both the platform and the marketplace
+  inside it, in the same way a company and its flagship product often share a
+  name. Where the distinction matters, the copy says "the Buildex Connect
+  marketplace" for the latter.
+*/
+export type ProductKey = "interiors" | "capital" | "connect";
 
 /**
- * The three businesses. Each follows the brand's own lockup construction —
- * "BUILDEX" in blue with the descriptor in yellow — exactly as the master
- * logo does with "INTERIORS". Products are distinguished by the descriptor
- * word, never by inventing a third colour.
+ * Each lockup follows the brand's own construction — "BUILDEX" in blue with
+ * the descriptor in yellow — exactly as the master logo does with "INTERIORS".
+ * The businesses are distinguished by the descriptor word, never by inventing
+ * an extra colour.
  */
 export const PRODUCT_META: Record<
   ProductKey,
-  { name: string; descriptor: string; description: string }
+  { name: string; descriptor: string; fullName: string; description: string }
 > = {
-  buildex: {
+  interiors: {
     name: "BUILDEX",
     descriptor: "INTERIORS",
+    fullName: "Buildex Interiors",
     description: "Product supply and distribution",
   },
   capital: {
     name: "BUILDEX",
     descriptor: "CAPITAL",
+    fullName: "Buildex Capital",
     description: "Credit, financing and collections",
   },
   connect: {
     name: "BUILDEX",
     descriptor: "CONNECT",
+    fullName: "Buildex Connect",
     description: "Manufacturer marketplace",
   },
 };
@@ -111,7 +129,7 @@ const SIZES = {
  * hierarchy, legible at 20px.
  */
 export function Wordmark({
-  product = "buildex",
+  product = "connect",
   size = "md",
   className,
 }: {

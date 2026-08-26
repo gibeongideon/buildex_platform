@@ -93,6 +93,106 @@ function SectionHeading({
   );
 }
 
+function PanelCard({
+  title,
+  subtitle,
+  href,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col rounded-lg border border-border bg-surface p-4">
+      <div className="mb-3 flex items-baseline justify-between gap-2">
+        <div className="min-w-0">
+          <p className="truncate font-display text-sm font-bold text-foreground">
+            {title}
+          </p>
+          {subtitle ? (
+            <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
+          ) : null}
+        </div>
+        <Link
+          href={href}
+          className="shrink-0 text-xs font-semibold text-brand hover:underline"
+        >
+          More
+        </Link>
+      </div>
+      <div className="mt-auto">{children}</div>
+    </div>
+  );
+}
+
+function ThumbGrid({ items }: { items: { id: string; category: string; priceBands: Parameters<typeof priceRange>[0] }[] }) {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {items.map((product) => (
+        <Link
+          key={product.id}
+          href={`/marketplace/product/${product.id}`}
+          className="group"
+        >
+          <ProductThumb
+            productId={product.id}
+            category={product.category}
+            className="aspect-square rounded-md border border-border transition-colors group-hover:border-brand"
+            iconClassName="size-6"
+            sizes="120px"
+          />
+          <p className="mt-1 truncate text-[11px] text-muted-foreground">
+            <Currency
+              value={priceRange(product.priceBands).min}
+              className="font-semibold text-foreground"
+            />
+          </p>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+function PromoPanel({
+  eyebrow,
+  title,
+  body,
+  cta,
+  href,
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+  cta: string;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="on-brand group flex flex-col justify-between overflow-hidden rounded-lg p-5"
+    >
+      <div>
+        <p className="font-display text-xs font-bold uppercase tracking-[0.18em] text-primary">
+          {eyebrow}
+        </p>
+        <p className="mt-2 font-display text-lg font-extrabold leading-tight text-white">
+          {title}
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-white/70">{body}</p>
+      </div>
+      <span className="mt-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+        {cta}
+        <ArrowRight
+          className="size-3.5 transition-transform group-hover:translate-x-0.5"
+          aria-hidden="true"
+        />
+      </span>
+    </Link>
+  );
+}
+
 export default function MarketplaceHomePage() {
   const { data: search, loading } = useQuery(
     () => marketplaceRepo.search({ sort: "relevance" }),
@@ -121,70 +221,138 @@ export default function MarketplaceHomePage() {
     (facets?.categories ?? []).map((c) => [c.value, c.count]),
   );
 
+  const newest = [...listings]
+    .sort(
+      (a, b) =>
+        new Date(b.product.createdAt).getTime() -
+        new Date(a.product.createdAt).getTime(),
+    )
+    .slice(0, 4);
+
+  const panels: React.ReactNode[] = [];
+
+  if (recent && recent.length > 0) {
+    panels.push(
+      <PanelCard key="history" title="Browsing history" href="/marketplace/search">
+        <ThumbGrid items={recent.slice(0, 4)} />
+      </PanelCard>,
+    );
+  }
+  if (followUpCategory && followUps.length > 0) {
+    panels.push(
+      <PanelCard
+        key="followup"
+        title="Keep looking for"
+        subtitle={followUpCategory}
+        href={`/marketplace/search?category=${encodeURIComponent(followUpCategory)}`}
+      >
+        <ThumbGrid items={followUps.slice(0, 4).map((l) => l.product)} />
+      </PanelCard>,
+    );
+  }
+  panels.push(
+    <PromoPanel
+      key="ranking"
+      eyebrow="Top ranking"
+      title="What the hardware network is buying right now"
+      body="Ranked by real enquiry volume, not paid placement."
+      cta="View ranking"
+      href="/marketplace/top-ranking"
+    />,
+  );
+  if (newest.length > 0) {
+    panels.push(
+      <PanelCard key="newest" title="New listings" href="/marketplace/search?sort=newest">
+        <ThumbGrid items={newest.map((l) => l.product)} />
+      </PanelCard>,
+    );
+  }
+  panels.push(
+    <PromoPanel
+      key="rfq"
+      eyebrow="Request for Quotation"
+      title="One requirement, every supplier who can deliver it"
+      body="Matched by category and delivery region, so nobody wastes your time."
+      cta="Start a request"
+      href="/marketplace/rfq"
+    />,
+  );
+
   return (
-    <div className="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8">
-      <section className="grid gap-4 sm:grid-cols-3">
-        {QUICK_ACTIONS.map((action) => {
-          const Icon = action.icon;
-          return (
-            <Link
-              key={action.href}
-              href={action.href}
-              className="group flex items-start gap-3 rounded-lg border border-border bg-surface p-4 transition-colors hover:border-brand"
-            >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand">
-                <Icon className="size-5" aria-hidden="true" />
-              </span>
-              <span className="min-w-0">
-                <span className="flex items-center gap-1 text-sm font-semibold text-foreground">
-                  {action.title}
-                  <ArrowRight
-                    className="size-3.5 opacity-0 transition-opacity group-hover:opacity-100"
-                    aria-hidden="true"
-                  />
-                </span>
-                <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
-                  {action.body}
-                </span>
-              </span>
-            </Link>
-          );
-        })}
+    <>
+      {/* Welcome bar: name the platform, then the three actions that skip search. */}
+      <section className="border-b border-border bg-surface">
+        <div className="mx-auto flex max-w-[90rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <h1 className="font-display text-lg font-bold tracking-tight text-foreground">
+            Welcome to Buildex Connect
+          </h1>
+          <nav aria-label="Quick actions" className="flex flex-wrap items-center">
+            {QUICK_ACTIONS.map((action, index) => {
+              const Icon = action.icon;
+              return (
+                <React.Fragment key={action.href}>
+                  {index > 0 ? (
+                    <span aria-hidden="true" className="mx-3 h-5 w-px bg-border" />
+                  ) : null}
+                  <Link
+                    href={action.href}
+                    className="group flex items-center gap-2 rounded-md px-1 py-1 text-sm font-medium text-foreground transition-colors hover:text-brand"
+                  >
+                    <Icon className="size-5 text-brand" aria-hidden="true" />
+                    {action.title}
+                  </Link>
+                </React.Fragment>
+              );
+            })}
+          </nav>
+        </div>
       </section>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <aside className="hidden lg:block">
-          <div className="sticky top-4 rounded-lg border border-border bg-surface">
-            <p className="border-b border-border px-4 py-3 text-sm font-semibold text-foreground">
-              Categories
-            </p>
-            <ul className="max-h-[32rem] overflow-y-auto py-1">
-              {PRODUCT_CATEGORIES.map((category) => {
-                const Icon = categoryIcon(category);
-                const count = categoryCounts.get(category) ?? 0;
-                return (
-                  <li key={category}>
-                    <Link
-                      href={`/marketplace/search?category=${encodeURIComponent(category)}`}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
-                    >
-                      <Icon
-                        className="size-4 shrink-0 text-subtle-foreground"
-                        aria-hidden="true"
-                      />
-                      <span className="min-w-0 flex-1 truncate">{category}</span>
-                      <span className="shrink-0 text-xs text-subtle-foreground text-numeric">
-                        {count}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </aside>
+      <div className="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8">
 
-        <div className="min-w-0 space-y-10">
+      <section className="grid items-stretch gap-4 lg:grid-cols-[17rem_minmax(0,1fr)]">
+        <div className="flex flex-col rounded-lg border border-border bg-surface">
+          <p className="shrink-0 border-b border-border px-4 py-3 text-sm font-semibold text-foreground">
+            Categories for you
+          </p>
+          <ul className="min-h-0 flex-1 overflow-y-auto py-1">
+            {PRODUCT_CATEGORIES.map((category) => {
+              const Icon = categoryIcon(category);
+              const count = categoryCounts.get(category) ?? 0;
+              return (
+                <li key={category}>
+                  <Link
+                    href={`/marketplace/search?category=${encodeURIComponent(category)}`}
+                    className="flex items-center gap-2.5 px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
+                  >
+                    <Icon
+                      className="size-4 shrink-0 text-subtle-foreground"
+                      aria-hidden="true"
+                    />
+                    <span className="min-w-0 flex-1 truncate">{category}</span>
+                    <span className="shrink-0 text-xs text-subtle-foreground text-numeric">
+                      {count}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        {/*
+          The reference site runs browsing history, follow-up recommendations
+          and a promo across one row beside the category rail. Ours builds the
+          row from whatever is actually available — history first when there is
+          any, then evergreen panels — and always fills three slots, so a
+          first-time visitor never sees a two-thirds-empty row.
+        */}
+        <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {panels.slice(0, 3)}
+        </div>
+      </section>
+
+      <div className="mt-10 space-y-10">
           <section className="overflow-hidden rounded-lg border border-border">
             <div className="on-brand grid gap-6 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
               <div>
@@ -236,62 +404,6 @@ export default function MarketplaceHomePage() {
             </div>
           </section>
 
-          {recent && recent.length > 0 ? (
-            <section>
-              <SectionHeading
-                title="Browsing history"
-                icon={History}
-                href="/marketplace/search"
-                linkLabel="Browse more"
-              />
-              <ul className="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-6">
-                {recent.map((product) => (
-                  <li key={product.id}>
-                    <Link
-                      href={`/marketplace/product/${product.id}`}
-                      className="group block"
-                    >
-                      <ProductThumb
-                        productId={product.id}
-                        category={product.category}
-                        className="aspect-square rounded-lg border border-border transition-colors group-hover:border-brand"
-                        iconClassName="size-8"
-                      />
-                      <p className="mt-2 line-clamp-2 text-xs font-medium leading-snug text-foreground group-hover:text-brand">
-                        {product.name}
-                      </p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        <Currency
-                          value={priceRange(product.priceBands).min}
-                          className="font-semibold text-foreground"
-                        />
-                      </p>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          {followUps.length > 0 && followUpCategory ? (
-            <section>
-              <SectionHeading
-                title={`Keep looking for ${followUpCategory}`}
-                icon={Zap}
-                href={`/marketplace/search?category=${encodeURIComponent(followUpCategory)}`}
-              />
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {followUps.slice(0, 3).map(({ product, manufacturer }) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    manufacturer={manufacturer}
-                  />
-                ))}
-              </div>
-            </section>
-          ) : null}
-
           <section>
             <SectionHeading
               title="Most in demand"
@@ -300,18 +412,20 @@ export default function MarketplaceHomePage() {
               linkLabel="Top ranking"
             />
             {loading && listings.length === 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                {Array.from({ length: 12 }).map((_, i) => (
                   <ProductCardSkeleton key={i} />
                 ))}
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {listings.slice(0, 6).map(({ product, manufacturer }) => (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                {listings.slice(0, 12).map(({ product, manufacturer, enquiryCount }, index) => (
                   <ProductCard
                     key={product.id}
                     product={product}
                     manufacturer={manufacturer}
+                    enquiryCount={enquiryCount}
+                    priority={index < 6}
                   />
                 ))}
               </div>
@@ -457,6 +571,6 @@ export default function MarketplaceHomePage() {
           </section>
         </div>
       </div>
-    </div>
+    </>
   );
 }

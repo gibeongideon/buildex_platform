@@ -39,15 +39,30 @@ function now() {
   return new Date().toISOString();
 }
 
+/**
+ * How many enquiries each listing has attracted — the marketplace's only real
+ * signal of demand, and what "most relevant" means when there is no query.
+ */
+function demandByProduct(): Map<string, number> {
+  const map = new Map<string, number>();
+  for (const enquiry of getSnapshot().enquiries) {
+    map.set(enquiry.productId, (map.get(enquiry.productId) ?? 0) + 1);
+  }
+  return map;
+}
+
 function publicListings(): MarketplaceListing[] {
   const { manufacturers, products } = getSnapshot();
   const byId = new Map(manufacturers.map((m) => [m.id, m]));
+  const demand = demandByProduct();
 
   return products.flatMap((product) => {
     if (product.status !== "active") return [];
     const manufacturer = byId.get(product.manufacturerId);
     if (!manufacturer || !canListProducts(manufacturer.status)) return [];
-    return [{ product, manufacturer }];
+    return [
+      { product, manufacturer, enquiryCount: demand.get(product.id) ?? 0 },
+    ];
   });
 }
 
@@ -113,18 +128,6 @@ function matches(listing: MarketplaceListing, filter: MarketplaceFilter) {
   return true;
 }
 
-/**
- * How many enquiries each listing has attracted — the marketplace's only real
- * signal of demand, and what "most relevant" means when there is no query.
- */
-function demandByProduct(): Map<string, number> {
-  const map = new Map<string, number>();
-  for (const enquiry of getSnapshot().enquiries) {
-    map.set(enquiry.productId, (map.get(enquiry.productId) ?? 0) + 1);
-  }
-  return map;
-}
-
 function sortListings(
   listings: MarketplaceListing[],
   sort: MarketplaceFilter["sort"],
@@ -153,10 +156,8 @@ function sortListings(
       // on the front page ahead of cement and rebar, which is the opposite of
       // relevant for a construction-supply marketplace.
       {
-        const demand = demandByProduct();
         return sorted.sort((a, b) => {
-          const byDemand =
-            (demand.get(b.product.id) ?? 0) - (demand.get(a.product.id) ?? 0);
+          const byDemand = b.enquiryCount - a.enquiryCount;
           if (byDemand !== 0) return byDemand;
           const verified =
             Number(b.manufacturer.status === "approved") -

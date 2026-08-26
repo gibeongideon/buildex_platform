@@ -325,7 +325,7 @@ export default function ProductDetailPage() {
                   Visit store
                 </Link>
               </div>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
                 {related.map((item) => (
                   <ProductCard
                     key={item.id}
@@ -345,7 +345,7 @@ export default function ProductDetailPage() {
               <p className="mt-1 text-sm text-muted-foreground">
                 Same category, different manufacturers — cheapest entry price first.
               </p>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
                 {similar.map(({ product: item, manufacturer: maker }) => (
                   <ProductCard key={item.id} product={item} manufacturer={maker} />
                 ))}

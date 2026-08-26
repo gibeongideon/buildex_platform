@@ -7,7 +7,7 @@ import { BadgeCheck, FileText, Flame, Truck } from "lucide-react";
 import { PromoStrip, UtilityBar, UtilityLinks } from "@/components/marketplace/top-bar";
 import { CategoryMegaMenu } from "@/components/marketplace/mega-menu";
 import { SearchHero } from "@/components/marketplace/search-hero";
-import { BuildexMark } from "@/components/shared/brand";
+import { BuildexMark, Wordmark } from "@/components/shared/brand";
 import { TooltipProvider } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +36,28 @@ export default function MarketplaceLayout({
   const pathname = usePathname();
   const isHome = pathname === "/marketplace";
   const [region, setRegion] = React.useState("");
+  const [stuck, setStuck] = React.useState(false);
+
+  /*
+    The reference site collapses its header on scroll: the promo strip and the
+    tall search hero give way to one compact bar carrying the logo, an inline
+    search and the utilities. Search is then never more than a click away, and
+    the grid gets the viewport back.
+
+    A sentinel element plus IntersectionObserver rather than a scroll listener,
+    so this costs nothing per frame.
+  */
+  const sentinelRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setStuck(!entry.isIntersecting),
+      { rootMargin: "0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -49,6 +71,40 @@ export default function MarketplaceLayout({
 
         <PromoStrip />
         <UtilityBar region={region} onRegionChange={setRegion} />
+        {/* Crossing this marks the point where the header collapses. */}
+        <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+
+        {/* The collapsed bar: logo + inline search, only once scrolled past. */}
+        <div
+          className={cn(
+            "fixed inset-x-0 top-0 z-40 border-b border-border bg-surface/95 backdrop-blur transition-transform duration-200",
+            stuck ? "translate-y-0 shadow-overlay" : "-translate-y-full",
+          )}
+          aria-hidden={!stuck}
+        >
+          <div className="mx-auto flex h-14 max-w-[90rem] items-center gap-4 px-4 sm:px-6 lg:px-8">
+            <Link href="/marketplace" className="shrink-0 rounded-md" tabIndex={stuck ? 0 : -1}>
+              <Wordmark product="connect" size="sm" />
+            </Link>
+            <div className="min-w-0 flex-1">
+              <SearchHero compact />
+            </div>
+            <Link
+              href="/marketplace/rfq"
+              tabIndex={stuck ? 0 : -1}
+              className="hidden shrink-0 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground md:block"
+            >
+              Request a quote
+            </Link>
+            <Link
+              href="/connect/dashboard"
+              tabIndex={stuck ? 0 : -1}
+              className="shrink-0 rounded-md px-2 py-2 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted"
+            >
+              Sign in
+            </Link>
+          </div>
+        </div>
 
         {/*
           `relative` is what lets the mega menu span the full width of this row

@@ -167,6 +167,9 @@ export type MarketplaceFilter = {
 export type MarketplaceListing = {
   product: Product;
   manufacturer: Manufacturer;
+  /** Enquiries this listing has drawn — the card's traction signal, and what
+   *  the default "most in demand" ordering ranks on. */
+  enquiryCount: number;
 };
 
 export type MarketplaceFacets = {

@@ -314,7 +314,7 @@ export default function ManufacturerStorefrontPage() {
                 </CardBody>
               </Card>
             ) : (
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
                 {filtered.map((product) => (
                   <ProductCard
                     key={product.id}

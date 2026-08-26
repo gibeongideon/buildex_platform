@@ -1,0 +1,30 @@
+My final recommendation
+
+For the first Buildex ecommerce release:
+
+Next.js + TypeScript + PostgreSQL + Drizzle + Odoo API + M-Pesa
+
+That's the stack I'd choose for you.
+
+Later, when traffic grows:
+
+Phase 1
+Next.js
+PostgreSQL
+Odoo
+        ↓
+Phase 2
++ Redis
++ background workers
+        ↓
+Phase 3
++ dedicated search
++ CDN
++ separate services
+        ↓
+Phase 4
++ Buildex Capital
++ Buildex Connect
++ POS
++ wallet
++ credit scoring

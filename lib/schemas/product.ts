@@ -55,10 +55,13 @@ export const listingFieldsSchema = z.object({
     .toUpperCase()
     .min(2, "SKU is required")
     .max(24, "Keep SKUs under 24 characters"),
-  description: z.string().trim().max(600).default(""),
+  // No .default() here: it would make the schema's input type diverge from its
+  // output type and break the react-hook-form resolver generics. The create
+  // form supplies "" through defaultValues instead.
+  description: z.string().trim().max(600),
   unit: productUnitSchema,
   /** e.g. "50 kg" for a cement bag, "20 L" for a paint drum. */
-  packSize: z.string().trim().max(40).default(""),
+  packSize: z.string().trim().max(40),
   priceBands: z
     .array(priceBandSchema)
     .min(1, "Add at least one price band")

@@ -54,7 +54,7 @@ export default function DirectorsStepPage() {
     defaultValues: { directors: [emptyDirector()] },
   });
 
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "directors",
   });
@@ -77,15 +77,17 @@ export default function DirectorsStepPage() {
   if (!ready) return <StepSkeleton />;
 
   async function runIprsCheck(index: number) {
-    const director = form.getValues(`directors.${index}`);
-    if (!/^\d{7,8}$/.test(director.nationalId)) return;
+    const nationalId = form.getValues(`directors.${index}.nationalId`);
+    if (!/^\d{7,8}$/.test(nationalId)) return;
 
-    update(index, { ...director, iprsStatus: "checking" });
+    // setValue rather than useFieldArray.update: update() remounts the row,
+    // which steals focus mid-typing and regenerates the React key.
+    form.setValue(`directors.${index}.iprsStatus`, "checking");
     await new Promise((resolve) => setTimeout(resolve, 900));
-    update(index, {
-      ...form.getValues(`directors.${index}`),
-      iprsStatus: director.nationalId.startsWith(MISMATCH_PREFIX) ? "mismatch" : "matched",
-    });
+    form.setValue(
+      `directors.${index}.iprsStatus`,
+      nationalId.startsWith(MISMATCH_PREFIX) ? "mismatch" : "matched",
+    );
   }
 
   const onSubmit = form.handleSubmit(async (values) => {

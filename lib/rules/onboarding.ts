@@ -131,8 +131,10 @@ export function furthestReachableStep(draft: OnboardingDraft): OnboardingStepId 
   if (draft.directors.length === 0) return "directors";
   if (!documentPackComplete(draft.documents)) return "documents";
   if (!draft.manufacturerId) return "review";
-  if (!draft.subscription) return "verification";
-  if (!draft.firstListing) return "subscription";
+  // Once the application is submitted, both verification and subscription are
+  // open: verification is a status page rather than a gate, and the package
+  // has to be reachable *before* one has been chosen.
+  if (!draft.subscription) return "subscription";
   return "first-listing";
 }
 

@@ -202,10 +202,20 @@
     font-feature-settings: "tnum";
   }
 
-  /* Wide content (tables, wizards) scrolls inside itself, never the page. */
+  /*
+    Wide content (tables, wizards) scrolls inside itself, never the page.
+
+    `contain: paint` is load-bearing, not decoration. Without it a wide table's
+    ink overflow still counts toward the root's scrollable area, so the whole
+    page scrolls sideways on narrow viewports even though the scroller clips
+    its layout correctly. It also tells the browser nothing paints outside the
+    box, which is exactly what an overflow scroller means.
+  */
   .scroll-x {
     overflow-x: auto;
     overscroll-behavior-x: contain;
+    contain: paint;
+    max-width: 100%;
   }
 }
 

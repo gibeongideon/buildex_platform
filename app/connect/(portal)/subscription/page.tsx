@@ -24,19 +24,20 @@ import { useCurrentManufacturer } from "../use-current-manufacturer";
 
 export default function SubscriptionPage() {
   const { data, loading } = useCurrentManufacturer();
-  const [cycle, setCycle] = React.useState<BillingCycle>("monthly");
-  const [selected, setSelected] = React.useState<PackageKey>("free");
   const [saving, setSaving] = React.useState(false);
   const [confirmed, setConfirmed] = React.useState(false);
 
   const current = data?.manufacturer.subscription ?? null;
 
-  React.useEffect(() => {
-    if (current) {
-      setSelected(current.package);
-      setCycle(current.billingCycle);
-    }
-  }, [current]);
+  // Derived rather than synced from the loaded subscription by an effect: the
+  // selection is whatever was last clicked, otherwise the current plan.
+  const [choice, setChoice] = React.useState<{
+    pkg: PackageKey;
+    cycle: BillingCycle;
+  } | null>(null);
+
+  const selected = choice?.pkg ?? current?.package ?? "free";
+  const cycle = choice?.cycle ?? current?.billingCycle ?? "monthly";
 
   if (loading && !data) {
     return (
@@ -83,12 +84,18 @@ export default function SubscriptionPage() {
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <div className="min-w-0 space-y-6">
-            <BillingCycleToggle cycle={cycle} onChange={setCycle} />
+            <BillingCycleToggle
+              cycle={cycle}
+              onChange={(nextCycle) => {
+                setChoice({ pkg: selected, cycle: nextCycle });
+                setConfirmed(false);
+              }}
+            />
             <PackageCards
               selected={selected}
               cycle={cycle}
               onSelect={(pkg) => {
-                setSelected(pkg);
+                setChoice({ pkg, cycle });
                 setConfirmed(false);
               }}
               currentPackage={current?.package}

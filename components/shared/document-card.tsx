@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { StatusPill, type Tone } from "@/components/ui/primitives";
 import {
   documentTypeMeta,
+  effectiveDocumentStatus,
   formatFileSize,
   type DocumentStatus,
   type DocumentTypeKey,
@@ -21,13 +22,6 @@ const STATUS_META: Record<DocumentStatus, { label: string; tone: Tone }> = {
   rejected: { label: "Rejected", tone: "danger" },
   expired: { label: "Expired", tone: "danger" },
 };
-
-/** A document is effectively expired the moment its date passes, whatever the stored status says. */
-function effectiveStatus(doc: UploadedDocument | undefined): DocumentStatus {
-  if (!doc) return "missing";
-  if (doc.expiresAt && new Date(doc.expiresAt).getTime() < Date.now()) return "expired";
-  return doc.status;
-}
 
 export function DocumentCard({
   type,
@@ -44,7 +38,7 @@ export function DocumentCard({
   highlight?: boolean;
 }) {
   const meta = documentTypeMeta(type);
-  const status = effectiveStatus(document);
+  const status = effectiveDocumentStatus(document);
   const statusMeta = STATUS_META[status];
   const needsAttention = status === "rejected" || status === "expired";
   const [replacing, setReplacing] = React.useState(false);

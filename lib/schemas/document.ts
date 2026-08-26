@@ -110,14 +110,27 @@ export const REQUIRED_DOCUMENT_TYPES = DOCUMENT_TYPES.filter((d) => d.required).
   (d) => d.key,
 );
 
+/** True once the expiry date has passed, whatever the stored status says. */
+export function isDocumentExpired(doc: UploadedDocument | undefined): boolean {
+  if (!doc?.expiresAt) return false;
+  return new Date(doc.expiresAt).getTime() < Date.now();
+}
+
+/** The status to display, which folds in a lapsed expiry date. */
+export function effectiveDocumentStatus(
+  doc: UploadedDocument | undefined,
+): DocumentStatus {
+  if (!doc) return "missing";
+  return isDocumentExpired(doc) ? "expired" : doc.status;
+}
+
 /** A document is only "good" if it was accepted and has not lapsed. */
 export function isDocumentSatisfied(doc: UploadedDocument | undefined): boolean {
   if (!doc) return false;
   if (doc.status === "rejected" || doc.status === "expired" || doc.status === "missing") {
     return false;
   }
-  if (doc.expiresAt && new Date(doc.expiresAt).getTime() < Date.now()) return false;
-  return true;
+  return !isDocumentExpired(doc);
 }
 
 export function formatFileSize(bytes: number) {

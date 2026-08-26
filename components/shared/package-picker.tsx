@@ -95,7 +95,10 @@ export function PackageCards({
     <div
       role="radiogroup"
       aria-label="Subscription package"
-      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      // Four across only on very wide screens: inside the portal these sit
+      // between a 16rem nav and a 20rem summary rail, where four columns
+      // squeeze the annual prices past the card edge.
+      className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4"
     >
       {SUBSCRIPTION_PACKAGES.map((pkg) => {
         const price = packagePrice(pkg.key, cycle);
@@ -130,14 +133,14 @@ export function PackageCards({
 
             <span className="text-sm font-semibold text-foreground">{pkg.name}</span>
 
-            <span className="mt-3 flex items-baseline gap-1">
+            <span className="mt-3 flex flex-wrap items-baseline gap-x-1">
               {price === 0 ? (
-                <span className="text-xl font-semibold text-foreground">Free</span>
+                <span className="text-lg font-semibold text-foreground">Free</span>
               ) : (
                 <>
-                  <Currency value={price} className="text-xl font-semibold text-foreground" />
-                  <span className="text-xs text-muted-foreground">
-                    /{cycle === "annual" ? "year" : "month"}
+                  <Currency value={price} className="text-lg font-semibold text-foreground" />
+                  <span className="whitespace-nowrap text-xs text-muted-foreground">
+                    per {cycle === "annual" ? "year" : "month"}
                   </span>
                 </>
               )}

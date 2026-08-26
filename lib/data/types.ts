@@ -116,9 +116,20 @@ export interface ProductRepo {
   remove(id: string): Promise<void>;
 }
 
+/**
+ * A patch, or a function producing one from the current draft.
+ *
+ * The functional form matters: uploading several documents in quick succession
+ * would otherwise have each save computed from a stale render-time snapshot,
+ * and the later writes would silently drop the earlier ones.
+ */
+export type DraftPatch =
+  | Partial<OnboardingDraft>
+  | ((current: OnboardingDraft) => Partial<OnboardingDraft>);
+
 export interface OnboardingRepo {
   load(): Promise<OnboardingDraft>;
-  save(patch: Partial<OnboardingDraft>): Promise<OnboardingDraft>;
+  save(patch: DraftPatch): Promise<OnboardingDraft>;
   clear(): Promise<void>;
 }
 

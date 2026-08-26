@@ -80,12 +80,14 @@ export const companyStepSchema = z.object({
     .max(currentYear, "Year cannot be in the future"),
   physicalAddress: z.string().trim().min(5, "Enter the physical address"),
   county: countySchema,
+  // No .default() on form-facing fields: a default makes the schema's input
+  // type diverge from its output type, which breaks the react-hook-form
+  // resolver's generics. Defaults belong in the form's defaultValues instead.
   website: z
     .string()
     .trim()
     .max(120)
-    .refine((v) => v === "" || /^https?:\/\/.+\..+/.test(v), "Enter a full URL including https://")
-    .default(""),
+    .refine((v) => v === "" || /^https?:\/\/.+\..+/.test(v), "Enter a full URL including https://"),
   categories: z
     .array(productCategorySchema)
     .min(1, "Select at least one category you manufacture"),
@@ -124,7 +126,7 @@ export const directorSchema = z.object({
     .min(0, "Ownership cannot be negative")
     .max(100, "Ownership cannot exceed 100%"),
   phone: kenyanPhone,
-  iprsStatus: iprsStatusSchema.default("unchecked"),
+  iprsStatus: iprsStatusSchema,
 });
 
 export type Director = z.infer<typeof directorSchema>;

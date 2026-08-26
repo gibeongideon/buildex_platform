@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { manufacturerRepo } from "@/lib/data";
 import {
   VERIFICATION_CHECKS,
+  checkMeta,
   type VerificationCheck,
 } from "@/lib/schemas/verification";
 
@@ -61,7 +62,7 @@ export function DemoScenarios({
             )
           }
         >
-          {allPassed ? "All checks passed" : `Pass “${nextCheck!.key.replace(/_/g, " ")}”`}
+          {allPassed ? "All checks passed" : `Pass: ${checkMeta(nextCheck!.key).label}`}
         </Button>
 
         <Button

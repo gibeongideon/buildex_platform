@@ -145,9 +145,16 @@ export function AppShell({
 }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const pathname = usePathname();
+  const [drawerPathname, setDrawerPathname] = React.useState(pathname);
 
-  // Route changes should always leave the mobile drawer closed.
-  React.useEffect(() => setMobileOpen(false), [pathname]);
+  // Route changes should always leave the mobile drawer closed — including on
+  // browser back/forward, which never goes through a nav link's onClick. This
+  // is React's documented "adjust state during render" pattern rather than an
+  // effect, so the drawer is already closed on the first render of the new page.
+  if (drawerPathname !== pathname) {
+    setDrawerPathname(pathname);
+    setMobileOpen(false);
+  }
 
   return (
     <TooltipProvider delayDuration={200}>

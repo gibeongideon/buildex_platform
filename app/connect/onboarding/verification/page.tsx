@@ -11,12 +11,12 @@ import {
   Skeleton,
   StatusPill,
 } from "@/components/ui/primitives";
-import { Button } from "@/components/ui/button";
 import { VerificationTracker } from "@/components/shared/verification-tracker";
 import { DocumentCard } from "@/components/shared/document-card";
 import type { PickedFile } from "@/components/shared/file-dropzone";
 import { manufacturerRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
+import { buildUploadedDocument } from "@/lib/rules/documents";
 import { blockingDocumentTypes } from "@/lib/rules/onboarding";
 import {
   STATUS_LABELS,
@@ -25,7 +25,6 @@ import {
   type VerificationCheck,
 } from "@/lib/schemas/verification";
 import type { DocumentTypeKey } from "@/lib/schemas/document";
-import { makeId } from "@/lib/utils";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
 import { StepShell, StepSkeleton } from "../step-frame";
 import { DemoScenarios } from "./demo-scenarios";
@@ -87,20 +86,10 @@ export default function VerificationStepPage() {
   const blocking = blockingDocumentTypes(manufacturer.checks);
 
   async function replaceDocument(type: DocumentTypeKey, file: PickedFile) {
-    await manufacturerRepo.replaceDocument(manufacturer!.id, {
-      id: makeId("doc"),
-      type,
-      fileName: file.name,
-      fileSize: file.size,
-      mimeType: file.type,
-      uploadedAt: new Date().toISOString(),
-      status: "uploaded",
-      expiresAt:
-        type === "tax_compliance_certificate"
-          ? new Date(Date.now() + 365 * 86_400_000).toISOString()
-          : null,
-      reviewNote: null,
-    });
+    await manufacturerRepo.replaceDocument(
+      manufacturer!.id,
+      buildUploadedDocument(type, file),
+    );
   }
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {

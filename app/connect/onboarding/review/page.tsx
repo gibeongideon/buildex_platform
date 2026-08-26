@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/primitives";
 import { DetailRow } from "@/components/shared/format";
 import { capacityBandLabel, regionForCounty } from "@/lib/schemas/common";
-import { documentTypeMeta } from "@/lib/schemas/document";
+import { documentTypeMeta, isDocumentExpired } from "@/lib/schemas/document";
 import { requiresSiteVisit, hasKebsPermit } from "@/lib/rules/onboarding";
 import { manufacturerRepo } from "@/lib/data";
 import { formatDate } from "@/lib/utils";
@@ -180,14 +180,8 @@ export default function ReviewStepPage() {
                   <span className="inline-flex flex-wrap items-center justify-end gap-2">
                     <span className="text-muted-foreground">{document.fileName}</span>
                     {document.expiresAt ? (
-                      <StatusPill
-                        tone={
-                          new Date(document.expiresAt).getTime() < Date.now()
-                            ? "danger"
-                            : "neutral"
-                        }
-                      >
-                        {new Date(document.expiresAt).getTime() < Date.now()
+                      <StatusPill tone={isDocumentExpired(document) ? "danger" : "neutral"}>
+                        {isDocumentExpired(document)
                           ? "Expired"
                           : `Valid to ${formatDate(document.expiresAt)}`}
                       </StatusPill>

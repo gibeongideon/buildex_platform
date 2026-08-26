@@ -15,15 +15,17 @@ import { StepShell, StepSkeleton } from "../step-frame";
 export default function SubscriptionStepPage() {
   const { ready, draft } = useStepGuard("subscription");
   const { completeStep, saving } = useOnboarding();
-  const [cycle, setCycle] = React.useState<BillingCycle>("monthly");
-  const [selected, setSelected] = React.useState<PackageKey>("free");
 
-  React.useEffect(() => {
-    if (draft?.subscription) {
-      setSelected(draft.subscription.package);
-      setCycle(draft.subscription.billingCycle);
-    }
-  }, [draft?.subscription]);
+  // Derived rather than synced from the draft by an effect: the choice is
+  // whatever the applicant last clicked, otherwise whatever the draft already
+  // holds, otherwise Free.
+  const [choice, setChoice] = React.useState<{
+    pkg: PackageKey;
+    cycle: BillingCycle;
+  } | null>(null);
+
+  const selected = choice?.pkg ?? draft?.subscription?.package ?? "free";
+  const cycle = choice?.cycle ?? draft?.subscription?.billingCycle ?? "monthly";
 
   if (!ready) return <StepSkeleton />;
 
@@ -49,8 +51,15 @@ export default function SubscriptionStepPage() {
       wide
     >
       <div className="space-y-6">
-        <BillingCycleToggle cycle={cycle} onChange={setCycle} />
-        <PackageCards selected={selected} cycle={cycle} onSelect={setSelected} />
+        <BillingCycleToggle
+          cycle={cycle}
+          onChange={(nextCycle) => setChoice({ pkg: selected, cycle: nextCycle })}
+        />
+        <PackageCards
+          selected={selected}
+          cycle={cycle}
+          onSelect={(pkg) => setChoice({ pkg, cycle })}
+        />
         <PackageComparison highlight={selected} />
 
         <Alert tone="info" title="Pricing shown is indicative">

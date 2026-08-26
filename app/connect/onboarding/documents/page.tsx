@@ -6,20 +6,18 @@ import { Alert, Card, CardBody, CardHeader, CardTitle } from "@/components/ui/pr
 import { Button } from "@/components/ui/button";
 import { DocumentCard } from "@/components/shared/document-card";
 import type { PickedFile } from "@/components/shared/file-dropzone";
-import { makeId } from "@/lib/utils";
 import {
   DOCUMENT_TYPES,
   documentTypeMeta,
   type DocumentTypeKey,
-  type UploadedDocument,
 } from "@/lib/schemas/document";
+import { buildUploadedDocument } from "@/lib/rules/documents";
 import { outstandingDocuments } from "@/lib/rules/onboarding";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
 import { StepShell, StepSkeleton } from "../step-frame";
 
 const REQUIRED = DOCUMENT_TYPES.filter((d) => d.required);
 const OPTIONAL = DOCUMENT_TYPES.filter((d) => !d.required);
-const YEAR_MS = 365 * 86_400_000;
 
 export default function DocumentsStepPage() {
   const { ready, draft } = useStepGuard("documents");
@@ -29,45 +27,23 @@ export default function DocumentsStepPage() {
 
   const documents = draft.documents;
 
-  function buildDocument(
-    type: DocumentTypeKey,
-    file: PickedFile,
-    options: { expired?: boolean } = {},
-  ): UploadedDocument {
-    const meta = documentTypeMeta(type);
-    return {
-      id: makeId("doc"),
-      type,
-      fileName: file.name,
-      fileSize: file.size,
-      mimeType: file.type,
-      uploadedAt: new Date().toISOString(),
-      status: options.expired ? "expired" : "uploaded",
-      // A Tax Compliance Certificate is valid twelve months from issue, so the
-      // expiry is derived rather than asked for.
-      expiresAt: meta.tracksExpiry
-        ? new Date(Date.now() + (options.expired ? -30 * 86_400_000 : YEAR_MS)).toISOString()
-        : null,
-      reviewNote: options.expired
-        ? "This certificate lapsed 30 days ago. Download a current one from iTax."
-        : null,
-    };
-  }
-
+  // Both use the functional patch form so that uploading several documents in
+  // quick succession composes rather than each overwriting the last.
   async function upload(
     type: DocumentTypeKey,
     file: PickedFile,
     options: { expired?: boolean } = {},
   ) {
-    const next = [
-      ...documents.filter((d) => d.type !== type),
-      buildDocument(type, file, options),
-    ];
-    await save({ documents: next });
+    const uploaded = buildUploadedDocument(type, file, options);
+    await save((current) => ({
+      documents: [...current.documents.filter((d) => d.type !== type), uploaded],
+    }));
   }
 
   async function removeDocument(type: DocumentTypeKey) {
-    await save({ documents: documents.filter((d) => d.type !== type) });
+    await save((current) => ({
+      documents: current.documents.filter((d) => d.type !== type),
+    }));
   }
 
   const missing = outstandingDocuments(documents);

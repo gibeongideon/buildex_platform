@@ -18,10 +18,11 @@ import type { PickedFile } from "@/components/shared/file-dropzone";
 import { DetailRow } from "@/components/shared/format";
 import { DemoScenarios } from "@/app/connect/onboarding/verification/demo-scenarios";
 import { manufacturerRepo } from "@/lib/data";
+import { buildUploadedDocument } from "@/lib/rules/documents";
 import { blockingDocumentTypes } from "@/lib/rules/onboarding";
 import { DOCUMENT_TYPES, type DocumentTypeKey } from "@/lib/schemas/document";
 import { STATUS_LABELS, STATUS_TONE } from "@/lib/schemas/verification";
-import { formatDate, makeId } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
 
 export default function VerificationPage() {
@@ -41,20 +42,10 @@ export default function VerificationPage() {
   const blocking = blockingDocumentTypes(manufacturer.checks);
 
   async function replaceDocument(type: DocumentTypeKey, file: PickedFile) {
-    await manufacturerRepo.replaceDocument(manufacturer.id, {
-      id: makeId("doc"),
-      type,
-      fileName: file.name,
-      fileSize: file.size,
-      mimeType: file.type,
-      uploadedAt: new Date().toISOString(),
-      status: "uploaded",
-      expiresAt:
-        type === "tax_compliance_certificate"
-          ? new Date(Date.now() + 365 * 86_400_000).toISOString()
-          : null,
-      reviewNote: null,
-    });
+    await manufacturerRepo.replaceDocument(
+      manufacturer.id,
+      buildUploadedDocument(type, file),
+    );
   }
 
   return (

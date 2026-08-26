@@ -42,6 +42,44 @@ function apply(preference: Preference) {
   document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
 }
 
+/*
+  The stored preference is external state, so it is read through
+  useSyncExternalStore rather than copied into React state by an effect. That
+  keeps the toggle correct across tabs for free, and avoids a render pass that
+  shows the wrong option selected.
+*/
+
+const preferenceListeners = new Set<() => void>();
+
+function subscribePreference(listener: () => void) {
+  preferenceListeners.add(listener);
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === STORAGE_KEY) listener();
+  };
+  window.addEventListener("storage", onStorage);
+  return () => {
+    preferenceListeners.delete(listener);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+
+function readPreference(): Preference {
+  try {
+    return (localStorage.getItem(STORAGE_KEY) as Preference) ?? "system";
+  } catch {
+    return "system";
+  }
+}
+
+function writePreference(next: Preference) {
+  try {
+    localStorage.setItem(STORAGE_KEY, next);
+  } catch {
+    // Blocked storage — the choice applies now but won't persist.
+  }
+  preferenceListeners.forEach((listener) => listener());
+}
+
 const OPTIONS: { value: Preference; label: string; icon: React.ElementType }[] = [
   { value: "light", label: "Light", icon: Sun },
   { value: "dark", label: "Dark", icon: Moon },
@@ -49,17 +87,11 @@ const OPTIONS: { value: Preference; label: string; icon: React.ElementType }[] =
 ];
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const [preference, setPreference] = React.useState<Preference>("system");
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-    try {
-      setPreference((localStorage.getItem(STORAGE_KEY) as Preference) ?? "system");
-    } catch {
-      // Blocked storage — stay on the default.
-    }
-  }, []);
+  const preference = React.useSyncExternalStore(
+    subscribePreference,
+    readPreference,
+    () => "system" as Preference, // server render has no stored preference
+  );
 
   // Follow the OS while the preference is "system".
   React.useEffect(() => {
@@ -71,12 +103,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   }, [preference]);
 
   function choose(next: Preference) {
-    setPreference(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // Preference just won't persist.
-    }
+    writePreference(next);
     apply(next);
   }
 
@@ -90,7 +117,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       )}
     >
       {OPTIONS.map(({ value, label, icon: Icon }) => {
-        const active = mounted && preference === value;
+        const active = preference === value;
         return (
           <button
             key={value}

@@ -11,6 +11,7 @@ import {
 } from "@/lib/rules/onboarding";
 import { makeId, sleep } from "@/lib/utils";
 import type {
+  DraftPatch,
   ManufacturerFilter,
   ManufacturerRepo,
   OnboardingDraft,
@@ -281,14 +282,17 @@ export const onboardingRepo: OnboardingRepo = {
     return fresh;
   },
 
-  async save(patch: Partial<OnboardingDraft>) {
+  async save(patch: DraftPatch) {
     await sleep(FAST);
+    // Read the current draft *after* the delay, and resolve a functional patch
+    // against it, so concurrent saves compose instead of clobbering.
     const current = getSnapshot().draft ?? emptyDraft();
+    const resolved = typeof patch === "function" ? patch(current) : patch;
     const next: OnboardingDraft = {
       ...current,
-      ...patch,
+      ...resolved,
       completedSteps: [
-        ...new Set([...current.completedSteps, ...(patch.completedSteps ?? [])]),
+        ...new Set([...current.completedSteps, ...(resolved.completedSteps ?? [])]),
       ],
       updatedAt: now(),
     };

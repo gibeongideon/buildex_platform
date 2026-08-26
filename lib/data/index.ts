@@ -33,6 +33,7 @@ export {
 
 export type {
   DemoSession,
+  DraftPatch,
   FirstListingDraft,
   ManufacturerFilter,
   ManufacturerRepo,

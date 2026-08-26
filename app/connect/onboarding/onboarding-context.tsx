@@ -2,7 +2,12 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { onboardingRepo, type OnboardingDraft, type OnboardingStepId } from "@/lib/data";
+import {
+  onboardingRepo,
+  type DraftPatch,
+  type OnboardingDraft,
+  type OnboardingStepId,
+} from "@/lib/data";
 import { furthestReachableStep, stepIndex } from "@/lib/rules/onboarding";
 import { stepHref } from "./steps";
 
@@ -19,7 +24,7 @@ type OnboardingContextValue = {
   draft: OnboardingDraft | null;
   loading: boolean;
   saving: boolean;
-  save: (patch: Partial<OnboardingDraft>) => Promise<OnboardingDraft>;
+  save: (patch: DraftPatch) => Promise<OnboardingDraft>;
   /** Saves the patch, marks the step complete and moves to `next`. */
   completeStep: (
     step: OnboardingStepId,
@@ -57,7 +62,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     };
   }, []);
 
-  const save = React.useCallback(async (patch: Partial<OnboardingDraft>) => {
+  const save = React.useCallback(async (patch: DraftPatch) => {
     setSaving(true);
     try {
       const next = await onboardingRepo.save(patch);

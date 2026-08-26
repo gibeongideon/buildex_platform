@@ -83,12 +83,17 @@ the documents step. Set `NEXT_PUBLIC_DEMO_MODE=false` to hide the global panel.
 
 **As a buyer (hardware shop):**
 
-1. `/marketplace` — the central catalogue. Search, filter by category and delivery
-   region, sort by price or lead time.
-2. Open any listing — the price-band table highlights the band your quantity falls into,
+1. `/marketplace` — the storefront home. Hover **All categories** for the mega menu,
+   or use the search hero (Products / Manufacturers / Regions).
+2. `/marketplace/search` — faceted results. Filter by category and delivery region, sort
+   by price or lead time. Deep-linkable: `?q=`, `?category=`, `?region=`.
+3. Open any listing — the price-band table highlights the band your quantity falls into,
    and the calculator shows the line total.
-3. **Visit store** — that manufacturer's own storefront, carrying only their range.
-4. Send a quote request from a listing.
+4. **Visit store** — that manufacturer's own storefront, carrying only their range.
+5. Send a quote request, or use `/marketplace/rfq` to reach every supplier who makes that
+   category *and* delivers to your region at once.
+6. `/marketplace/top-ranking` and `/marketplace/regions` — demand leaderboard and
+   delivery coverage. Revisit `/marketplace` and your browsing history is there.
 
 **As a manufacturer:**
 

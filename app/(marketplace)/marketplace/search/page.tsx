@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal, Store, X } from "lucide-react";
 import { marketplaceRepo, type MarketplaceSort } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
@@ -13,6 +14,7 @@ import { Input, Select } from "@/components/ui/field";
 import {
   Alert,
   Card,
+  Skeleton,
   CardBody,
   CardHeader,
   CardTitle,
@@ -102,11 +104,22 @@ function FacetGroup({
   );
 }
 
-export default function MarketplacePage() {
-  const [query, setQuery] = React.useState("");
-  const [submittedQuery, setSubmittedQuery] = React.useState("");
-  const [categories, setCategories] = React.useState<string[]>([]);
-  const [regions, setRegions] = React.useState<string[]>([]);
+function MarketplaceSearchInner() {
+  // Deep links carry the query and filters, so the mega menu, hero tabs and
+  // suggestion chips can all land the buyer on a pre-filtered result set.
+  const params = useSearchParams();
+  const initialQuery = params.get("q") ?? "";
+  const initialCategory = params.get("category");
+  const initialRegion = params.get("region");
+
+  const [query, setQuery] = React.useState(initialQuery);
+  const [submittedQuery, setSubmittedQuery] = React.useState(initialQuery);
+  const [categories, setCategories] = React.useState<string[]>(
+    initialCategory ? [initialCategory] : [],
+  );
+  const [regions, setRegions] = React.useState<string[]>(
+    initialRegion ? [initialRegion] : [],
+  );
   const [verifiedOnly, setVerifiedOnly] = React.useState(false);
   const [sort, setSort] = React.useState<MarketplaceSort>("relevance");
   const [filtersOpen, setFiltersOpen] = React.useState(false);
@@ -204,48 +217,33 @@ export default function MarketplacePage() {
 
   return (
     <>
-      <section className="on-brand">
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            Buildex Connect Marketplace
-          </p>
-          <h1 className="mt-2 max-w-2xl text-2xl font-semibold tracking-tight text-white">
-            Source building materials directly from verified manufacturers.
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-white/70">
-            Wholesale price bands, minimum order quantities and lead times published
-            up front — compare on the quantity you actually buy.
-          </p>
+      <div className="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8">
+        <nav aria-label="Breadcrumb" className="mb-4">
+          <ol className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+            <li>
+              <Link href="/marketplace" className="hover:text-foreground hover:underline">
+                Marketplace
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li className="text-foreground">
+              {submittedQuery
+                ? `Search: ${submittedQuery}`
+                : categories.length
+                  ? categories.join(", ")
+                  : "All listings"}
+            </li>
+          </ol>
+        </nav>
 
-          <form
-            className="mt-6 flex max-w-2xl gap-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setSubmittedQuery(query);
-              setSort("relevance");
-            }}
-          >
-            <div className="relative flex-1">
-              <Search
-                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-                aria-hidden="true"
-              />
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search cement, rebar, tiles, cable…"
-                aria-label="Search the marketplace"
-                className="h-11 pl-9"
-              />
-            </div>
-            <Button type="submit" size="lg">
-              Search
-            </Button>
-          </form>
-        </div>
-      </section>
+        <h1 className="mb-5 font-display text-xl font-bold tracking-tight text-foreground">
+          {submittedQuery
+            ? `Results for “${submittedQuery}”`
+            : categories.length === 1
+              ? categories[0]
+              : "All listings"}
+        </h1>
 
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8">
           <aside className="hidden lg:block">
             <div className="flex items-center justify-between">
@@ -466,5 +464,31 @@ export default function MarketplacePage() {
         </div>
       </div>
     </>
+  );
+}
+
+/*
+  `useSearchParams()` opts a page out of static prerendering unless it sits
+  inside a Suspense boundary, so the reading component is split out and wrapped.
+  The fallback matches the loaded layout closely enough that nothing jumps.
+*/
+
+export default function MarketplaceSearchPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="mt-4 h-7 w-64" />
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <MarketplaceSearchInner />
+    </React.Suspense>
   );
 }

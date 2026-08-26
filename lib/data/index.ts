@@ -27,6 +27,7 @@ export {
 
 export {
   marketplaceRepo,
+  browsingRepo,
   enquiryRepo,
   campaignRepo,
   insightsRepo,
@@ -39,6 +40,7 @@ export {
 } from "./mock/db";
 
 export type {
+  BrowsingRepo,
   CampaignRepo,
   DemoSession,
   DraftPatch,

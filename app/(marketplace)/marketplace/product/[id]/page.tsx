@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   Store,
 } from "lucide-react";
-import { enquiryRepo, marketplaceRepo } from "@/lib/data";
+import { browsingRepo, enquiryRepo, marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import {
   formatBandRange,
@@ -83,6 +83,12 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = React.useState<number | null>(null);
   const [sent, setSent] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
+
+  // Record the view so the marketplace home's browsing-history and
+  // "keep looking for" rails reflect what was actually opened.
+  React.useEffect(() => {
+    browsingRepo.record(productId);
+  }, [productId]);
 
   const product = listing?.product;
   const manufacturer = listing?.manufacturer;

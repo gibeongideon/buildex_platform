@@ -79,7 +79,7 @@ export default function HomePage() {
                   </Link>
                 </Button>
                 <Button variant="secondary" size="lg" asChild>
-                  <Link href="/connect/dashboard">Explore the manufacturer portal</Link>
+                  <Link href="/marketplace">Browse the marketplace</Link>
                 </Button>
               </div>
             </div>

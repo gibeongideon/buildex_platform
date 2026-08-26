@@ -7,6 +7,7 @@ import { enquiryValue } from "@/lib/schemas/enquiry";
 import { sleep, makeId } from "@/lib/utils";
 import type { Campaign } from "@/lib/schemas/campaign";
 import type {
+  BrowsingRepo,
   CampaignRepo,
   EnquiryFilter,
   EnquiryRepo,
@@ -300,6 +301,39 @@ export const marketplaceRepo: MarketplaceRepo = {
       )
       .sort((a, b) => lowestPrice(a.product) - lowestPrice(b.product))
       .slice(0, limit);
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Browsing history
+// ---------------------------------------------------------------------------
+
+const RECENT_LIMIT = 24;
+
+export const browsingRepo: BrowsingRepo = {
+  async recent(limit = 8) {
+    await sleep(FAST);
+    const { recentProductIds } = getSnapshot();
+    const published = new Map(publicListings().map((l) => [l.product.id, l.product]));
+    // Anything since unpublished simply drops out of the rail.
+    return recentProductIds
+      .map((id) => published.get(id))
+      .filter((p): p is Product => Boolean(p))
+      .slice(0, limit);
+  },
+
+  async record(productId) {
+    mutate((db) => ({
+      ...db,
+      recentProductIds: [
+        productId,
+        ...db.recentProductIds.filter((id) => id !== productId),
+      ].slice(0, RECENT_LIMIT),
+    }));
+  },
+
+  async clear() {
+    mutate((db) => ({ ...db, recentProductIds: [] }));
   },
 };
 

@@ -14,10 +14,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("the central marketplace searches, filters and sorts", async ({ page }) => {
-  await page.goto("/marketplace");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    /Source building materials/i,
-  );
+  await page.goto("/marketplace/search");
 
   // Default ranking is by demand, so cement leads rather than something alphabetical.
   const cards = page.locator("article h3 a");
@@ -44,8 +41,7 @@ test("the central marketplace searches, filters and sorts", async ({ page }) => 
     .toBe(total);
 
   // Search narrows to matching listings.
-  await page.getByPlaceholder(/Search cement/).fill("plywood");
-  await page.getByRole("button", { name: "Search" }).click();
+  await page.goto("/marketplace/search?q=plywood");
   await expect(page.getByText(/for “plywood”/)).toBeVisible({ timeout: 15_000 });
   await expect(page.locator("article h3 a").first()).toContainText(/Plywood/i);
 });
@@ -114,9 +110,7 @@ test("an unverified manufacturer has no public storefront", async ({ page }) => 
   });
 
   // And their draft listing is absent from the central catalogue.
-  await page.goto("/marketplace");
-  await page.getByPlaceholder(/Search cement/).fill("Wire Nails");
-  await page.getByRole("button", { name: "Search" }).click();
+  await page.goto("/marketplace/search?q=Wire%20Nails");
   await expect(page.getByText(/No listings match those filters/)).toBeVisible({
     timeout: 15_000,
   });
@@ -156,4 +150,88 @@ test("a manufacturer can add a listing from the catalogue", async ({ page }) => 
   await expect
     .poll(async () => page.locator("tbody tr").count(), { timeout: 15_000 })
     .toBe(before + 1);
+});
+
+test("the marketplace home carries the full storefront chrome", async ({ page }) => {
+  await page.goto("/marketplace");
+
+  // Search hero with its three scope tabs.
+  await expect(page.getByRole("tab", { name: "Products" })).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(page.getByRole("tab", { name: "Manufacturers" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Regions" })).toBeVisible();
+
+  // Quick actions and the live counts in the hero panel.
+  await expect(page.getByRole("link", { name: /Request for Quotation/ })).toBeVisible();
+  await expect(page.getByText("Most in demand")).toBeVisible();
+  await expect(page.getByText("Shop by category")).toBeVisible();
+});
+
+test("the All categories mega menu opens on hover and links through", async ({ page }) => {
+  await page.goto("/marketplace");
+  await page.getByRole("button", { name: /All categories/i }).hover();
+
+  // The panel shows the hovered category's real listings.
+  await expect(page.getByRole("tab", { name: "Cement & Concrete" })).toBeVisible({
+    timeout: 15_000,
+  });
+  await page.getByRole("tab", { name: "Electrical" }).hover();
+  await expect(
+    page.getByRole("heading", { name: "Electrical", exact: true }),
+  ).toBeVisible({ timeout: 15_000 });
+
+  await page
+    .getByRole("link", { name: "View all" })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/marketplace\/search\?category=Electrical/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Electrical");
+});
+
+test("a request for quotation reaches every matching supplier", async ({ page }) => {
+  await page.goto("/marketplace/rfq");
+
+  await page.getByLabel(/^Category/).selectOption("Cement & Concrete");
+  await page.getByLabel(/^Delivery county/).selectOption("Machakos");
+
+  // The match preview names who would receive it before anything is sent.
+  await expect(page.getByText(/Savannah Cement/)).toBeVisible({ timeout: 15_000 });
+
+  await page.getByLabel(/^Quantity/).fill("500");
+  await page.getByLabel(/^Hardware shop/).fill("RFQ Test Hardware");
+  await page.getByLabel(/^Your name/).fill("Test Buyer");
+  await page.getByLabel(/^Phone/).fill("+254712000222");
+  await page.getByLabel(/^Email/).fill("rfq@testhardware.co.ke");
+  await page.getByRole("button", { name: /Send to \d+ supplier/ }).click();
+
+  await expect(page.getByText(/Your request went to/)).toBeVisible({ timeout: 20_000 });
+});
+
+test("top ranking is ordered by real enquiry demand", async ({ page }) => {
+  await page.goto("/marketplace/top-ranking");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Top ranking", {
+    timeout: 15_000,
+  });
+
+  // The breadcrumb is an <ol> too, so anchor on the rank badges instead.
+  // These are decorative spans, so match the attribute directly rather than
+  // by accessible name.
+  const rankOne = page.locator('[aria-label="Rank 1"]');
+  await expect(rankOne).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator("li").filter({ has: rankOne })).toContainText(/Cement/i);
+  await expect(page.locator('[aria-label="Rank 6"]')).toBeVisible();
+});
+
+test("browsing a listing populates the history rail on the home page", async ({ page }) => {
+  await page.goto("/marketplace/product/prd_eq_vinyl20");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(/Vinyl Silk/i, {
+    timeout: 15_000,
+  });
+
+  await page.goto("/marketplace");
+  await expect(page.getByText("Browsing history")).toBeVisible({ timeout: 15_000 });
+  await expect(
+    page.getByRole("link", { name: /Equator Vinyl Silk Emulsion/ }).first(),
+  ).toBeVisible();
 });

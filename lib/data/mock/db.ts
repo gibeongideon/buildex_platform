@@ -18,7 +18,7 @@ import { seedCampaigns } from "@/lib/data/fixtures/campaigns";
 */
 
 /* Bump when the shape of seeded data changes, or old persisted data wins. */
-const STORAGE_KEY = "buildex.mock.v3";
+const STORAGE_KEY = "buildex.mock.v4";
 
 export type MockDb = {
   manufacturers: Manufacturer[];
@@ -27,6 +27,8 @@ export type MockDb = {
   campaigns: Campaign[];
   draft: OnboardingDraft | null;
   session: DemoSession;
+  /** Product ids, most recent first. Powers the browsing-history rail. */
+  recentProductIds: string[];
 };
 
 export function emptyDraft(): OnboardingDraft {
@@ -53,6 +55,7 @@ function seed(): MockDb {
     campaigns: seedCampaigns(),
     draft: null,
     session: { role: "guest", manufacturerId: null },
+    recentProductIds: [],
   };
 }
 

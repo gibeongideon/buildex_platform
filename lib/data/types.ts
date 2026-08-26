@@ -203,6 +203,19 @@ export interface MarketplaceRepo {
   similarFromOthers(productId: string, limit?: number): Promise<MarketplaceListing[]>;
 }
 
+/**
+ * What this browser has looked at, most recent first.
+ *
+ * Alibaba-style marketplaces lean heavily on "browsing history" and "keep
+ * looking for" rails. Those are only worth showing if they are real, so the
+ * marketplace records views rather than faking the panels.
+ */
+export interface BrowsingRepo {
+  recent(limit?: number): Promise<Product[]>;
+  record(productId: string): Promise<void>;
+  clear(): Promise<void>;
+}
+
 export type EnquiryFilter = {
   manufacturerId?: string;
   status?: Enquiry["status"][];

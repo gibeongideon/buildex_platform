@@ -7,12 +7,12 @@ Covers Phase 0 (Foundation), Phase 1 (manufacturer onboarding) and Phase 2
 
 | Metric | Value |
 | --- | --- |
-| Source files | 77 (`app/`, `components/`, `lib/`, `e2e/`) |
-| Routes | 25 (plus `/_not-found`) |
+| Source files | 86 (`app/`, `components/`, `lib/`, `e2e/`) |
+| Routes | 30 (plus `/_not-found`) |
 | Onboarding steps | 9, all resumable and deep-linkable |
 | Seeded manufacturers / products | 12 / 72 |
 | Seeded enquiries / campaigns | 50 / 12 |
-| End-to-end specs | 9, all passing |
+| End-to-end specs | 14, all passing |
 | TypeScript | `tsc --noEmit` clean |
 | ESLint | 0 errors |
 | Production build | Clean, all routes prerendered as static |
@@ -111,11 +111,22 @@ than no preview.
 
 ### The two-tier marketplace
 
-**Tier 1 — `/marketplace`.** Every published listing across every cleared supplier.
-Faceted search with live counts, category and delivery-region filters, five sort orders,
-and removable filter chips. The default order is **by demand** — how many enquiries each
-listing has attracted — so cement and rebar lead the page rather than whatever happens to
-be alphabetically first.
+**Tier 1 — the central catalogue.** `/marketplace` is the storefront home: a search hero
+with Products / Manufacturers / Regions scopes, a full-width "All categories" mega menu,
+a category rail with live counts, browsing-history and follow-up rails, a demand-ranked
+grid, the supplier list and regional coverage. `/marketplace/search` is the faceted result
+set — live facet counts, category and delivery-region filters, five sort orders, removable
+chips, and query plus filters read from the URL so every entry point can deep-link into a
+pre-filtered view.
+
+The default order is **by demand** — how many enquiries each listing has attracted — so
+cement and rebar lead the page rather than whatever happens to be alphabetically first.
+
+Around it sit the pages the navigation promises: `/marketplace/manufacturers` (supplier
+directory), `/marketplace/regions` (delivery coverage), `/marketplace/top-ranking`
+(leaderboard by real enquiry volume) and `/marketplace/rfq` (Request for Quotation — one
+requirement matched to every supplier who makes that category *and* delivers to that
+region, creating a real enquiry for each).
 
 **Tier 2 — `/marketplace/manufacturer/[id]`.** Each supplier's own branded page carrying
 only their range, with in-store search, category filter and sort; a banner with their
@@ -130,6 +141,17 @@ differentiates one store from another is substance: range, terms, trading record
 interactive: type the quantity you actually want and it highlights the band you fall
 into, shows the unit price and the line total. From there the navigation goes up to the
 supplier's store and sideways to comparable listings from other suppliers, cheapest first.
+
+### The mega menu
+
+Hovering "All categories" opens a panel spanning the full width of the viewport: the
+category rail on the left, the hovered category's real listings on the right with prices,
+plus its suppliers and delivery regions. It opens on hover with a short close delay so a
+diagonal mouse path into the panel does not dismiss it, and on click for keyboard and
+touch; Escape and mouse-away both close it.
+
+Because it renders real listings, a category with three products says three. That is more
+useful than a padded grid.
 
 ### Product imagery without photography
 
@@ -203,9 +225,9 @@ Horizontal page scroll measured on the **production build** by attempting
 
 | Width | Result |
 | --- | --- |
-| 375px | All 14 pages OK |
-| 768px | All 14 pages OK |
-| 1440px | All 14 pages OK |
+| 375px | All 16 pages OK |
+| 768px | All 16 pages OK |
+| 1440px | All 16 pages OK |
 
 Wide tables confirmed to still scroll inside their own container (326px box, 672px
 content, 346px of internal scroll) — the fix clips paint, not content.

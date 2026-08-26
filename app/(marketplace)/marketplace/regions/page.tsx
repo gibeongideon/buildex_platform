@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, MapPin, Package, Store, Truck } from "lucide-react";
 import { marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
+import { useSearchParams } from "next/navigation";
 import { COUNTIES, REGIONS, type Region } from "@/lib/schemas/common";
 import { REGION_REACH } from "@/lib/schemas/campaign";
 import { Currency, Num } from "@/components/shared/format";
@@ -20,8 +21,17 @@ import { priceRange } from "@/lib/schemas/product";
   what it starts at.
 */
 
-export default function RegionsPage() {
-  const { data, loading } = useQuery(() => marketplaceRepo.search({ sort: "relevance" }), []);
+function RegionsInner() {
+  // The Regions tab searches too: a query here means "which regions can serve
+  // this?", so it filters the cards by region or county name and, failing that,
+  // by what the listings in each region actually are.
+  const params = useSearchParams();
+  const query = (params.get("q") ?? "").trim();
+
+  const { data, loading } = useQuery(
+    () => marketplaceRepo.search({ query: query || undefined, sort: "relevance" }),
+    [query],
+  );
   const listings = data?.listings ?? [];
 
   const byRegion = new Map<
@@ -42,6 +52,22 @@ export default function RegionsPage() {
     }
   }
 
+  // A query can name a region or county directly, or describe a product; either
+  // way, only regions with something to show are worth rendering.
+  const q = query.toLowerCase();
+  const namedRegions = q
+    ? REGIONS.filter(
+        (r) =>
+          r.toLowerCase().includes(q) ||
+          COUNTIES.some((c) => c.region === r && c.name.toLowerCase().includes(q)),
+      )
+    : [];
+  const visibleRegions = !q
+    ? REGIONS
+    : namedRegions.length > 0
+      ? namedRegions
+      : REGIONS.filter((r) => (byRegion.get(r)?.listings ?? 0) > 0);
+
   return (
     <div className="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8">
       <nav aria-label="Breadcrumb" className="mb-4">
@@ -61,8 +87,18 @@ export default function RegionsPage() {
         Delivery regions
       </h1>
       <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-        Whether a supplier delivers where you build decides everything else. Start with the
-        region, then compare on price.
+        {query ? (
+          <>
+            Regions that can serve{" "}
+            <span className="font-medium text-foreground">&ldquo;{query}&rdquo;</span> —{" "}
+            <span className="font-medium text-foreground text-numeric">
+              {visibleRegions.length}
+            </span>{" "}
+            of {REGIONS.length}.
+          </>
+        ) : (
+          "Whether a supplier delivers where you build decides everything else. Start with the region, then compare on price."
+        )}
       </p>
 
       {loading && listings.length === 0 ? (
@@ -73,14 +109,14 @@ export default function RegionsPage() {
         </div>
       ) : (
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {REGIONS.map((region) => {
+          {visibleRegions.map((region) => {
             const entry = byRegion.get(region)!;
             const reach = REGION_REACH[region];
             const counties = COUNTIES.filter((c) => c.region === region);
             return (
               <li key={region}>
                 <Link
-                  href={`/marketplace/search?region=${encodeURIComponent(region)}`}
+                  href={`/marketplace/search?region=${encodeURIComponent(region)}${query ? `&q=${encodeURIComponent(query)}` : ""}`}
                   className="group flex h-full flex-col rounded-lg border border-border bg-surface p-5 transition-colors hover:border-brand"
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -156,5 +192,28 @@ export default function RegionsPage() {
         </CardBody>
       </Card>
     </div>
+  );
+}
+
+/*
+  `useSearchParams()` needs a Suspense boundary to keep the page prerenderable.
+*/
+export default function RegionsPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="mt-4 h-7 w-56" />
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-44" />
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <RegionsInner />
+    </React.Suspense>
   );
 }

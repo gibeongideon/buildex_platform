@@ -249,7 +249,7 @@ test("Ask AI parses a requirement and shows its working", async ({ page }) => {
   });
 
   await page
-    .getByLabel("Describe what you need")
+    .getByLabel("Describe what you need", { exact: true })
     .fill("400 bags of cement delivered to Machakos");
   await page.getByRole("button", { name: "Ask" }).click();
 
@@ -284,4 +284,57 @@ test("the manufacturers tab lists suppliers with their product strips", async ({
 
   await first.getByRole("link", { name: "Visit store" }).click();
   await expect(page).toHaveURL(/\/marketplace\/manufacturer\//);
+});
+
+test("the four scope tabs navigate and carry the query", async ({ page }) => {
+  await page.goto("/marketplace");
+
+  // Each tab is navigation, not just a mode switch on the form.
+  for (const [label, path] of [
+    ["Ask AI", "/marketplace/ask"],
+    ["Manufacturers", "/marketplace/manufacturers"],
+    ["Regions", "/marketplace/regions"],
+    ["Products", "/marketplace/search"],
+  ] as const) {
+    await page.goto("/marketplace");
+    await page.getByRole("tab", { name: new RegExp(label) }).click();
+    await expect(page).toHaveURL(new RegExp(path.replace(/\//g, "\\/")));
+  }
+
+  // The active tab is derived from the route, so a deep link shows it correctly.
+  await page.goto("/marketplace/manufacturers");
+  await expect(page.getByRole("tab", { selected: true })).toContainText(
+    "Manufacturers",
+    { timeout: 15_000 },
+  );
+
+  // Switching surface keeps the buyer's term.
+  await page.goto("/marketplace/search?q=cement");
+  await page.getByRole("tab", { name: /Ask AI/ }).click();
+  await expect(page).toHaveURL(/\/marketplace\/ask\?q=cement/);
+  await expect(page.getByRole("tab", { selected: true })).toContainText("Ask AI");
+});
+
+test("the Regions tab actually searches", async ({ page }) => {
+  await page.goto("/marketplace/regions?q=Kisumu");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "Delivery regions",
+    { timeout: 15_000 },
+  );
+  await expect(page.getByText(/Regions that can serve/)).toBeVisible();
+  await expect(page.getByText(/“Kisumu”/)).toBeVisible();
+});
+
+test("the hero's category scope narrows the results", async ({ page }) => {
+  await page.goto("/marketplace");
+  await page
+    .getByLabel("Narrow to a category")
+    .selectOption("Roofing", { timeout: 15_000 });
+  await page.getByLabel(/^Search cement/).fill("sheet");
+  await page.locator('form button[type="submit"]').click();
+
+  await expect(page).toHaveURL(/category=Roofing/);
+  await expect(page.getByRole("button", { name: /^Roofing/ })).toBeVisible({
+    timeout: 15_000,
+  });
 });

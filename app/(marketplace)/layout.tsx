@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { BadgeCheck, FileText, Flame, Sparkles, Truck } from "lucide-react";
 import { PromoStrip, UtilityBar, UtilityLinks } from "@/components/marketplace/top-bar";
 import { CategoryMegaMenu } from "@/components/marketplace/mega-menu";
-import { SearchHero } from "@/components/marketplace/search-hero";
+import { SearchHero, SearchScopeTabs } from "@/components/marketplace/search-hero";
 import { BuildexMark, Wordmark } from "@/components/shared/brand";
 import { TooltipProvider } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
@@ -36,6 +36,19 @@ export default function MarketplaceLayout({
 }) {
   const pathname = usePathname();
   const isHome = pathname === "/marketplace";
+  /*
+    Exactly one search input per page.
+
+    Two inputs sharing a label are ambiguous to a screen reader and to anyone
+    driving the page by keyboard, so the layout's compact field is rendered in
+    one place only (the scope bar) and stands down entirely on pages that carry
+    their own: the home hero, Ask AI, the supplier directory and a storefront.
+  */
+  const ownsSearch =
+    isHome ||
+    pathname.startsWith("/marketplace/ask") ||
+    pathname.startsWith("/marketplace/manufacturer");
+  const showCompactSearch = !ownsSearch;
   const [region, setRegion] = React.useState("");
   const [stuck, setStuck] = React.useState(false);
 
@@ -87,9 +100,12 @@ export default function MarketplaceLayout({
             <Link href="/marketplace" className="shrink-0 rounded-md" tabIndex={stuck ? 0 : -1}>
               <Wordmark product="connect" size="sm" />
             </Link>
-            <div className="min-w-0 flex-1">
-              <SearchHero compact />
-            </div>
+            {/*
+              Only mounted while the bar is actually shown. Rendering it hidden
+              would leave a second search input in the DOM with the same label —
+              focusable by keyboard and ambiguous to screen readers.
+            */}
+            <div className="min-w-0 flex-1">{stuck ? <SearchHero compact /> : null}</div>
             <Link
               href="/marketplace/rfq"
               tabIndex={stuck ? 0 : -1}
@@ -138,15 +154,7 @@ export default function MarketplaceLayout({
               })}
             </nav>
 
-            {!isHome ? (
-              <div className="ml-auto hidden min-w-0 flex-1 justify-end lg:flex">
-                <div className="w-full max-w-md">
-                  <SearchHero compact />
-                </div>
-              </div>
-            ) : (
-              <UtilityLinks className="ml-auto" />
-            )}
+            <UtilityLinks className="ml-auto" />
           </div>
         </div>
 
@@ -156,7 +164,25 @@ export default function MarketplaceLayout({
               <SearchHero />
             </div>
           </section>
-        ) : null}
+        ) : (
+          <div className="border-b border-border bg-surface">
+            {/*
+              Four tabs and a search field do not fit 375px side by side, so the
+              row wraps: tabs scroll horizontally on their own line, search takes
+              the full width beneath.
+            */}
+            <div className="mx-auto flex max-w-[90rem] flex-wrap items-center gap-x-3 px-4 sm:px-6 lg:px-8">
+              <div className="scroll-x -mx-1 w-full py-1 sm:w-auto">
+                <SearchScopeTabs size="sm" className="px-1" />
+              </div>
+              {showCompactSearch ? (
+                <div className="min-w-0 w-full pb-2 sm:ml-auto sm:w-auto sm:max-w-md sm:flex-1 sm:pb-0 sm:py-2">
+                  <SearchHero compact />
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
 
         <main id="main" className="flex-1">
           {children}

@@ -13,7 +13,7 @@ Covers Phase 0 (Foundation), Phase 1 (manufacturer onboarding) and Phase 2
 | Seeded manufacturers / products | 12 / 72 |
 | Seeded enquiries / campaigns | 50 / 12 |
 | Bundled product photos | 22 across 13 categories (CC / public domain) |
-| End-to-end specs | 16, all passing |
+| End-to-end specs | 19, all passing |
 | TypeScript | `tsc --noEmit` clean |
 | ESLint | 0 errors |
 | Production build | Clean, all routes prerendered as static |
@@ -179,6 +179,21 @@ product, so it falls back to a generated tile — the category icon over one of 
 patterns, also seeded from the product id. And candidate photos showing *people working*
 rather than the product were rejected: in a grid of product shots, a photo of a person
 reads as an error. A wrong photo is worse than an honest placeholder.
+
+### The scope tabs
+
+Ask AI / Products / Manufacturers / Regions are real navigation: each maps to a route, the
+active one is derived from the URL, and switching carries the query across. The row shows
+large in the home hero and as a slim bar on every other page, so the four surfaces are
+always one click apart.
+
+The hero's search box is two rows, matching the reference: the term gets a full-width line,
+with a category scope selector and the action beneath it. Choosing a category there carries
+into the results as `?category=`.
+
+The Regions tab searches too — `?q=` filters the region cards by region or county name, and
+falls back to "which regions have listings matching this" when the term names a product
+rather than a place.
 
 ### Ask AI
 

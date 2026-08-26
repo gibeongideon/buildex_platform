@@ -126,7 +126,7 @@ function PanelCard({
           More
         </Link>
       </div>
-      <div className="mt-auto">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }
@@ -236,13 +236,39 @@ export default function MarketplaceHomePage() {
     (facets?.categories ?? []).map((c) => [c.value, c.count]),
   );
 
-  const newest = [...listings]
-    .sort(
+  /*
+    One per category. A four-up thumbnail panel filled from a single category
+    shows four near-identical photos, which tells a buyer nothing — spreading it
+    across categories makes the panel actually informative.
+  */
+  function spread<T extends { product: { category: string } }>(items: T[], take: number) {
+    const seen = new Set<string>();
+    const picked: T[] = [];
+    for (const item of items) {
+      if (seen.has(item.product.category)) continue;
+      seen.add(item.product.category);
+      picked.push(item);
+      if (picked.length === take) return picked;
+    }
+    // Top up from the remainder if there were not enough distinct categories.
+    for (const item of items) {
+      if (picked.includes(item)) continue;
+      picked.push(item);
+      if (picked.length === take) break;
+    }
+    return picked;
+  }
+
+  const newest = spread(
+    [...listings].sort(
       (a, b) =>
         new Date(b.product.createdAt).getTime() -
         new Date(a.product.createdAt).getTime(),
-    )
-    .slice(0, 4);
+    ),
+    4,
+  );
+
+  const mostWanted = spread(listings, 4);
 
   const panels: React.ReactNode[] = [];
 
@@ -265,6 +291,26 @@ export default function MarketplaceHomePage() {
       </PanelCard>,
     );
   }
+  if (newest.length > 0) {
+    panels.push(
+      <PanelCard key="newest" title="New listings" href="/marketplace/search">
+        <ThumbGrid items={newest.map((l) => l.product)} />
+      </PanelCard>,
+    );
+  }
+  if (mostWanted.length > 0) {
+    panels.push(
+      <PanelCard
+        key="wanted"
+        title="Most enquired"
+        subtitle="What buyers are pricing this week"
+        href="/marketplace/top-ranking"
+      >
+        <ThumbGrid items={mostWanted.map((l) => l.product)} />
+      </PanelCard>,
+    );
+  }
+  // Exactly one promo, and only ever as the last slot.
   panels.push(
     <PromoPanel
       key="ranking"
@@ -273,23 +319,6 @@ export default function MarketplaceHomePage() {
       body="Ranked by real enquiry volume, not paid placement."
       cta="View ranking"
       href="/marketplace/top-ranking"
-    />,
-  );
-  if (newest.length > 0) {
-    panels.push(
-      <PanelCard key="newest" title="New listings" href="/marketplace/search?sort=newest">
-        <ThumbGrid items={newest.map((l) => l.product)} />
-      </PanelCard>,
-    );
-  }
-  panels.push(
-    <PromoPanel
-      key="rfq"
-      eyebrow="Request for Quotation"
-      title="One requirement, every supplier who can deliver it"
-      body="Matched by category and delivery region, so nobody wastes your time."
-      cta="Start a request"
-      href="/marketplace/rfq"
     />,
   );
 
@@ -333,7 +362,7 @@ export default function MarketplaceHomePage() {
           <ul className="min-h-0 flex-1 overflow-y-auto py-1">
             {PRODUCT_CATEGORIES.map((category) => {
               const Icon = categoryIcon(category);
-              const count = categoryCounts.get(category) ?? 0;
+              const count = categoryCounts.get(category);
               return (
                 <li key={category}>
                   <Link
@@ -345,9 +374,20 @@ export default function MarketplaceHomePage() {
                       aria-hidden="true"
                     />
                     <span className="min-w-0 flex-1 truncate">{category}</span>
-                    <span className="shrink-0 text-xs text-subtle-foreground text-numeric">
-                      {count}
-                    </span>
+                    {count === undefined ? (
+                      <span
+                        aria-hidden="true"
+                        className="h-3 w-4 shrink-0 animate-pulse rounded bg-surface-muted"
+                      />
+                    ) : (
+                      <span className="shrink-0 text-xs text-subtle-foreground text-numeric">
+                        {count}
+                      </span>
+                    )}
+                    <ChevronRight
+                      className="size-3.5 shrink-0 text-subtle-foreground"
+                      aria-hidden="true"
+                    />
                   </Link>
                 </li>
               );
@@ -456,7 +496,7 @@ export default function MarketplaceHomePage() {
             <ul className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
               {PRODUCT_CATEGORIES.map((category) => {
                 const Icon = categoryIcon(category);
-                const count = categoryCounts.get(category) ?? 0;
+                const count = categoryCounts.get(category);
                 return (
                   <li key={category}>
                     <Link
@@ -470,7 +510,9 @@ export default function MarketplaceHomePage() {
                         {category}
                       </span>
                       <span className="text-[11px] text-subtle-foreground text-numeric">
-                        {count} {count === 1 ? "listing" : "listings"}
+                        {count === undefined
+                          ? "\u00a0"
+                          : `${count} ${count === 1 ? "listing" : "listings"}`}
                       </span>
                     </Link>
                   </li>

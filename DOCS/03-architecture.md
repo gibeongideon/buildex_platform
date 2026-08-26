@@ -126,6 +126,18 @@ Search, storefronts, related products and comparables all build on it, so a veri
 state can never leak a listing by accident. An unverified manufacturer has no public
 storefront at all.
 
+**The scope tabs are navigation.** Ask AI / Products / Manufacturers / Regions each map to
+a route, and the active tab is derived from `usePathname()` rather than local state — so it
+stays correct on a page reached by any other means (deep link, mega menu, a card). Switching
+tab carries the current `?q=` across, read from `window.location.search` at click time so
+the layout never needs `useSearchParams` and stays statically renderable. The tab row shows
+large inside the home hero and as a slim bar on every other marketplace page.
+
+**One search field per page.** Two inputs sharing a label are ambiguous to a screen reader
+and to keyboard users, so the layout's compact field renders in exactly one place and stands
+down entirely on pages that carry their own — the home hero, Ask AI, the supplier directory
+and a storefront.
+
 **Ask AI is a matcher, not a model.** `lib/rules/sourcing.ts` parses a requirement
 against the catalogue's own vocabulary — material synonyms, the 47 counties, quantities,
 urgency and price sensitivity — and returns a structured filter. It is deterministic, works

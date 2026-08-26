@@ -140,7 +140,7 @@ function MarketplaceSearchInner() {
         : "All listings";
 
   return (
-    <div className="mx-auto max-w-[90rem] px-4 py-5 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-[112rem] px-4 py-5 sm:px-6 lg:px-8">
       <nav aria-label="Breadcrumb" className="mb-3">
         <ol className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
           <li>
@@ -305,7 +305,7 @@ function MarketplaceSearchInner() {
       ) : null}
 
       {loading && !data ? (
-        <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+        <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1700px]:grid-cols-7">
           {Array.from({ length: 12 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
@@ -328,7 +328,7 @@ function MarketplaceSearchInner() {
       ) : (
         <div
           className={cn(
-            "mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6",
+            "mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1700px]:grid-cols-7",
             loading && "opacity-60 transition-opacity",
           )}
         >
@@ -356,10 +356,10 @@ export default function MarketplaceSearchPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="mx-auto max-w-[90rem] px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[112rem] px-4 py-5 sm:px-6 lg:px-8">
           <Skeleton className="h-4 w-40" />
           <Skeleton className="mt-3 h-7 w-64" />
-          <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+          <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1700px]:grid-cols-7">
             {Array.from({ length: 12 }).map((_, i) => (
               <ProductCardSkeleton key={i} />
             ))}

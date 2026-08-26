@@ -40,7 +40,7 @@ export function PromoStrip() {
         aria-hidden="true"
         className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-r from-transparent to-primary/25"
       />
-      <div className="relative mx-auto flex max-w-[90rem] flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2 text-center sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex max-w-[112rem] flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2 text-center sm:px-6 lg:px-8">
         <span className="rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary-foreground">
           Verified suppliers
         </span>
@@ -75,7 +75,7 @@ export function UtilityBar({
 }) {
   return (
     <div className="border-b border-border bg-surface">
-      <div className="mx-auto flex h-14 max-w-[90rem] items-center gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14 max-w-[112rem] items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/marketplace" className="shrink-0 rounded-md">
           <Wordmark product="connect" size="sm" className="lg:hidden" />
           <Wordmark product="connect" className="hidden lg:inline-flex" />

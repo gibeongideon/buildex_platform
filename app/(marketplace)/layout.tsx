@@ -96,7 +96,7 @@ export default function MarketplaceLayout({
           )}
           aria-hidden={!stuck}
         >
-          <div className="mx-auto flex h-14 max-w-[90rem] items-center gap-4 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto flex h-14 max-w-[112rem] items-center gap-4 px-4 sm:px-6 lg:px-8">
             <Link href="/marketplace" className="shrink-0 rounded-md" tabIndex={stuck ? 0 : -1}>
               <Wordmark product="connect" size="sm" />
             </Link>
@@ -128,7 +128,7 @@ export default function MarketplaceLayout({
           rather than being clipped to the button it hangs off.
         */}
         <div className="relative border-b border-border bg-surface">
-          <div className="mx-auto flex max-w-[90rem] items-center gap-2 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-[112rem] items-center gap-2 px-4 sm:px-6 lg:px-8">
             <CategoryMegaMenu />
 
             <nav aria-label="Marketplace" className="hidden items-center gap-1 md:flex">
@@ -160,7 +160,7 @@ export default function MarketplaceLayout({
 
         {isHome ? (
           <section className="border-b border-border bg-surface-muted">
-            <div className="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-[112rem] px-4 sm:px-6 lg:px-8">
               <SearchHero />
             </div>
           </section>
@@ -171,7 +171,7 @@ export default function MarketplaceLayout({
               row wraps: tabs scroll horizontally on their own line, search takes
               the full width beneath.
             */}
-            <div className="mx-auto flex max-w-[90rem] flex-wrap items-center gap-x-3 px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto flex max-w-[112rem] flex-wrap items-center gap-x-3 px-4 sm:px-6 lg:px-8">
               <div className="scroll-x -mx-1 w-full py-1 sm:w-auto">
                 <SearchScopeTabs size="sm" className="px-1" />
               </div>
@@ -189,7 +189,7 @@ export default function MarketplaceLayout({
         </main>
 
         <footer className="on-brand mt-12">
-          <div className="mx-auto max-w-[90rem] px-4 py-10 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-[112rem] px-4 py-10 sm:px-6 lg:px-8">
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <span className="inline-flex items-center gap-2.5">

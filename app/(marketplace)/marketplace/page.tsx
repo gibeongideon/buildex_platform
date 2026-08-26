@@ -170,6 +170,22 @@ function ThumbGrid({
   );
 }
 
+function PanelSkeleton({ title }: { title: string }) {
+  return (
+    <div className="flex flex-col rounded-lg border border-border bg-surface p-4">
+      <p className="mb-3 font-display text-sm font-bold text-foreground">{title}</p>
+      <div className="grid grid-cols-2 gap-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i}>
+            <div className="aspect-square animate-pulse rounded-md bg-surface-muted" />
+            <div className="mt-1 h-3 w-12 animate-pulse rounded bg-surface-muted" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function PromoPanel({
   eyebrow,
   title,
@@ -297,6 +313,8 @@ export default function MarketplaceHomePage() {
         <ThumbGrid items={newest.map((l) => l.product)} />
       </PanelCard>,
     );
+  } else if (loading) {
+    panels.push(<PanelSkeleton key="newest-skeleton" title="New listings" />);
   }
   if (mostWanted.length > 0) {
     panels.push(
@@ -309,6 +327,8 @@ export default function MarketplaceHomePage() {
         <ThumbGrid items={mostWanted.map((l) => l.product)} />
       </PanelCard>,
     );
+  } else if (loading) {
+    panels.push(<PanelSkeleton key="wanted-skeleton" title="Most enquired" />);
   }
   // Exactly one promo, and only ever as the last slot.
   panels.push(
@@ -322,14 +342,34 @@ export default function MarketplaceHomePage() {
     />,
   );
 
+  const shown = panels.slice(0, 3);
+
   return (
     <>
       {/* Welcome bar: name the platform, then the three actions that skip search. */}
       <section className="border-b border-border bg-surface">
-        <div className="mx-auto flex max-w-[90rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <h1 className="font-display text-lg font-bold tracking-tight text-foreground">
-            Welcome to Buildex Connect
-          </h1>
+        <div className="mx-auto flex max-w-[112rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <div>
+            <h1 className="font-display text-lg font-bold tracking-tight text-foreground">
+              Welcome to Buildex Connect
+            </h1>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {facets ? (
+                <>
+                  <span className="font-medium text-foreground text-numeric">
+                    <Num value={facets.total} />
+                  </span>{" "}
+                  listings from{" "}
+                  <span className="font-medium text-foreground text-numeric">
+                    <Num value={storefronts?.length ?? 0} />
+                  </span>{" "}
+                  verified suppliers, delivered across {REGIONS.length} regions
+                </>
+              ) : (
+                "Loading the catalogue…"
+              )}
+            </p>
+          </div>
           <nav aria-label="Quick actions" className="flex flex-wrap items-center">
             {QUICK_ACTIONS.map((action, index) => {
               const Icon = action.icon;
@@ -352,10 +392,10 @@ export default function MarketplaceHomePage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8">
 
       <section className="grid items-stretch gap-4 lg:grid-cols-[17rem_minmax(0,1fr)]">
-        <div className="flex flex-col rounded-lg border border-border bg-surface">
+        <div className="flex max-h-[26rem] flex-col rounded-lg border border-border bg-surface">
           <p className="shrink-0 border-b border-border px-4 py-3 text-sm font-semibold text-foreground">
             Categories for you
           </p>
@@ -402,79 +442,39 @@ export default function MarketplaceHomePage() {
           any, then evergreen panels — and always fills three slots, so a
           first-time visitor never sees a two-thirds-empty row.
         */}
-        <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {panels.slice(0, 3)}
+        {/*
+          Column count follows the number of panels, so a short row never leaves
+          dead columns on the right.
+        */}
+        <div
+          className={cn(
+            "grid min-w-0 gap-4",
+            shown.length === 1 && "grid-cols-1",
+            shown.length === 2 && "sm:grid-cols-2",
+            shown.length >= 3 && "sm:grid-cols-2 xl:grid-cols-3",
+          )}
+        >
+          {shown}
         </div>
       </section>
 
-      <div className="mt-10 space-y-10">
-          <section className="overflow-hidden rounded-lg border border-border">
-            <div className="on-brand grid gap-6 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-              <div>
-                <p className="font-display text-xs font-bold uppercase tracking-[0.18em] text-primary">
-                  Buildex Connect
-                </p>
-                <h1 className="mt-2 max-w-xl font-display text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-                  Source building materials directly from verified manufacturers.
-                </h1>
-                <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/75">
-                  Wholesale price bands, minimum order quantities and lead times published
-                  up front. Compare on the quantity you actually buy, then enquire
-                  directly with the plant.
-                </p>
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <Button size="lg" asChild>
-                    <Link href="/marketplace/search">
-                      Browse all listings
-                      <ArrowRight aria-hidden="true" />
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="lg"
-                    className="border-white/25 bg-white/10 text-white hover:bg-white/20"
-                    asChild
-                  >
-                    <Link href="/marketplace/rfq">Request a quote</Link>
-                  </Button>
-                </div>
-              </div>
-
-              <dl className="grid grid-cols-3 gap-5 lg:shrink-0">
-                {[
-                  { label: "Listings", value: facets?.total ?? 0 },
-                  { label: "Suppliers", value: storefronts?.length ?? 0 },
-                  { label: "Regions", value: REGIONS.length },
-                ].map((stat) => (
-                  <div key={stat.label}>
-                    <dt className="text-[11px] uppercase tracking-wider text-white/50">
-                      {stat.label}
-                    </dt>
-                    <dd className="mt-0.5 font-display text-xl font-bold text-white text-numeric">
-                      <Num value={stat.value} />
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </section>
-
-          <section>
+      <div className="mt-8 space-y-10">
+          <section id="listings">
             <SectionHeading
               title="Most in demand"
               icon={Flame}
-              href="/marketplace/top-ranking"
-              linkLabel="Top ranking"
+              href="/marketplace/search"
+              linkLabel="See all listings"
             />
             {loading && listings.length === 0 ? (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-                {Array.from({ length: 12 }).map((_, i) => (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1700px]:grid-cols-7">
+                {Array.from({ length: 24 }).map((_, i) => (
                   <ProductCardSkeleton key={i} />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-                {listings.slice(0, 12).map(({ product, manufacturer, enquiryCount }, index) => (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1700px]:grid-cols-7">
+                {listings.slice(0, 42).map(({ product, manufacturer, enquiryCount }, index) => (
                   <ProductCard
                     key={product.id}
                     product={product}

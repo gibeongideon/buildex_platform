@@ -24,11 +24,55 @@ import { useQuery } from "@/lib/data/hooks";
   than a padded grid.
 
   Opens on hover with a short close delay (so a diagonal mouse path to the panel
-  doesn't dismiss it), and on click/Enter for keyboard and touch. Escape closes.
+  doesn't dismiss it), and on click or Enter for keyboard and touch.
+
+  Click only ever *opens*. Toggling looked right but broke for mouse users: the
+  hover fires first, so the click that followed closed the panel they had just
+  opened. Escape, moving away, or picking something closes it.
 */
 
 const CLOSE_DELAY_MS = 180;
 
+/**
+ * Column count that leaves the fewest empty cells in the last row.
+ *
+ * A fixed seven-wide grid is right for a catalogue with hundreds of items per
+ * category, but ours has single digits — eight tiles in a seven-wide grid strand
+ * one on its own with six dead cells beside it. Choosing four instead fills two
+ * clean rows. Wider is preferred on ties, so a full row still reads as dense.
+ */
+function bestColumns(count: number) {
+  if (count <= 4) return count || 1;
+  let best = 7;
+  let fewestGaps = Number.POSITIVE_INFINITY;
+  for (const cols of [7, 6, 5, 4]) {
+    const gaps = (cols - (count % cols)) % cols;
+    if (gaps < fewestGaps) {
+      fewestGaps = gaps;
+      best = cols;
+    }
+  }
+  return best;
+}
+
+const COLUMN_CLASS: Record<number, string> = {
+  1: "sm:grid-cols-1",
+  2: "sm:grid-cols-2",
+  3: "sm:grid-cols-3",
+  4: "sm:grid-cols-4",
+  5: "sm:grid-cols-5",
+  6: "sm:grid-cols-5 lg:grid-cols-6",
+  7: "sm:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7",
+};
+
+/*
+  The panel body.
+
+  Modelled on the reference's "Categories for you" pane: a heading, then a dense
+  grid of circular tiles filling the whole width. No side column — that was the
+  part that left dead space whenever a category had few suppliers, and the tiles
+  carry more information per pixel anyway.
+*/
 function CategoryPanel({
   category,
   onNavigate,
@@ -43,131 +87,80 @@ function CategoryPanel({
 
   const listings = data?.listings ?? [];
   const suppliers = data?.facets.manufacturers ?? [];
-  const regions = data?.facets.regions ?? [];
 
   return (
-    <div className="flex min-h-[26rem] flex-col">
-      <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border px-6 py-4">
-        <div>
-          <h3 className="font-display text-lg font-bold tracking-tight text-foreground">
-            {category}
-          </h3>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {loading && !data ? (
-              "Loading…"
-            ) : (
-              <>
-                <span className="font-medium text-foreground text-numeric">
-                  {listings.length}
-                </span>{" "}
-                listings from{" "}
-                <span className="font-medium text-foreground text-numeric">
-                  {suppliers.length}
-                </span>{" "}
-                {suppliers.length === 1 ? "supplier" : "suppliers"}
-              </>
-            )}
-          </p>
-        </div>
+    <div className="flex min-h-0 flex-col">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 px-6 pt-5">
+        <h3 className="font-display text-lg font-bold tracking-tight text-foreground">
+          {category}
+        </h3>
         <Link
           href={`/marketplace/search?category=${encodeURIComponent(category)}`}
           onClick={onNavigate}
           className="inline-flex items-center gap-1 text-sm font-semibold text-brand hover:underline"
         >
-          View all
+          {loading && !data ? (
+            "View all"
+          ) : (
+            <>
+              View all {listings.length} from {suppliers.length}{" "}
+              {suppliers.length === 1 ? "supplier" : "suppliers"}
+            </>
+          )}
           <ChevronRight className="size-3.5" aria-hidden="true" />
         </Link>
       </div>
 
-      <div className="grid flex-1 gap-6 px-6 py-5 lg:grid-cols-[minmax(0,1fr)_15rem]">
-        <div className="min-w-0">
-          {loading && !data ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="aspect-square animate-pulse rounded-lg bg-surface-muted" />
-                  <div className="h-3 w-3/4 animate-pulse rounded bg-surface-muted" />
-                </div>
-              ))}
-            </div>
-          ) : listings.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">
-              No published listings in this category yet.
-            </p>
-          ) : (
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3 xl:grid-cols-4">
-              {listings.slice(0, 8).map(({ product }: { product: Product }) => (
-                <li key={product.id}>
-                  <Link
-                    href={`/marketplace/product/${product.id}`}
-                    onClick={onNavigate}
-                    className="group block"
-                  >
-                    <ProductThumb
-                      productId={product.id}
-                      category={product.category}
-                      className="aspect-square rounded-lg border border-border transition-colors group-hover:border-brand"
-                      iconClassName="size-9"
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+        {loading && !data ? (
+          <ul className="grid grid-cols-4 gap-x-4 gap-y-5 sm:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
+            {Array.from({ length: 14 }).map((_, i) => (
+              <li key={i} className="flex flex-col items-center gap-2">
+                <div className="aspect-square w-full animate-pulse rounded-full bg-surface-muted" />
+                <div className="h-3 w-3/4 animate-pulse rounded bg-surface-muted" />
+              </li>
+            ))}
+          </ul>
+        ) : listings.length === 0 ? (
+          <p className="py-10 text-center text-sm text-muted-foreground">
+            No published listings in this category yet.
+          </p>
+        ) : (
+          <ul
+            className={cn(
+              "grid grid-cols-3 gap-x-4 gap-y-5",
+              COLUMN_CLASS[bestColumns(listings.length)],
+            )}
+          >
+            {listings.map(({ product }: { product: Product }) => (
+              <li key={product.id}>
+                <Link
+                  href={`/marketplace/product/${product.id}`}
+                  onClick={onNavigate}
+                  className="group flex flex-col items-center gap-2 text-center"
+                >
+                  <ProductThumb
+                    productId={product.id}
+                    category={product.category}
+                    className="aspect-square w-full rounded-full ring-1 ring-border transition-all group-hover:ring-2 group-hover:ring-brand"
+                    iconClassName="size-7"
+                    sizes="120px"
+                  />
+                  <span className="line-clamp-2 text-xs font-medium leading-snug text-foreground group-hover:text-brand">
+                    {product.name}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">
+                    from{" "}
+                    <Currency
+                      value={priceRange(product.priceBands).min}
+                      className="font-semibold text-foreground"
                     />
-                    <p className="mt-2 line-clamp-2 text-xs font-medium leading-snug text-foreground group-hover:text-brand">
-                      {product.name}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      from{" "}
-                      <Currency
-                        value={priceRange(product.priceBands).min}
-                        className="font-semibold text-foreground"
-                      />
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div className="space-y-5 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-subtle-foreground">
-              Suppliers
-            </p>
-            <ul className="mt-2 space-y-0.5">
-              {suppliers.slice(0, 6).map((supplier) => (
-                <li key={supplier.id}>
-                  <Link
-                    href={`/marketplace/manufacturer/${supplier.id}`}
-                    onClick={onNavigate}
-                    className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
-                  >
-                    <span className="truncate">{supplier.name}</span>
-                    <span className="shrink-0 text-xs text-subtle-foreground text-numeric">
-                      {supplier.count}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-subtle-foreground">
-              Delivers to
-            </p>
-            <ul className="mt-2 flex flex-wrap gap-1.5">
-              {regions.slice(0, 8).map((region) => (
-                <li key={region.value}>
-                  <Link
-                    href={`/marketplace/search?category=${encodeURIComponent(category)}&region=${encodeURIComponent(region.value)}`}
-                    onClick={onNavigate}
-                    className="inline-block rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-brand hover:text-brand"
-                  >
-                    {region.value}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -217,7 +210,7 @@ export function CategoryMegaMenu() {
           cancelClose();
           setOpen(true);
         }}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(true)}
         className={cn(
           "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
           open
@@ -242,9 +235,9 @@ export function CategoryMegaMenu() {
             onMouseEnter={cancelClose}
             onMouseLeave={scheduleClose}
           >
-            <div className="mx-auto grid max-w-[90rem] grid-cols-1 lg:grid-cols-[16rem_minmax(0,1fr)]">
+            <div className="mx-auto grid h-[min(32rem,70vh)] max-w-[112rem] grid-cols-1 lg:grid-cols-[16rem_minmax(0,1fr)]">
               <ul
-                className="max-h-[30rem] overflow-y-auto border-b border-border py-2 lg:border-b-0 lg:border-r"
+                className="min-h-0 overflow-y-auto border-b border-border py-2 lg:border-b-0 lg:border-r"
                 role="tablist"
                 aria-orientation="vertical"
               >

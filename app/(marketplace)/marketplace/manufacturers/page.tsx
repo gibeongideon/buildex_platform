@@ -82,7 +82,7 @@ function ManufacturersDirectoryInner() {
     });
 
   return (
-    <div className="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8">
       <nav aria-label="Breadcrumb" className="mb-4">
         <ol className="flex items-center gap-1 text-xs text-muted-foreground">
           <li>
@@ -340,7 +340,7 @@ export default function ManufacturersDirectoryPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8">
           <Skeleton className="h-4 w-40" />
           <Skeleton className="mt-4 h-7 w-64" />
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

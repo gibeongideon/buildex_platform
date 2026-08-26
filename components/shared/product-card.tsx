@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { BadgeCheck, MessageSquare, Store } from "lucide-react";
+import { BadgeCheck, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Currency } from "./format";
 import { ProductThumb } from "./product-thumb";
@@ -12,15 +12,20 @@ import type { Manufacturer } from "@/lib/schemas/manufacturer";
 /*
   The marketplace product card.
 
-  Modelled on the dense card the large B2B marketplaces use, because in a
-  six-across grid the buyer is comparing, not reading. The stack is:
+  Type scale and weights follow the reference card closely, because the hierarchy
+  is doing real work in a six-across grid: the buyer is comparing, not reading.
 
-      photo → title (2 lines) → price RANGE → MOQ + traction → trust line
+      photo
+      title        14px / 400  · two lines, so long names do not shout
+      PRICE RANGE  20px / 700  · the loudest thing on the card
+      MOQ line     13px        · value in foreground, traction muted beside it
+      trust line   12px        · "Verified · 17 yrs · Machakos"
 
-  The price range matters more than a single figure: wholesale listings are
-  banded, so "KSh 712–745" tells a buyer what the spread is between their order
-  size and the best one. The trust line mirrors the reference site's
-  "Verified · 6 yrs · CN" — here it is verification, years trading and county.
+  Deliberately: the title is *regular* weight, not medium. Bolding both the name
+  and the price gives the eye nowhere to land, and price is what a buyer scans a
+  wholesale grid for. The range matters more than a single figure — wholesale
+  listings are banded, so "KSh 712-745" shows the spread between the buyer's
+  order size and the best one.
 */
 
 export function ProductCard({
@@ -66,7 +71,7 @@ export function ProductCard({
       </Link>
 
       <div className="flex flex-1 flex-col p-3">
-        <h3 className="text-[13px] font-medium leading-snug text-foreground">
+        <h3 className="text-sm font-normal leading-[1.4] text-foreground">
           {/* Stretched link: the whole card is the hit area, but the supplier
               line below sits above it so it stays separately clickable. */}
           <Link
@@ -77,57 +82,51 @@ export function ProductCard({
           </Link>
         </h3>
 
-        <div className="mt-2">
-          <p className="flex flex-wrap items-baseline gap-x-1">
-            <Currency
-              value={range.min}
-              className="text-base font-bold text-foreground"
-            />
-            {range.max !== range.min ? (
-              <>
-                <span className="text-sm text-muted-foreground">–</span>
-                <Currency
-                  value={range.max}
-                  className="text-base font-bold text-foreground"
-                />
-              </>
-            ) : null}
-          </p>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
-            per {product.unit} · {formatLeadTime(product.leadTimeDays)}
-          </p>
-        </div>
+        {/* The price owns the card. A tight hyphen, not a spaced dash — the two
+            figures read as one range rather than two numbers. */}
+        <p className="mt-2 font-display text-lg font-bold leading-none text-foreground">
+          <Currency value={range.min} />
+          {range.max !== range.min ? (
+            <>
+              <span aria-hidden="true">-</span>
+              <Currency value={range.max} hideSymbol />
+            </>
+          ) : null}
+        </p>
 
-        <p className="mt-1.5 text-[11px] text-muted-foreground text-numeric">
-          MOQ {product.moq} {product.unit}
-          {product.moq === 1 ? "" : "s"}
+        <p className="mt-1.5 text-[13px] leading-snug">
+          <span className="text-foreground text-numeric">
+            MOQ {product.moq} {product.unit}
+            {product.moq === 1 ? "" : "s"}
+          </span>
           {enquiryCount > 0 ? (
-            <span className="ml-1.5 inline-flex items-center gap-0.5 text-subtle-foreground">
-              <MessageSquare className="size-3" aria-hidden="true" />
-              {enquiryCount}
+            <span className="ml-1.5 text-muted-foreground text-numeric">
+              {enquiryCount} {enquiryCount === 1 ? "enquiry" : "enquiries"}
             </span>
           ) : null}
         </p>
 
+        <p className="mt-0.5 text-[13px] text-muted-foreground">
+          {formatLeadTime(product.leadTimeDays)} · per {product.unit}
+        </p>
+
         {hideSupplier ? null : (
-          <div className="relative z-10 mt-auto pt-2.5">
+          <div className="relative z-10 mt-auto pt-2">
             <Link
               href={`/marketplace/manufacturer/${manufacturer.id}`}
-              className="flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-brand"
+              className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-brand"
             >
               {verified ? (
                 <>
                   <BadgeCheck
-                    className="size-3.5 shrink-0 text-success"
+                    className="size-4 shrink-0 text-success"
                     aria-label="Verified manufacturer"
                   />
-                  <span className="font-semibold text-success">Verified</span>
+                  <span className="font-bold text-success">Verified</span>
                   <span aria-hidden="true">·</span>
                 </>
               ) : (
-                <>
-                  <Store className="size-3 shrink-0" aria-hidden="true" />
-                </>
+                <Store className="size-3.5 shrink-0" aria-hidden="true" />
               )}
               <span className="text-numeric">{years} yrs</span>
               <span aria-hidden="true">·</span>

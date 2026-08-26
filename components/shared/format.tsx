@@ -13,16 +13,24 @@ export function Currency({
   value,
   decimals = false,
   compact = false,
+  /**
+   * Drop the "KSh" prefix. For the upper bound of a range — "KSh 712-745"
+   * repeats the unit needlessly, and the repetition is what makes a price range
+   * read as two separate numbers instead of one span.
+   */
+  hideSymbol = false,
   className,
 }: {
   value: number;
   decimals?: boolean;
   compact?: boolean;
+  hideSymbol?: boolean;
   className?: string;
 }) {
+  const formatted = formatKsh(value, { decimals, compact });
   return (
     <span data-numeric className={cn("text-numeric", className)}>
-      {formatKsh(value, { decimals, compact })}
+      {hideSymbol ? formatted.replace(/^KSh\s*/, "") : formatted}
     </span>
   );
 }

@@ -157,7 +157,7 @@ export default function AccountStepPage() {
 
       <p className="mt-4 text-sm text-muted-foreground">
         Already registered?{" "}
-        <Link href="/connect/dashboard" className="font-medium text-primary hover:underline">
+        <Link href="/connect/dashboard" className="font-medium text-brand hover:underline">
           Go to your dashboard
         </Link>
       </p>

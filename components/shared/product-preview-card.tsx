@@ -57,7 +57,7 @@ export function ProductPreviewCard({
       </div>
 
       <div className="p-4">
-        <p className="text-[11px] font-medium uppercase tracking-wider text-connect">
+        <p className="text-[11px] font-medium uppercase tracking-wider text-brand">
           {product.category || "Category"}
         </p>
         <h3 className="mt-1 text-sm font-semibold leading-snug text-foreground">

@@ -107,13 +107,13 @@ export function FileDropzone({
           "flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed text-center transition-colors",
           compact ? "px-4 py-4" : "px-6 py-8",
           dragging
-            ? "border-primary bg-primary-soft"
+            ? "border-brand bg-brand-soft"
             : "border-border-strong bg-surface-muted hover:border-subtle-foreground",
           disabled && "cursor-not-allowed opacity-60",
         )}
       >
         <Upload
-          className={cn("size-5", dragging ? "text-primary" : "text-subtle-foreground")}
+          className={cn("size-5", dragging ? "text-brand" : "text-subtle-foreground")}
           aria-hidden="true"
         />
         <span className="text-sm font-medium text-foreground">{label}</span>

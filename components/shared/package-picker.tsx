@@ -116,12 +116,12 @@ export function PackageCards({
             className={cn(
               "relative flex flex-col rounded-lg border p-5 text-left transition-colors",
               active
-                ? "border-primary bg-primary-soft"
+                ? "border-brand bg-brand-soft"
                 : "border-border bg-surface hover:border-border-strong",
             )}
           >
             {pkg.recommended && !isCurrent ? (
-              <span className="absolute -top-2.5 left-5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
+              <span className="absolute -top-2.5 left-5 rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-foreground">
                 Recommended
               </span>
             ) : null}
@@ -159,7 +159,7 @@ export function PackageCards({
               className={cn(
                 "mt-4 flex h-9 items-center justify-center rounded-md border text-sm font-medium",
                 active
-                  ? "border-primary bg-primary text-primary-foreground"
+                  ? "border-brand bg-brand text-brand-foreground"
                   : "border-border-strong text-foreground",
               )}
             >
@@ -192,7 +192,7 @@ export function PackageComparison({ highlight }: { highlight?: PackageKey }) {
                     scope="col"
                     className={cn(
                       "px-3 py-3 text-center font-semibold",
-                      highlight === pkg.key ? "text-primary" : "text-foreground",
+                      highlight === pkg.key ? "text-brand" : "text-foreground",
                     )}
                   >
                     {pkg.name}
@@ -214,7 +214,7 @@ export function PackageComparison({ highlight }: { highlight?: PackageKey }) {
                       key={key}
                       className={cn(
                         "px-3 py-2.5 text-center",
-                        highlight === key && "bg-primary-soft/50",
+                        highlight === key && "bg-brand-soft/50",
                       )}
                     >
                       <FeatureValue value={feature[key]} />

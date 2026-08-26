@@ -37,7 +37,7 @@ function SectionCard({
         <CardTitle>{title}</CardTitle>
         <Link
           href={stepHref(editStep)}
-          className="inline-flex items-center gap-1.5 rounded-md text-xs font-medium text-primary hover:underline"
+          className="inline-flex items-center gap-1.5 rounded-md text-xs font-medium text-brand hover:underline"
         >
           <Pencil className="size-3" aria-hidden="true" />
           Edit

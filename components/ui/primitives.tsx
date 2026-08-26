@@ -163,7 +163,7 @@ export function Checkbox({
     <CheckboxPrimitive.Root
       className={cn(
         "peer size-4 shrink-0 rounded-sm border border-border-strong bg-surface transition-colors",
-        "data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+        "data-[state=checked]:border-brand data-[state=checked]:bg-brand data-[state=checked]:text-brand-foreground",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
@@ -220,7 +220,7 @@ export function RadioItem({
     <RadioGroupPrimitive.Item
       className={cn(
         "size-4 shrink-0 rounded-full border border-border-strong bg-surface transition-colors",
-        "data-[state=checked]:border-primary data-[state=checked]:border-[5px]",
+        "data-[state=checked]:border-brand data-[state=checked]:border-[5px]",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
@@ -237,7 +237,7 @@ export function Switch({
     <SwitchPrimitive.Root
       className={cn(
         "inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors",
-        "bg-border-strong data-[state=checked]:bg-primary",
+        "bg-border-strong data-[state=checked]:bg-brand",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
@@ -295,14 +295,14 @@ export function ChipGroup<T extends string>({
             className={cn(
               "flex items-center gap-2 rounded-md border px-3 py-2 text-left text-sm transition-colors",
               selected
-                ? "border-primary bg-primary-soft font-medium text-foreground"
+                ? "border-brand bg-brand-soft font-medium text-foreground"
                 : "border-border-strong bg-surface text-muted-foreground hover:border-subtle-foreground hover:text-foreground",
             )}
           >
             <span
               className={cn(
                 "flex size-4 shrink-0 items-center justify-center rounded-sm border",
-                selected ? "border-primary bg-primary text-primary-foreground" : "border-border-strong",
+                selected ? "border-brand bg-brand text-brand-foreground" : "border-border-strong",
               )}
               aria-hidden="true"
             >

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Wordmark } from "@/components/shared/brand";
+import { BuildexMark, Wordmark } from "@/components/shared/brand";
 import { ThemeToggle } from "@/components/shared/theme";
 import { Button } from "@/components/ui/button";
 
@@ -33,23 +33,28 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
     <div className="flex min-h-dvh flex-col bg-background">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:text-brand-foreground"
       >
         Skip to content
       </a>
 
       <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
           <Link href="/" className="rounded-md">
-            <Wordmark />
+            {/* The descriptor must stay readable, so the mark shrinks instead. */}
+            <Wordmark size="sm" className="sm:hidden" />
+            <Wordmark className="hidden sm:inline-flex" />
           </Link>
           <div className="flex items-center gap-2">
-            <ThemeToggle className="hidden sm:inline-flex" />
-            <Button variant="secondary" size="sm" asChild>
+            <ThemeToggle className="hidden lg:inline-flex" />
+            <Button variant="secondary" size="sm" className="hidden sm:inline-flex" asChild>
               <Link href="/connect/dashboard">Sign in</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/manufacturers">For manufacturers</Link>
+              <Link href="/manufacturers">
+                <span className="sm:hidden">Manufacturers</span>
+                <span className="hidden sm:inline">For manufacturers</span>
+              </Link>
             </Button>
           </div>
         </div>
@@ -59,25 +64,44 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         {children}
       </main>
 
-      <footer className="border-t border-border bg-surface">
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+      {/*
+        The guideline's 70/20/10 blue/yellow/white ratio is about brand
+        expression, so the public site's footer is a blue ground. The portals
+        stay light, where data legibility outranks brand dominance.
+      */}
+      <footer className="on-brand">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <Wordmark />
-              <p className="mt-3 max-w-xs text-sm text-muted-foreground">
+              {/* Reversed lockup — the variant the guideline supplies for dark grounds. */}
+              <span className="inline-flex items-center gap-2.5">
+                <BuildexMark className="h-7 text-white" />
+                <span className="flex flex-col items-start leading-none">
+                  <span className="font-display text-base font-extrabold tracking-tight text-white">
+                    BUILDEX
+                  </span>
+                  <span className="mt-1 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+                    INTERIORS
+                  </span>
+                </span>
+              </span>
+              <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/70">
                 Product supply, financing and the manufacturer marketplace for Kenya&apos;s
                 construction material market.
+              </p>
+              <p className="mt-4 font-display text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                Building Better Lives
               </p>
             </div>
             {FOOTER_SECTIONS.map((section) => (
               <div key={section.title}>
-                <p className="text-sm font-semibold text-foreground">{section.title}</p>
+                <p className="text-sm font-semibold text-white">{section.title}</p>
                 <ul className="mt-3 space-y-2">
                   {section.links.map((link) => (
                     <li key={link.label}>
                       <Link
                         href={link.href}
-                        className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+                        className="rounded text-sm text-white/70 transition-colors hover:text-white hover:underline"
                       >
                         {link.label}
                       </Link>
@@ -88,11 +112,11 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             ))}
           </div>
 
-          <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} Buildex. Nairobi, Kenya.
+          <div className="mt-10 flex flex-col gap-3 border-t border-white/15 pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-white/60">
+              © {new Date().getFullYear()} Buildex Interiors Co. Ltd. Nairobi, Kenya.
             </p>
-            <p className="text-xs text-subtle-foreground">
+            <p className="text-xs text-white/50">
               Prototype build — mock data only, no live services connected.
             </p>
           </div>

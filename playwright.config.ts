@@ -1,6 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 4123;
+/*
+  The default dev port, deliberately. Next.js refuses to run a second dev
+  server for the same directory, so the suite reuses whatever `npm run dev`
+  already started rather than trying to bring up its own on a side port.
+*/
+const PORT = 3000;
 
 export default defineConfig({
   testDir: "./e2e",

@@ -50,7 +50,7 @@ those is stubbed behind an interface designed to be **swapped, not rewritten**.
 | --- | --- | --- |
 | Codebase layout | One Next.js app, route groups per product, one shared design system | Fastest to build, demos on one domain; splitting a group into its own deployable app later is a directory move, not a rewrite |
 | Phase 1 scope | Design system + app shell + complete manufacturer onboarding journey | Tight, demo-ready slice that de-risks the primitives everything else needs |
-| Visual direction | Enterprise palette defined in-project, tokens swappable in one file | No brand assets were available; real brand colours replace values in `app/globals.css` alone |
+| Visual direction | The official brand palette — `#262E70` blue, `#FFDA03` yellow, white | Adopted from `BUILDEX BRANDING FULL.pdf`. Blue for navigation and structure, yellow for important actions, per the guideline's own digital rule |
 | Stack | Next.js + TypeScript + Tailwind + Zod, per the stack recommendation | Matches the chosen production stack, so mockup components survive the cutover |
 | Mock data strategy | Repository interfaces with an in-memory implementation | Makes the backend cutover a one-file change rather than a rewrite |
 

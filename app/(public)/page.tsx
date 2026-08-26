@@ -17,7 +17,6 @@ const PRODUCTS = [
     name: "Buildex",
     role: "Product supply & distribution",
     icon: Truck,
-    accent: "text-supply",
     description:
       "Sourcing, stocking and delivery into the hardware network. The supply relationships and inventory the rest of the ecosystem runs on.",
     points: ["Marketplace ordering", "Inventory & stock movement", "Delivery and fulfilment"],
@@ -28,7 +27,6 @@ const PRODUCTS = [
     name: "Buildex Capital",
     role: "Credit, financing & collections",
     icon: Banknote,
-    accent: "text-capital",
     description:
       "Short-cycle stock financing for hardware shops, underwritten on platform data rather than a subjective assessment.",
     points: ["Credit scoring & limits", "Wallet and collections", "Loan tracking, DPD and recovery"],
@@ -39,7 +37,6 @@ const PRODUCTS = [
     name: "Buildex Connect",
     role: "Manufacturer marketplace",
     icon: Factory,
-    accent: "text-connect",
     description:
       "Verified manufacturers listing directly to hardware shops, with regional targeting and market intelligence.",
     points: ["KYB-verified onboarding", "Catalogue & price bands", "Regional targeting"],
@@ -62,7 +59,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <div className="min-w-0">
-              <p className="text-sm font-medium text-connect">The Buildex Ecosystem</p>
+              <p className="text-sm font-medium text-brand">The Buildex Ecosystem</p>
               <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                 One platform connecting manufacturers, hardware shops and the capital that
                 moves between them.
@@ -147,7 +144,7 @@ export default function HomePage() {
               const card = (
                 <>
                   <div className="flex items-start justify-between gap-3">
-                    <span className={`rounded-md border border-border bg-background p-2 ${product.accent}`}>
+                    <span className="rounded-md border border-border bg-background p-2 text-brand">
                       <Icon className="size-5" aria-hidden="true" />
                     </span>
                     <span className="rounded-full border border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
@@ -155,7 +152,7 @@ export default function HomePage() {
                     </span>
                   </div>
                   <h3 className="mt-4 text-sm font-semibold text-foreground">{product.name}</h3>
-                  <p className={`text-xs font-medium ${product.accent}`}>{product.role}</p>
+                  <p className="text-xs font-medium text-brand">{product.role}</p>
                   <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
                     {product.description}
                   </p>
@@ -171,7 +168,7 @@ export default function HomePage() {
                     ))}
                   </ul>
                   {product.href ? (
-                    <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+                    <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-brand">
                       Get started
                       <ArrowRight className="size-3.5" aria-hidden="true" />
                     </span>
@@ -203,7 +200,7 @@ export default function HomePage() {
       <section>
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-14 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div className="flex gap-4">
-            <BuildexMark product="connect" className="mt-1 size-8 shrink-0" />
+            <BuildexMark className="mt-1 h-8 shrink-0" />
             <div>
               <h2 className="text-lg font-semibold tracking-tight text-foreground">
                 Manufacturers: get in front of the hardware network

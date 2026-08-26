@@ -21,9 +21,14 @@ Covers Phase 0 (Foundation) and Phase 1 (Buildex Connect manufacturer onboarding
 
 ### Design system
 
-`app/globals.css` — the complete token set: two separated colour scales (product identity
-vs semantic), light and dark palettes, type scale, radii, one overlay shadow, tabular
-numerals by default, reduced-motion handling.
+`app/globals.css` — the complete token set, built on the official brand palette from
+`requirements_reference/BUILDEX BRANDING FULL.pdf`: Primary Blue `#262E70`, Accent Yellow
+`#FFDA03`, White. Blue carries navigation and structure, yellow carries important actions,
+per the guideline's explicit digital rule. Every neutral is mixed from `#262E70`. Light and
+dark palettes, type scale, radii, one overlay shadow, tabular numerals by default,
+reduced-motion handling. See
+[03 — Architecture](./03-architecture.md) for the full palette and the accessibility
+maths behind it.
 
 ### Component library
 
@@ -179,8 +184,8 @@ The seam is intact. No component bypasses the repository interfaces.
 
 ## Defects found and fixed
 
-Building the test suite and reviewing screenshots surfaced six real defects. None were
-test artefacts.
+Building the test suite, reviewing screenshots and adopting the brand surfaced nine real
+defects. None were test artefacts.
 
 ### 1. Lost-update race on document upload
 
@@ -239,6 +244,35 @@ IPRS check while a director's details were being entered moved the caret. Replac
 `setValue`, which updates in place.
 
 `app/connect/onboarding/directors/page.tsx`
+
+### 7. Headings silently fell back to Arial
+
+Found while adopting the brand typography. `--font-display` is declared on `:root` and
+references `--font-montserrat`, but `next/font` put that variable on `<body>`. A `var()`
+inside a custom property resolves at the scope where the property is *declared*, so the
+reference resolved to nothing, the `font-family` declaration became invalid, and every
+heading inherited Arial — with no error in the console, the build or the linter. Moving the
+font class to `<html>` fixed it.
+
+`app/layout.tsx`
+
+### 8. Brand mark clipped at small sizes
+
+The house outline's stroke extended past the SVG viewBox at the roof apex and chimney, so
+the top of the logo was cut off in the sidebar and header. Geometry re-inset by half the
+stroke width, and the standalone mark redrawn at house proportions (~1.4:1) rather than the
+master artwork's full-lockup width.
+
+`components/shared/brand.tsx`
+
+### 9. Header overflowed at 375px after rebranding
+
+The wordmark grew wider once it carried a descriptor chip, pushing the public header past
+the viewport. The header is now responsive: smaller wordmark, "Sign in" hidden below `sm`,
+and a shortened CTA label. Caught by the overflow check, which is exactly why it runs on
+every page at three widths.
+
+`app/(public)/layout.tsx`
 
 ### Also addressed: React Compiler correctness
 

@@ -49,7 +49,7 @@ function WizardChrome({ children }: { children: React.ReactNode }) {
     <div className="min-h-dvh bg-background">
       <a
         href="#wizard"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:text-brand-foreground"
       >
         Skip to form
       </a>

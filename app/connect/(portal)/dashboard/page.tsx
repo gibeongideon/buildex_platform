@@ -168,7 +168,7 @@ export default function ConnectDashboardPage() {
             <CardTitle>Your catalogue</CardTitle>
             <Link
               href="/connect/catalogue"
-              className="text-xs font-medium text-primary hover:underline"
+              className="text-xs font-medium text-brand hover:underline"
             >
               Manage
             </Link>
@@ -260,7 +260,7 @@ export default function ConnectDashboardPage() {
               aria-label="Account setup progress"
             >
               <div
-                className="h-full rounded-full bg-primary transition-all"
+                className="h-full rounded-full bg-brand transition-all"
                 style={{ width: `${(done / checklist.length) * 100}%` }}
               />
             </div>
@@ -297,7 +297,7 @@ export default function ConnectDashboardPage() {
                       </p>
                       <Link
                         href={item.href}
-                        className="mt-1 inline-block text-xs font-medium text-primary hover:underline"
+                        className="mt-1 inline-block text-xs font-medium text-brand hover:underline"
                       >
                         {item.cta}
                       </Link>

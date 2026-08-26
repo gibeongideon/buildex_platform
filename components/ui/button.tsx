@@ -4,18 +4,33 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/*
+  Brand guideline: "Use blue for navigation and structure, with yellow for
+  important actions."
+
+  `primary` is therefore brand yellow — the important action. It carries BLUE
+  text (white on yellow is 1.37:1 and unreadable) and a darkened-gold border,
+  because yellow against a white page is only 1.37:1 and would otherwise fail
+  non-text contrast. In dark mode `--primary-border` resolves to transparent,
+  since the surrounding contrast is already ample.
+
+  `brand` is blue-filled, for prominent actions that are structural rather than
+  the single most important thing on the page.
+*/
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         primary:
-          "bg-primary text-primary-foreground hover:bg-primary-hover shadow-none",
+          "border border-primary-border bg-primary text-primary-foreground hover:bg-primary-hover font-semibold shadow-none",
+        brand:
+          "bg-brand text-brand-foreground hover:bg-brand-hover shadow-none",
         secondary:
           "border border-border-strong bg-surface text-foreground hover:bg-surface-muted",
         ghost: "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
         danger: "bg-danger text-white hover:opacity-90",
-        link: "text-primary underline-offset-4 hover:underline p-0 h-auto",
+        link: "text-brand underline-offset-4 hover:underline p-0 h-auto",
       },
       size: {
         sm: "h-8 px-3 text-xs [&_svg]:size-3.5",

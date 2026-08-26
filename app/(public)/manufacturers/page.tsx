@@ -42,8 +42,8 @@ export default function ManufacturersPage() {
       <section className="border-b border-border">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <div className="flex items-center gap-2.5">
-            <BuildexMark product="connect" className="size-6" />
-            <p className="text-sm font-medium text-connect">Buildex Connect</p>
+            <BuildexMark className="h-6" />
+            <p className="text-sm font-medium text-brand">Buildex Connect</p>
           </div>
           <h1 className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             Sell your products to Kenya&apos;s hardware network.
@@ -74,7 +74,7 @@ export default function ManufacturersPage() {
               const Icon = benefit.icon;
               return (
                 <div key={benefit.title} className="flex gap-4">
-                  <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-connect">
+                  <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-brand">
                     <Icon className="size-4" aria-hidden="true" />
                   </span>
                   <div>

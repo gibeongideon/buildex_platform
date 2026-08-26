@@ -1,19 +1,52 @@
 @import "tailwindcss";
 
 /*
-  Buildex design system.
+  ===========================================================================
+  BUILDEX DESIGN TOKENS
+  ===========================================================================
+
+  Source of truth: "BUILDEX BRANDING FULL.pdf" (Brand Guidelines, Aug 2026)
+  in requirements_reference/.
+
+  The brand defines exactly three colours:
+
+      Primary Blue    #262E70
+      Accent Yellow   #FFDA03
+      White           #FFFFFF
+      Usage ratio     70% blue · 20% yellow · 10% white
+
+  and one explicit digital rule:
+
+      "Use blue for navigation and structure, with yellow for important
+       actions."
+
+  That rule is what drives the two token families below:
+
+      --brand-*    Blue. Navigation, structure, selection, progress, links,
+                   focus rings, checked controls. The dominant colour.
+      --primary-*  Yellow. Primary call-to-action only. Used sparingly, so
+                   that "yellow" reliably means "this is the action".
+
+  Every neutral in the system is mixed from #262E70 rather than picked from a
+  generic grey ramp, so surfaces, borders and body text all carry the brand's
+  blue cast.
+
   ---------------------------------------------------------------------------
-  Two colour scales are deliberately kept apart:
+  Accessibility, measured (WCAG 2.1 AA)
+  ---------------------------------------------------------------------------
+  Brand yellow has a relative luminance of 0.714 — it is a *light* colour.
+  Two consequences are baked into these tokens:
 
-    * PRODUCT accents  — identity only (nav chrome, product badges, chart
-                         series). Never used to communicate state.
-    * SEMANTIC colours — state only (status pills, alerts, validation).
+    1. Yellow CTAs carry BLUE text, never white.
+         #262E70 on #FFDA03 = 8.95:1   PASS
+         #FFFFFF on #FFDA03 = 1.37:1   FAIL — never do this
+    2. A yellow button on a white page is only 1.37:1 against that page, which
+       fails non-text contrast (1.4.11). Light-mode yellow buttons therefore
+       carry a darkened-gold border, #A38C02, at 3.33:1 against white. In dark
+       mode the surrounding contrast is ample and no border is needed.
 
-  Keeping them separate is what stops a Capital-green sidebar from reading as
-  "everything is fine" on a page full of overdue loans.
-
-  To rebrand: change the values in :root and [data-theme="dark"] below.
-  Nothing else in the codebase hard-codes a colour.
+  Semantic warning is ORANGE (#B23C0B), not yellow, so that a warning can
+  never be mistaken for a call to action.
 */
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -31,17 +64,19 @@
   --color-muted-foreground: var(--fg-muted);
   --color-subtle-foreground: var(--fg-subtle);
 
+  /* Blue — navigation and structure. */
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-foreground: var(--brand-fg);
+  --color-brand-soft: var(--brand-soft);
+
+  /* Yellow — important actions. */
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-fg);
-  --color-primary-soft: var(--primary-soft);
+  --color-primary-border: var(--primary-border);
 
-  /* Product identity — chrome and charts only. */
-  --color-supply: var(--supply);
-  --color-capital: var(--capital);
-  --color-connect: var(--connect);
-
-  /* Semantic — state only. */
+  /* Semantic — state only, never brand expression. */
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);
@@ -53,8 +88,21 @@
   --color-neutral: var(--neutral);
   --color-neutral-soft: var(--neutral-soft);
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, sans-serif;
+  /*
+    Brand typography, in the guideline's own order of prominence:
+    NEXA (primary) · ARIAL (secondary) · MONTSERAT (tertiary).
+
+    Nexa is a commercial licence and is not bundled here. Montserrat — also
+    on the brand's approved list, and likewise a geometric sans — stands in
+    for display type until a Nexa licence is in place; swap --font-display
+    when it is. Body, UI and data type use Arial, the brand's second face,
+    which is a system font (so no download) and whose digits are natively
+    monospaced — exactly what dense financial tables need.
+  */
+  --font-sans: Arial, "Helvetica Neue", Helvetica, ui-sans-serif, system-ui,
+    sans-serif;
+  --font-display: var(--font-montserrat), Arial, "Helvetica Neue", Helvetica,
+    sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
 
   --text-xs: 0.75rem;
@@ -78,81 +126,101 @@
   --radius-xl: 0.75rem;
 
   /* Overlays only. Surfaces are separated by 1px borders, not shadows. */
-  --shadow-overlay: 0 16px 40px -12px rgb(9 17 31 / 0.28),
-    0 4px 12px -4px rgb(9 17 31 / 0.16);
+  --shadow-overlay: 0 16px 40px -12px rgb(31 38 92 / 0.28),
+    0 4px 12px -4px rgb(31 38 92 / 0.16);
 }
 
 :root {
   color-scheme: light;
 
-  --bg: #f6f7f9;
+  /* Brand primitives, verbatim from the guideline. */
+  --buildex-blue: #262e70;
+  --buildex-yellow: #ffda03;
+  --buildex-white: #ffffff;
+
+  /* Neutrals, all mixed from --buildex-blue. */
+  --bg: #f7f8fa;
   --surface: #ffffff;
-  --surface-muted: #f1f3f7;
+  --surface-muted: #f2f2f6;
   --surface-raised: #ffffff;
 
-  --border: #e2e5eb;
-  --border-strong: #c8cedb;
+  --border: #e3e4ec;
+  --border-strong: #8e93b5; /* 3.00:1 on white — control boundaries */
 
-  --fg: #0f172a;
-  --fg-muted: #55607a;
-  --fg-subtle: #7a8399;
+  --fg: #1f265c; /* 14.3:1 on white */
+  --fg-muted: #5e6495; /* 5.63:1 on white */
+  --fg-subtle: #6e73a0; /* 4.54:1 on white */
 
-  --primary: #0b2545;
-  --primary-hover: #123a5f;
-  --primary-fg: #ffffff;
-  --primary-soft: #e8edf4;
+  /* Blue: navigation and structure. */
+  --brand: #262e70;
+  --brand-hover: #444b84;
+  --brand-fg: #ffffff;
+  --brand-soft: #eeeef4;
 
-  --supply: #123a5f;
-  --capital: #12654a;
-  --connect: #9a5b18;
+  /* Yellow: important actions. Blue text, gold boundary. */
+  --primary: #ffda03;
+  --primary-hover: #e0c003;
+  --primary-fg: #262e70;
+  --primary-border: #a38c02;
 
-  --success: #15803d;
-  --success-soft: #e3f5e9;
-  --warning: #a16207;
-  --warning-soft: #fbf1dc;
-  --danger: #b91c1c;
-  --danger-soft: #fbe9e9;
-  --info: #1d4ed8;
-  --info-soft: #e6ecfd;
-  --neutral: #55607a;
-  --neutral-soft: #eef0f4;
+  --success: #0f7a3d;
+  --success-soft: #eff5f2;
+  --warning: #b23c0b; /* orange, not yellow — see header note */
+  --warning-soft: #f9efeb;
+  --danger: #b3261e;
+  --danger-soft: #f9eeed;
+  --info: #262e70;
+  --info-soft: #eeeef4;
+  --neutral: #5e6495;
+  --neutral-soft: #f2f2f6;
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #0a0f1a;
-  --surface: #0f1623;
-  --surface-muted: #151e2e;
-  --surface-raised: #16202f;
+  /*
+    The brand does not specify a dark theme. These values are mixed from
+    #262E70 toward black, so the dark surfaces read as deep brand blue rather
+    than neutral charcoal.
+  */
+  --bg: #080916;
+  --surface: #0b0d1f;
+  --surface-muted: #0e112b;
+  --surface-raised: #12152f;
 
-  --border: #1f2a3c;
-  --border-strong: #33425c;
+  --border: #181d45;
+  --border-strong: #565c8f; /* 3.04:1 on surface */
 
-  --fg: #e8edf5;
-  --fg-muted: #97a3b8;
-  --fg-subtle: #6b7789;
+  --fg: #f2f2f6;
+  --fg-muted: #b5b8ce;
+  --fg-subtle: #9296b8;
 
-  /* Deep navy is invisible on near-black, so the CTA colour lifts in dark. */
-  --primary: #2e6db4;
-  --primary-hover: #3b82ce;
-  --primary-fg: #ffffff;
-  --primary-soft: #16283f;
+  /*
+    #262E70 is invisible as text on a near-black ground, so structural blue
+    lifts to a brand tint. The guideline sanctions a reversed logo on dark
+    grounds, which is the same principle.
+  */
+  --brand: #9da1bf;
+  --brand-hover: #babcd1;
+  --brand-fg: #262e70;
+  --brand-soft: #15193e;
 
-  --supply: #6ba3d6;
-  --capital: #4fbf95;
-  --connect: #d9973f;
+  /* Yellow is unchanged — it reads beautifully on dark and needs no border. */
+  --primary: #ffda03;
+  --primary-hover: #ffe02b;
+  --primary-fg: #262e70;
+  --primary-border: transparent;
 
-  --success: #56c26c;
-  --success-soft: #12291a;
-  --warning: #d6a13a;
-  --warning-soft: #2a2113;
-  --danger: #f2726b;
-  --danger-soft: #2e1717;
-  --info: #6fa8f5;
-  --info-soft: #14213a;
-  --neutral: #97a3b8;
-  --neutral-soft: #1a2333;
+  --success: #8cbfa2;
+  --success-soft: #0c1c23;
+  --warning: #e2a48a;
+  --warning-soft: #25141c;
+  --danger: #db9793;
+  --danger-soft: #23101f;
+  --info: #979bba;
+  --info-soft: #0f122a;
+  --neutral: #b5b8ce;
+  --neutral-soft: #0e112b;
 }
 
 @layer base {
@@ -162,6 +230,8 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    /* Reserve the scrollbar so navigation between pages doesn't shift layout. */
+    scrollbar-gutter: stable;
   }
 
   body {
@@ -170,6 +240,17 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /*
+    Display face on headings only. Body, UI and data stay on Arial, which is
+    more legible than a geometric sans at 12–14px in a dense table.
+  */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.011em;
   }
 
   /*
@@ -184,15 +265,15 @@
     font-feature-settings: "tnum";
   }
 
+  /* Focus is structural, so it uses brand blue. */
   :focus-visible {
-    outline: 2px solid var(--primary);
+    outline: 2px solid var(--brand);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
 
-  /* Reserve the scrollbar so navigation between pages doesn't shift layout. */
-  html {
-    scrollbar-gutter: stable;
+  [data-theme="dark"] :focus-visible {
+    outline-color: var(--brand);
   }
 }
 
@@ -200,6 +281,10 @@
   .text-numeric {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
+  }
+
+  .font-display {
+    font-family: var(--font-display);
   }
 
   /*
@@ -216,6 +301,20 @@
     overscroll-behavior-x: contain;
     contain: paint;
     max-width: 100%;
+  }
+
+  /*
+    Brand-dominant section. The guideline's 70/20/10 ratio is about brand
+    expression, so the public site leans on blue grounds while the portals
+    stay light for data legibility.
+  */
+  .on-brand {
+    background-color: var(--buildex-blue);
+    color: #ffffff;
+  }
+
+  [data-theme="dark"] .on-brand {
+    background-color: var(--surface-muted);
   }
 }
 

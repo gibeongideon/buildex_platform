@@ -50,12 +50,12 @@ function NavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void 
       className={cn(
         "group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
         active
-          ? "bg-primary-soft font-medium text-foreground"
+          ? "bg-brand-soft font-medium text-foreground"
           : "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
       )}
     >
       <Icon
-        className={cn("size-4 shrink-0", active ? "text-primary" : "text-subtle-foreground")}
+        className={cn("size-4 shrink-0", active ? "text-brand" : "text-subtle-foreground")}
         aria-hidden="true"
       />
       <span className="truncate">{item.label}</span>
@@ -112,7 +112,7 @@ function SidebarContent({
       <div className="shrink-0 border-t border-border p-3">
         <div className="flex items-center gap-3 rounded-md px-2 py-2">
           <span
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-semibold text-brand-foreground"
             aria-hidden="true"
           >
             {initials(user.name)}
@@ -161,7 +161,7 @@ export function AppShell({
       <div className="min-h-dvh bg-background">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:text-brand-foreground"
         >
           Skip to content
         </a>

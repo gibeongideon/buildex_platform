@@ -39,8 +39,8 @@ function Marker({ state, index }: { state: StepState; index: number }) {
       aria-hidden="true"
       className={cn(
         "flex size-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold transition-colors",
-        state === "complete" && "border-primary bg-primary text-primary-foreground",
-        state === "current" && "border-primary bg-surface text-primary",
+        state === "complete" && "border-brand bg-brand text-brand-foreground",
+        state === "current" && "border-brand bg-surface text-brand",
         state === "upcoming" && "border-border-strong bg-surface text-subtle-foreground",
         state === "locked" && "border-border bg-surface-muted text-subtle-foreground",
       )}
@@ -84,7 +84,7 @@ export function StepRail({
                     aria-hidden="true"
                     className={cn(
                       "mt-1 w-px flex-1",
-                      index < currentIndex ? "bg-primary/40" : "bg-border",
+                      index < currentIndex ? "bg-brand/40" : "bg-border",
                     )}
                   />
                 ) : null}
@@ -163,7 +163,7 @@ export function StepProgressBar({
         aria-label="Onboarding progress"
       >
         <div
-          className="h-full rounded-full bg-primary transition-all"
+          className="h-full rounded-full bg-brand transition-all"
           style={{ width: `${percent}%` }}
         />
       </div>

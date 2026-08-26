@@ -11,12 +11,6 @@
     "artist": "W.carter",
     "descurl": "https://commons.wikimedia.org/wiki/File:A_bunch_of_rebar_up_close.jpg"
   },
-  "steel-reinforcement-2.jpg": {
-    "title": "File:Rebar worker.jpg",
-    "license": "CC BY-SA 3.0",
-    "artist": "Tomas Castelazo",
-    "descurl": "https://commons.wikimedia.org/wiki/File:Rebar_worker.jpg"
-  },
   "timber-boards-1.jpg": {
     "title": "File:Plywood panels for new construction.jpg",
     "license": "CC BY-SA 4.0",
@@ -119,12 +113,6 @@
     "artist": "Cjp24",
     "descurl": "https://commons.wikimedia.org/wiki/File:Adhesive_sealant_in_aluminium_cartridge_packaging.jpg"
   },
-  "adhesives-sealants-2.jpg": {
-    "title": "File:Caulking, USAF.jpg",
-    "license": "Public domain",
-    "artist": "?",
-    "descurl": "https://commons.wikimedia.org/wiki/File:Caulking,_USAF.jpg"
-  },
   "insulation-1.jpg": {
     "title": "File:Arrangement Mineralwolle.jpeg",
     "license": "CC BY-SA 3.0 de",
@@ -136,5 +124,11 @@
     "license": "CC BY-SA 4.0",
     "artist": "Basile Morin",
     "descurl": "https://commons.wikimedia.org/wiki/File:Infinity_mirror,_hand-washing_sink_and_wardrobes_in_the_spa_of_Amantaka_luxury_Resort_%26_Hotel_in_Luang_Prabang_Laos.jpg"
+  },
+  "cement-concrete-2.jpg": {
+    "title": "File:Concrete-block,japan.JPG",
+    "license": "CC BY 2.5",
+    "artist": "katorisi",
+    "descurl": "https://commons.wikimedia.org/wiki/File:Concrete-block,japan.JPG"
   }
 }

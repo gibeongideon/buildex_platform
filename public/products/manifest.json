@@ -1,15 +1,15 @@
 {
-  "cement-concrete": 1,
-  "steel-reinforcement": 2,
-  "timber-boards": 1,
-  "paints-coatings": 2,
-  "roofing": 1,
-  "plumbing": 2,
-  "electrical": 2,
-  "tiles-flooring": 2,
+  "adhesives-sealants": 1,
+  "cement-concrete": 2,
   "doors-windows": 3,
+  "electrical": 2,
   "hardware-fasteners": 3,
-  "adhesives-sealants": 2,
   "insulation": 1,
-  "interior-finishes": 1
+  "interior-finishes": 1,
+  "paints-coatings": 2,
+  "plumbing": 2,
+  "roofing": 1,
+  "steel-reinforcement": 1,
+  "tiles-flooring": 2,
+  "timber-boards": 1
 }

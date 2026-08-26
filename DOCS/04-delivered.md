@@ -7,12 +7,13 @@ Covers Phase 0 (Foundation), Phase 1 (manufacturer onboarding) and Phase 2
 
 | Metric | Value |
 | --- | --- |
-| Source files | 86 (`app/`, `components/`, `lib/`, `e2e/`) |
-| Routes | 30 (plus `/_not-found`) |
+| Source files | 88 (`app/`, `components/`, `lib/`, `e2e/`) |
+| Routes | 31 (plus `/_not-found`) |
 | Onboarding steps | 9, all resumable and deep-linkable |
 | Seeded manufacturers / products | 12 / 72 |
 | Seeded enquiries / campaigns | 50 / 12 |
-| End-to-end specs | 14, all passing |
+| Bundled product photos | 22 across 13 categories (CC / public domain) |
+| End-to-end specs | 16, all passing |
 | TypeScript | `tsc --noEmit` clean |
 | ESLint | 0 errors |
 | Production build | Clean, all routes prerendered as static |
@@ -54,8 +55,9 @@ maths behind it.
 | `document-card.tsx` | One KYB document with status, expiry, replace and remove |
 | `verification-tracker.tsx` | The five-check pipeline with authority and SLA countdown |
 | `package-picker.tsx` | Billing toggle, package cards and comparison matrix |
-| `product-preview-card.tsx` | The card a hardware shop sees — shared by preview and marketplace |
-| `page-header.tsx` | `PageHeader` with breadcrumbs, and `PhasePlaceholder` |
+| `product-thumb.tsx` | Product imagery: bundled category photo, or a generated tile |
+| `product-card.tsx` | The marketplace card — price range, MOQ, traction, trust line |
+| `page-header.tsx` | `PageHeader` with breadcrumbs |
 | `format.tsx` | `Currency`, `Num`, `Pct`, `DetailRow` |
 | `stat-card.tsx` | A single figure with label and hint |
 | `demo-panel.tsx` | Global demo controls |
@@ -112,7 +114,7 @@ than no preview.
 ### The two-tier marketplace
 
 **Tier 1 — the central catalogue.** `/marketplace` is the storefront home: a search hero
-with Products / Manufacturers / Regions scopes, a full-width "All categories" mega menu,
+with Ask AI / Products / Manufacturers / Regions scopes, a full-width "All categories" mega menu,
 a category rail with live counts, browsing-history and follow-up rails, a demand-ranked
 grid, the supplier list and regional coverage. `/marketplace/search` is the faceted result
 set — live facet counts, category and delivery-region filters, five sort orders, removable
@@ -153,14 +155,48 @@ touch; Escape and mouse-away both close it.
 Because it renders real listings, a category with three products says three. That is more
 useful than a padded grid.
 
-### Product imagery without photography
+### Layout: full-bleed, six across, no sidebar
 
-No supplier has uploaded photos, and a grid of grey "no image" boxes makes a marketplace
-look abandoned. `ProductThumb` generates a tile per listing instead: the category's icon
-over one of four geometric patterns, chosen by a stable hash of the product id. The same
-product always draws the same tile, so the grid is stable across reloads and buyers learn
-to recognise a listing by its mark. No network request, and it is replaced wholesale the
-day real photography exists.
+Results and the home grid run the full width at six columns, with refinement in a
+horizontal bar that expands into a panel. A permanent left rail would cost roughly two
+columns of listings, and buyers scanning a grid want density far more often than facets.
+The header collapses on scroll into a compact bar carrying the logo and an inline search —
+driven by a sentinel plus `IntersectionObserver`, so it costs nothing per frame.
+
+### Product imagery
+
+22 photographs across 13 categories, bundled in `public/products/` under CC and
+public-domain licences (`ATTRIBUTION.json` records source, creator and licence for each).
+They are served locally rather than hotlinked, so the marketplace works offline and no
+third-party CDN is loaded on every page view.
+
+Several photos per category matters: a six-across grid filtered to one category would
+otherwise repeat the same image straight down a column. Which one a listing gets is chosen
+by a stable hash of its id.
+
+Two deliberate limits. Glass & Glazing has no photograph that genuinely reads as the
+product, so it falls back to a generated tile — the category icon over one of four
+patterns, also seeded from the product id. And candidate photos showing *people working*
+rather than the product were rejected: in a grid of product shots, a photo of a person
+reads as an error. A wrong photo is worse than an honest placeholder.
+
+### Ask AI
+
+`/marketplace/ask` takes a requirement in plain language — "400 bags of cement delivered to
+Machakos" — and returns the listings and suppliers that match, priced at the stated
+quantity against a real band.
+
+It is a deterministic matcher over the catalogue's vocabulary, not a language model, and
+the page says so. It shows its working: the chips under the answer are exactly what it
+recognised (`cement`, `Machakos`, `400 units`), so a buyer can see why they got those
+results. Urgency sorts by lead time; price sensitivity sorts by price.
+
+### The manufacturers tab
+
+`/marketplace/manufacturers` lists suppliers as wide rows rather than cards: identity,
+capability tags and trust metrics on the left, a strip of that supplier's actual products
+in the middle, entry price and actions on the right. Filterable by category and delivery
+region, sortable by range depth, responsiveness or years trading.
 
 ### Manufacturer portal
 
@@ -202,8 +238,15 @@ marketplace.spec.ts
   ✓ an enquiry sent from a listing reaches the manufacturer's inbox
   ✓ an unverified manufacturer has no public storefront
   ✓ a manufacturer can add a listing from the catalogue
+  ✓ the marketplace home carries the full storefront chrome
+  ✓ the All categories mega menu opens on hover and links through
+  ✓ a request for quotation reaches every matching supplier
+  ✓ top ranking is ordered by real enquiry demand
+  ✓ browsing a listing populates the history rail on the home page
+  ✓ Ask AI parses a requirement and shows its working
+  ✓ the manufacturers tab lists suppliers with their product strips
 
-9 passed
+16 passed
 ```
 
 The happy-path spec drives all nine steps, uploads six documents through the real file
@@ -225,9 +268,9 @@ Horizontal page scroll measured on the **production build** by attempting
 
 | Width | Result |
 | --- | --- |
-| 375px | All 16 pages OK |
-| 768px | All 16 pages OK |
-| 1440px | All 16 pages OK |
+| 375px | All 18 pages OK |
+| 768px | All 18 pages OK |
+| 1440px | All 18 pages OK |
 
 Wide tables confirmed to still scroll inside their own container (326px box, 672px
 content, 346px of internal scroll) — the fix clips paint, not content.

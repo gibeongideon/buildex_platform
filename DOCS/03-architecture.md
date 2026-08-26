@@ -25,7 +25,8 @@ components survive the backend cutover rather than being thrown away.
 app/
   (public)/               Corporate site — platform overview, supplier acquisition
   (marketplace)/          Buyer-facing marketplace, with its own storefront chrome
-    marketplace/          Home: search hero, category grid, browsing history
+    marketplace/          Home: search hero, category rail, panel row, demand grid
+      ask/                Ask AI — plain-language sourcing (see below)
       search/             Faceted results (query and filters read from the URL)
       product/[id]        Listing detail, price-band calculator, enquiry form
       manufacturer/[id]   A supplier's own branded storefront (tier 2)
@@ -124,6 +125,14 @@ marketplace: a listing must be `active` *and* its manufacturer must be cleared t
 Search, storefronts, related products and comparables all build on it, so a verification
 state can never leak a listing by accident. An unverified manufacturer has no public
 storefront at all.
+
+**Ask AI is a matcher, not a model.** `lib/rules/sourcing.ts` parses a requirement
+against the catalogue's own vocabulary — material synonyms, the 47 counties, quantities,
+urgency and price sensitivity — and returns a structured filter. It is deterministic, works
+offline, and can never invent a supplier or a price. The page shows exactly what it
+recognised, so a buyer can see why they got those results and rephrase if something was
+missed. When a real model is wired in at the cutover it replaces `parseRequirement`; every
+surface downstream stays put.
 
 **Insights are derived, never stored.** Views come from the campaigns that carried a
 listing; enquiries and orders come from the enquiry records themselves. There is no

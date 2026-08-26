@@ -65,8 +65,8 @@ const CATEGORY_ICON: Record<ProductCategory, React.ElementType> = {
  * fall back to the generated tile.
  */
 const CATEGORY_PHOTOS: Partial<Record<ProductCategory, { slug: string; count: number }>> = {
-  "Cement & Concrete": { slug: "cement-concrete", count: 1 },
-  "Steel & Reinforcement": { slug: "steel-reinforcement", count: 2 },
+  "Cement & Concrete": { slug: "cement-concrete", count: 2 },
+  "Steel & Reinforcement": { slug: "steel-reinforcement", count: 1 },
   "Timber & Boards": { slug: "timber-boards", count: 1 },
   "Paints & Coatings": { slug: "paints-coatings", count: 2 },
   Roofing: { slug: "roofing", count: 1 },
@@ -75,7 +75,7 @@ const CATEGORY_PHOTOS: Partial<Record<ProductCategory, { slug: string; count: nu
   "Tiles & Flooring": { slug: "tiles-flooring", count: 2 },
   "Doors & Windows": { slug: "doors-windows", count: 3 },
   "Hardware & Fasteners": { slug: "hardware-fasteners", count: 3 },
-  "Adhesives & Sealants": { slug: "adhesives-sealants", count: 2 },
+  "Adhesives & Sealants": { slug: "adhesives-sealants", count: 1 },
   Insulation: { slug: "insulation", count: 1 },
   "Interior Finishes": { slug: "interior-finishes", count: 1 },
 };

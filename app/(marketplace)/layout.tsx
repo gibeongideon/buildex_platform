@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BadgeCheck, FileText, Flame, Truck } from "lucide-react";
+import { BadgeCheck, FileText, Flame, Sparkles, Truck } from "lucide-react";
 import { PromoStrip, UtilityBar, UtilityLinks } from "@/components/marketplace/top-bar";
 import { CategoryMegaMenu } from "@/components/marketplace/mega-menu";
 import { SearchHero } from "@/components/marketplace/search-hero";
@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 */
 
 const NAV_LINKS = [
+  { href: "/marketplace/ask", label: "Ask AI", icon: Sparkles },
   { href: "/marketplace/manufacturers", label: "Verified manufacturers", icon: BadgeCheck },
   { href: "/marketplace/regions", label: "Delivery regions", icon: Truck },
   { href: "/marketplace/top-ranking", label: "Top ranking", icon: Flame },
@@ -122,12 +123,15 @@ export default function MarketplaceLayout({
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "rounded-md px-3 py-2 text-sm transition-colors",
+                      "flex items-center gap-1.5 rounded-md px-3 py-2 text-sm transition-colors",
                       active
                         ? "font-semibold text-brand"
                         : "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
                     )}
                   >
+                    {link.href === "/marketplace/ask" ? (
+                      <link.icon className="size-4 text-primary" aria-hidden="true" />
+                    ) : null}
                     {link.label}
                   </Link>
                 );

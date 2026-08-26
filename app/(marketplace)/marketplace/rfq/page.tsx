@@ -34,7 +34,6 @@ import {
   CardHeader,
   CardTitle,
   Separator,
-  StatusPill,
 } from "@/components/ui/primitives";
 
 /*

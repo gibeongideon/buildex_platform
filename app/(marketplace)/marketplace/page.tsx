@@ -6,15 +6,13 @@ import {
   ArrowRight,
   BadgeCheck,
   ChevronRight,
-  Clock,
   FileText,
   Flame,
-  History,
   MapPin,
   ShieldCheck,
+  Sparkles,
   Store,
   Truck,
-  Zap,
 } from "lucide-react";
 import { browsingRepo, marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
@@ -43,6 +41,12 @@ import { cn } from "@/lib/utils";
 */
 
 const QUICK_ACTIONS = [
+  {
+    href: "/marketplace/ask",
+    icon: Sparkles,
+    title: "Ask AI",
+    body: "Describe the job in plain words and get the suppliers who can serve it.",
+  },
   {
     href: "/marketplace/rfq",
     icon: FileText,
@@ -127,7 +131,16 @@ function PanelCard({
   );
 }
 
-function ThumbGrid({ items }: { items: { id: string; category: string; priceBands: Parameters<typeof priceRange>[0] }[] }) {
+function ThumbGrid({
+  items,
+}: {
+  items: {
+    id: string;
+    name: string;
+    category: string;
+    priceBands: Parameters<typeof priceRange>[0];
+  }[];
+}) {
   return (
     <div className="grid grid-cols-2 gap-2">
       {items.map((product) => (
@@ -149,6 +162,8 @@ function ThumbGrid({ items }: { items: { id: string; category: string; priceBand
               className="font-semibold text-foreground"
             />
           </p>
+          {/* Without this the link announces only its price. */}
+          <span className="sr-only">{product.name}</span>
         </Link>
       ))}
     </div>

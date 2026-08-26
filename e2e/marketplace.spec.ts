@@ -22,7 +22,8 @@ test("the central marketplace searches, filters and sorts", async ({ page }) => 
   const total = await cards.count();
   expect(total).toBeGreaterThan(20);
 
-  // Faceted filter narrows the grid and shows a removable chip.
+  // Facets live behind the Filters toggle now that the grid is full-bleed.
+  await page.getByRole("button", { name: /^Filters/ }).click();
   await page.getByRole("checkbox", { name: /^Roofing/ }).first().click();
   await expect(page.getByRole("button", { name: /^Roofing/ })).toBeVisible({
     timeout: 15_000,
@@ -42,7 +43,9 @@ test("the central marketplace searches, filters and sorts", async ({ page }) => 
 
   // Search narrows to matching listings.
   await page.goto("/marketplace/search?q=plywood");
-  await expect(page.getByText(/for “plywood”/)).toBeVisible({ timeout: 15_000 });
+  await expect(
+    page.getByRole("heading", { name: /for “plywood”/ }),
+  ).toBeVisible({ timeout: 15_000 });
   await expect(page.locator("article h3 a").first()).toContainText(/Plywood/i);
 });
 
@@ -156,14 +159,17 @@ test("the marketplace home carries the full storefront chrome", async ({ page })
   await page.goto("/marketplace");
 
   // Search hero with its three scope tabs.
-  await expect(page.getByRole("tab", { name: "Products" })).toBeVisible({
+  await expect(page.getByRole("tab", { name: /Ask AI/ })).toBeVisible({
     timeout: 15_000,
   });
+  await expect(page.getByRole("tab", { name: "Products" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Manufacturers" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Regions" })).toBeVisible();
 
   // Quick actions and the live counts in the hero panel.
-  await expect(page.getByRole("link", { name: /Request for Quotation/ })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Request for Quotation", exact: true }),
+  ).toBeVisible();
   await expect(page.getByText("Most in demand")).toBeVisible();
   await expect(page.getByText("Shop by category")).toBeVisible();
 });
@@ -233,5 +239,49 @@ test("browsing a listing populates the history rail on the home page", async ({ 
   await expect(page.getByText("Browsing history")).toBeVisible({ timeout: 15_000 });
   await expect(
     page.getByRole("link", { name: /Equator Vinyl Silk Emulsion/ }).first(),
-  ).toBeVisible();
+  ).toBeAttached();
+});
+
+test("Ask AI parses a requirement and shows its working", async ({ page }) => {
+  await page.goto("/marketplace/ask");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Ask AI", {
+    timeout: 15_000,
+  });
+
+  await page
+    .getByLabel("Describe what you need")
+    .fill("400 bags of cement delivered to Machakos");
+  await page.getByRole("button", { name: "Ask" }).click();
+
+  await expect(page).toHaveURL(/\/marketplace\/ask\?q=/);
+  await expect(page.getByText("Here is what I found")).toBeVisible({ timeout: 15_000 });
+
+  // It shows exactly what it recognised, rather than a black-box answer.
+  await expect(page.getByText("Matched on")).toBeVisible();
+  await expect(page.getByText("cement", { exact: true })).toBeVisible();
+  await expect(page.getByText("Machakos", { exact: true }).first()).toBeVisible();
+
+  // And prices the stated quantity against a real listing.
+  await expect(page.getByText(/Best indicative price at/)).toBeVisible();
+  await expect(page.getByRole("link", { name: /Send this to every matching/ })).toBeVisible();
+});
+
+test("the manufacturers tab lists suppliers with their product strips", async ({ page }) => {
+  await page.goto("/marketplace/manufacturers");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "Verified manufacturers",
+    { timeout: 15_000 },
+  );
+
+  const rows = page.locator("ul > li").filter({ hasText: "Main products" });
+  await expect(rows.first()).toBeVisible({ timeout: 15_000 });
+  expect(await rows.count()).toBeGreaterThan(4);
+
+  // Each row carries trust signals and a route into the store.
+  const first = rows.first();
+  await expect(first.getByText("Response")).toBeVisible();
+  await expect(first.getByRole("link", { name: "Visit store" })).toBeVisible();
+
+  await first.getByRole("link", { name: "Visit store" }).click();
+  await expect(page).toHaveURL(/\/marketplace\/manufacturer\//);
 });

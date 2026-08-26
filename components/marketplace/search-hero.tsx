@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /*
@@ -15,14 +15,24 @@ import { cn } from "@/lib/utils";
   second is the search term itself.
 
   The reference site's tabs are AI Mode / Products / Manufacturers / Worldwide.
-  Ours are Products / Manufacturers / Regions: three surfaces that exist and
-  work. There is no AI sourcing mode in this build, and a tab that leads
-  nowhere would be worse than one fewer tab.
+  Ours are Ask AI / Products / Manufacturers / Regions — "Worldwide" becomes
+  "Regions" because Buildex trades inside one country, where the useful question
+  is which region a supplier delivers to.
+
+  Ask AI takes a requirement in plain language. It is a deterministic matcher
+  over the catalogue's own vocabulary rather than a language model, and the page
+  says so — it shows exactly what it recognised, so the buyer can see why they
+  got the results they did.
 */
 
-export type SearchScope = "products" | "manufacturers" | "regions";
+export type SearchScope = "ask" | "products" | "manufacturers" | "regions";
 
 const TABS: { value: SearchScope; label: string; hint: string }[] = [
+  {
+    value: "ask",
+    label: "Ask AI",
+    hint: "Describe what you need — “400 bags of cement to Machakos”…",
+  },
   { value: "products", label: "Products", hint: "Search cement, rebar, tiles, cable…" },
   {
     value: "manufacturers",
@@ -57,6 +67,10 @@ export function SearchHero({
   function submit(event: React.FormEvent) {
     event.preventDefault();
     const q = query.trim();
+    if (scope === "ask") {
+      router.push(`/marketplace/ask${q ? `?q=${encodeURIComponent(q)}` : ""}`);
+      return;
+    }
     if (scope === "manufacturers") {
       router.push(`/marketplace/manufacturers${q ? `?q=${encodeURIComponent(q)}` : ""}`);
       return;
@@ -78,7 +92,7 @@ export function SearchHero({
           aria-label="What are you searching for"
           // Three tabs at display weight do not fit 375px at the desktop gap,
           // so the gap and type size both step down on the smallest screens.
-          className="flex items-end justify-center gap-4 sm:gap-10"
+          className="flex flex-wrap items-end justify-center gap-x-4 gap-y-2 sm:gap-x-8"
         >
           {TABS.map((tab) => {
             const isActive = tab.value === scope;
@@ -97,6 +111,15 @@ export function SearchHero({
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
+                {tab.value === "ask" ? (
+                  <Sparkles
+                    className={cn(
+                      "mr-1 inline-block size-4 align-[-2px]",
+                      isActive ? "text-primary" : "text-subtle-foreground",
+                    )}
+                    aria-hidden="true"
+                  />
+                ) : null}
                 {tab.label}
                 {isActive ? (
                   <span
@@ -139,7 +162,7 @@ export function SearchHero({
               compact ? "h-9 px-5 text-sm" : "h-12 px-8 text-base",
             )}
           >
-            Search
+            {scope === "ask" ? "Ask" : "Search"}
           </button>
         </div>
       </form>

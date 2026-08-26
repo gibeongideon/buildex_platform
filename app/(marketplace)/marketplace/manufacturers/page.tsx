@@ -3,15 +3,16 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { BadgeCheck, CalendarDays, Clock, MapPin, Package, Search, Store } from "lucide-react";
+import { BadgeCheck, CalendarDays, MapPin, Search, Store } from "lucide-react";
 import { marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
-import { PRODUCT_CATEGORIES, REGIONS, regionForCounty } from "@/lib/schemas/common";
+import { PRODUCT_CATEGORIES, REGIONS } from "@/lib/schemas/common";
 import { Currency, Num } from "@/components/shared/format";
+import { ProductThumb } from "@/components/shared/product-thumb";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/field";
-import { Card, CardBody, EmptyState, Skeleton, StatusPill } from "@/components/ui/primitives";
-import { priceRange } from "@/lib/schemas/product";
+import { Card, CardBody, EmptyState, Skeleton } from "@/components/ui/primitives";
+import { priceRange, type Product } from "@/lib/schemas/product";
 
 /*
   The supplier directory — the "Manufacturers" search tab.
@@ -34,12 +35,16 @@ function ManufacturersDirectoryInner() {
   const { data: search } = useQuery(() => marketplaceRepo.search({ sort: "relevance" }), []);
 
   const priceByManufacturer = new Map<string, number>();
+  const productsByManufacturer = new Map<string, Product[]>();
   for (const listing of search?.listings ?? []) {
     const min = priceRange(listing.product.priceBands).min;
     const current = priceByManufacturer.get(listing.manufacturer.id);
     if (current === undefined || min < current) {
       priceByManufacturer.set(listing.manufacturer.id, min);
     }
+    const strip = productsByManufacturer.get(listing.manufacturer.id) ?? [];
+    strip.push(listing.product);
+    productsByManufacturer.set(listing.manufacturer.id, strip);
   }
 
   const rows = (data ?? [])
@@ -185,78 +190,137 @@ function ManufacturersDirectoryInner() {
           </CardBody>
         </Card>
       ) : (
-        <ul className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="mt-4 space-y-4">
           {rows.map(({ manufacturer, productCount }) => {
             const from = priceByManufacturer.get(manufacturer.id);
+            const strip = productsByManufacturer.get(manufacturer.id) ?? [];
+            const verified = manufacturer.status === "approved";
+            const years = new Date().getFullYear() - manufacturer.yearEstablished;
+
             return (
-              <li key={manufacturer.id}>
-                <Link
-                  href={`/marketplace/manufacturer/${manufacturer.id}`}
-                  className="group flex h-full flex-col rounded-lg border border-border bg-surface p-5 transition-colors hover:border-brand"
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand">
-                      <Store className="size-5" aria-hidden="true" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="flex items-center gap-1.5 truncate text-sm font-semibold text-foreground group-hover:text-brand">
-                        {manufacturer.tradingName}
-                        {manufacturer.status === "approved" ? (
-                          <BadgeCheck
-                            className="size-4 shrink-0 text-success"
-                            aria-label="Verified"
-                          />
-                        ) : null}
-                      </p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        {manufacturer.storefront.tagline}
-                      </p>
-                    </div>
-                  </div>
-
-                  <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="size-3.5" aria-hidden="true" />
-                      {manufacturer.county}, {regionForCounty(manufacturer.county)}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <CalendarDays className="size-3.5" aria-hidden="true" />
-                      since {manufacturer.yearEstablished}
-                    </span>
-                  </p>
-
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {manufacturer.categories.slice(0, 3).map((c) => (
-                      <span
-                        key={c}
-                        className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground"
-                      >
-                        {c}
+              <li
+                key={manufacturer.id}
+                className="rounded-lg border border-border bg-surface p-5 transition-colors hover:border-brand"
+              >
+                <div className="grid gap-5 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)_auto]">
+                  {/* Identity and trust */}
+                  <div className="min-w-0">
+                    <div className="flex items-start gap-3">
+                      <span className="flex size-12 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand">
+                        <Store className="size-6" aria-hidden="true" />
                       </span>
-                    ))}
+                      <div className="min-w-0">
+                        <Link
+                          href={`/marketplace/manufacturer/${manufacturer.id}`}
+                          className="flex items-center gap-1.5 text-base font-semibold text-foreground hover:text-brand hover:underline"
+                        >
+                          <span className="truncate">{manufacturer.tradingName}</span>
+                          {verified ? (
+                            <BadgeCheck
+                              className="size-4 shrink-0 text-success"
+                              aria-label="Verified"
+                            />
+                          ) : null}
+                        </Link>
+                        <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+                          {manufacturer.storefront.tagline}
+                        </p>
+                        <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="size-3.5" aria-hidden="true" />
+                            {manufacturer.county}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <CalendarDays className="size-3.5" aria-hidden="true" />
+                            <span className="text-numeric">{years}</span> yrs
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {manufacturer.categories.slice(0, 3).map((c) => (
+                        <span
+                          key={c}
+                          className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground"
+                        >
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+
+                    <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-3 text-xs">
+                      <div>
+                        <dt className="text-subtle-foreground">Response</dt>
+                        <dd className="font-semibold text-foreground text-numeric">
+                          {manufacturer.storefront.responseRatePercent}%
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-subtle-foreground">Replies in</dt>
+                        <dd className="font-semibold text-foreground">
+                          {manufacturer.storefront.avgResponseHours}h
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-subtle-foreground">Orders</dt>
+                        <dd className="font-semibold text-foreground text-numeric">
+                          <Num value={manufacturer.storefront.ordersFulfilled} />
+                        </dd>
+                      </div>
+                    </dl>
                   </div>
 
-                  <dl className="mt-auto grid grid-cols-3 gap-2 border-t border-border pt-3 text-xs">
-                    <div>
-                      <dt className="text-subtle-foreground">Listings</dt>
-                      <dd className="font-semibold text-foreground text-numeric">
-                        <Num value={productCount} />
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-subtle-foreground">From</dt>
-                      <dd className="font-semibold text-foreground">
+                  {/* What they actually make */}
+                  <div className="min-w-0">
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-subtle-foreground">
+                      Main products
+                    </p>
+                    <ul className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+                      {strip.slice(0, 5).map((product) => (
+                        <li key={product.id}>
+                          <Link
+                            href={`/marketplace/product/${product.id}`}
+                            className="group block"
+                          >
+                            <ProductThumb
+                              productId={product.id}
+                              category={product.category}
+                              className="aspect-square rounded-md border border-border transition-colors group-hover:border-brand"
+                              iconClassName="size-5"
+                              sizes="110px"
+                            />
+                            <p className="mt-1 truncate text-[11px] font-medium text-foreground">
+                              <Currency value={priceRange(product.priceBands).min} />
+                            </p>
+                            <span className="sr-only">{product.name}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Act */}
+                  <div className="flex flex-row items-center gap-2 lg:w-44 lg:flex-col lg:items-stretch lg:justify-center">
+                    <div className="lg:mb-1 lg:text-center">
+                      <p className="text-[11px] text-muted-foreground">Listings from</p>
+                      <p className="font-display text-lg font-bold text-foreground">
                         {from ? <Currency value={from} /> : "—"}
-                      </dd>
+                      </p>
+                      <p className="text-[11px] text-muted-foreground text-numeric">
+                        {productCount} products
+                      </p>
                     </div>
-                    <div>
-                      <dt className="text-subtle-foreground">Replies in</dt>
-                      <dd className="font-semibold text-foreground">
-                        {manufacturer.storefront.avgResponseHours}h
-                      </dd>
-                    </div>
-                  </dl>
-                </Link>
+                    <Button size="sm" className="lg:w-full" asChild>
+                      <Link href={`/marketplace/manufacturer/${manufacturer.id}`}>
+                        Visit store
+                      </Link>
+                    </Button>
+                    <Button variant="secondary" size="sm" className="lg:w-full" asChild>
+                      <Link href="/marketplace/rfq">Contact supplier</Link>
+                    </Button>
+                  </div>
+                </div>
               </li>
             );
           })}

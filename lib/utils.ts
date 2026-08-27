@@ -160,3 +160,20 @@ export function formatMoney(
     .replace(/^UGX\s?/, "UGX ")
     .replace(/^TZS\s?/, "TZS ");
 }
+
+/**
+ * Narrow a `<select>` value or a URL parameter to one of a known set.
+ *
+ * Filter state is a union — a `Region`, a `ProductCategory` — but the value
+ * arriving from the DOM or the query string is only ever `string`. Five call
+ * sites had bridged that with `as never`, which compiles by asserting the
+ * value is impossible and tells a reader nothing true. Here the membership is
+ * actually checked, so an unrecognised value becomes "no filter" rather than a
+ * lie the type system has agreed to.
+ */
+export function asOption<T extends string>(
+  options: readonly T[],
+  value: string | null | undefined,
+): T | "" {
+  return (options as readonly string[]).includes(value ?? "") ? (value as T) : "";
+}

@@ -5,7 +5,12 @@ import { useSearchParams } from "next/navigation";
 import { Store } from "lucide-react";
 import { marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
-import { PRODUCT_CATEGORIES, REGIONS } from "@/lib/schemas/common";
+import {
+  PRODUCT_CATEGORIES,
+  REGIONS,
+  type ProductCategory,
+  type Region,
+} from "@/lib/schemas/common";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
 import { Select } from "@/components/ui/field";
@@ -13,6 +18,7 @@ import { Card, CardBody, EmptyState, Skeleton } from "@/components/ui/primitives
 import { priceRange, type Product } from "@/lib/schemas/product";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { SearchField } from "@/components/ui/filter-bar";
+import { asOption } from "@/lib/utils";
 import {
   ManufacturerRow,
   ManufacturerRowSkeleton,
@@ -35,8 +41,8 @@ type Sort = "range" | "response" | "established" | "name";
 function ManufacturersDirectoryInner() {
   const params = useSearchParams();
   const [query, setQuery] = React.useState(params.get("q") ?? "");
-  const [region, setRegion] = React.useState("");
-  const [category, setCategory] = React.useState("");
+  const [region, setRegion] = React.useState<Region | "">("");
+  const [category, setCategory] = React.useState<ProductCategory | "">("");
   const [sort, setSort] = React.useState<Sort>("range");
 
   const { data, loading, error, refetch } = useQuery(() => marketplaceRepo.listStorefronts(), []);
@@ -57,8 +63,8 @@ function ManufacturersDirectoryInner() {
 
   const rows = (data ?? [])
     .filter(({ manufacturer }) => {
-      if (region && !manufacturer.distributionRegions.includes(region as never)) return false;
-      if (category && !manufacturer.categories.includes(category as never)) return false;
+      if (region && !manufacturer.distributionRegions.includes(region)) return false;
+      if (category && !manufacturer.categories.includes(category)) return false;
       if (query.trim()) {
         const haystack = [
           manufacturer.tradingName,
@@ -119,7 +125,7 @@ function ManufacturersDirectoryInner() {
         />
         <Select
           value={category}
-          onChange={(event) => setCategory(event.target.value)}
+          onChange={(event) => setCategory(asOption(PRODUCT_CATEGORIES, event.target.value))}
           aria-label="Filter by category"
           className="h-9 w-auto"
         >
@@ -132,7 +138,7 @@ function ManufacturersDirectoryInner() {
         </Select>
         <Select
           value={region}
-          onChange={(event) => setRegion(event.target.value)}
+          onChange={(event) => setRegion(asOption(REGIONS, event.target.value))}
           aria-label="Filter by delivery region"
           className="h-9 w-auto"
         >

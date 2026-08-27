@@ -22,7 +22,13 @@ import {
 } from "@/components/marketplace/manufacturer-row";
 import { SUPPLIER_CAPABILITIES } from "@/lib/rules/suppliers";
 import { SOURCING_EXAMPLES } from "@/lib/rules/sourcing";
-import { PRODUCT_CATEGORIES, REGIONS, COUNTIES, type Region } from "@/lib/schemas/common";
+import {
+  PRODUCT_CATEGORIES,
+  REGIONS,
+  COUNTIES,
+  type ProductCategory,
+  type Region,
+} from "@/lib/schemas/common";
 import { priceRange, type Product } from "@/lib/schemas/product";
 import { REGION_REACH } from "@/lib/schemas/campaign";
 import { cn } from "@/lib/utils";
@@ -80,7 +86,7 @@ export function ManufacturersSurface() {
     () => marketplaceRepo.search({ sort: "relevance" }),
     [],
   );
-  const [category, setCategory] = React.useState("");
+  const [category, setCategory] = React.useState<ProductCategory | "">("");
   const [capabilities, setCapabilities] = React.useState<string[]>([]);
 
   // Each supplier's own listings, so a row can show what they actually make.
@@ -97,7 +103,7 @@ export function ManufacturersSurface() {
       products: productsBySupplier.get(row.manufacturer.id) ?? [],
     }))
     .filter(({ manufacturer, products }) => {
-      if (category && !manufacturer.categories.includes(category as never)) return false;
+      if (category && !manufacturer.categories.includes(category)) return false;
       return capabilities.every((key) => {
         const meta = SUPPLIER_CAPABILITIES.find((c) => c.key === key);
         return meta ? meta.matches(manufacturer, products) : true;

@@ -6,7 +6,12 @@ import { ChevronRight, Trophy } from "lucide-react";
 import { marketplaceRepo } from "@/lib/data";
 import type { MarketplaceListing } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
-import { PRODUCT_CATEGORIES, REGIONS } from "@/lib/schemas/common";
+import {
+  PRODUCT_CATEGORIES,
+  REGIONS,
+  type ProductCategory,
+  type Region,
+} from "@/lib/schemas/common";
 import { formatLeadTime, priceRange } from "@/lib/schemas/product";
 import { Select } from "@/components/ui/field";
 import { QueryError } from "@/components/ui/query-state";
@@ -17,7 +22,7 @@ import {
   moqCaption,
   type RankingMetric,
 } from "@/components/marketplace/ranking-block";
-import { cn } from "@/lib/utils";
+import { asOption, cn } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 
 /*
@@ -64,9 +69,18 @@ const METRICS: RankingMetric[] = [
 /** How many blocks arrive at a time as the page is scrolled. */
 const PAGE = 6;
 
+/*
+  Annotated rather than inferred: without the type, the "All" entry widens
+  `value` to `string` and the tab can no longer set the category state.
+*/
+const CATEGORY_TABS: { value: ProductCategory | ""; label: string }[] = [
+  { value: "", label: "All" },
+  ...PRODUCT_CATEGORIES.map((c) => ({ value: c, label: c })),
+];
+
 export default function TopRankingPage() {
-  const [category, setCategory] = React.useState("");
-  const [region, setRegion] = React.useState("");
+  const [category, setCategory] = React.useState<ProductCategory | "">("");
+  const [region, setRegion] = React.useState<Region | "">("");
   const [metricKey, setMetricKey] = React.useState(METRICS[0].key);
   const [shown, setShown] = React.useState(PAGE);
 
@@ -83,7 +97,7 @@ export default function TopRankingPage() {
     () =>
       all.filter(
         (l) =>
-          (!region || l.product.availableRegions.includes(region as never)) &&
+          (!region || l.product.availableRegions.includes(region)) &&
           (!category || l.product.category === category),
       ),
     [all, region, category],
@@ -95,10 +109,10 @@ export default function TopRankingPage() {
     two-level shape as the reference, on the axis that matters here.
   */
   const blocks = React.useMemo(() => {
-    const build = (
-      keys: readonly string[],
-      pick: (listing: MarketplaceListing, key: string) => boolean,
-      href: (key: string) => string,
+    const build = <K extends string>(
+      keys: readonly K[],
+      pick: (listing: MarketplaceListing, key: K) => boolean,
+      href: (key: K) => string,
       subtitle: (n: number) => string,
     ) =>
       keys
@@ -122,7 +136,7 @@ export default function TopRankingPage() {
 
     return build(
       REGIONS,
-      (l, key) => l.product.availableRegions.includes(key as never),
+      (l, key) => l.product.availableRegions.includes(key),
       (key) =>
         `/marketplace/search?category=${encodeURIComponent(category)}&region=${encodeURIComponent(key)}`,
       (n) => `${category} · ${n} delivered here`,
@@ -189,7 +203,7 @@ export default function TopRankingPage() {
             <Select
               id="rank-region"
               value={region}
-              onChange={(event) => setRegion(event.target.value)}
+              onChange={(event) => setRegion(asOption(REGIONS, event.target.value))}
               className="h-11 w-auto rounded-full border-white/25 bg-white/10 px-5 font-medium text-white [&>option]:text-foreground"
             >
               <option value="">All Kenya</option>
@@ -206,7 +220,7 @@ export default function TopRankingPage() {
             <Select
               id="rank-category"
               value={category}
-              onChange={(event) => setCategory(event.target.value)}
+              onChange={(event) => setCategory(asOption(PRODUCT_CATEGORIES, event.target.value))}
               className="h-11 w-auto rounded-full border-white/25 bg-white/10 px-5 font-medium text-white [&>option]:text-foreground"
             >
               <option value="">All categories</option>
@@ -224,40 +238,38 @@ export default function TopRankingPage() {
       <div className="border-b border-border bg-surface">
         <div className="mx-auto max-w-[112rem] px-4 sm:px-6 lg:px-8">
           <div role="tablist" aria-label="Rank by category" className="scroll-x flex gap-1">
-            {[{ value: "", label: "All" }, ...PRODUCT_CATEGORIES.map((c) => ({ value: c, label: c }))].map(
-              (tab) => {
-                const active = tab.value === category;
-                return (
-                  <button
-                    key={tab.label}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => setCategory(tab.value)}
-                    className={cn(
-                      "-mb-px shrink-0 whitespace-nowrap border-b-2 px-3 py-3 text-sm transition-colors",
-                      active
-                        ? "border-brand font-semibold text-foreground"
-                        : "border-transparent text-muted-foreground hover:border-border-strong hover:text-foreground",
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              },
-            )}
+            {CATEGORY_TABS.map((tab) => {
+              const active = tab.value === category;
+              return (
+                <button
+                  key={tab.label}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setCategory(tab.value)}
+                  className={cn(
+                    "-mb-px shrink-0 whitespace-nowrap border-b-2 px-3 py-3 text-sm transition-colors",
+                    active
+                      ? "border-brand font-semibold text-foreground"
+                      : "border-transparent text-muted-foreground hover:border-border-strong hover:text-foreground",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
       <div className="mx-auto max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8">
-      <Breadcrumbs
-        className="mb-4"
-        items={[
-          { label: "Marketplace", href: "/marketplace" },
-          { label: "Top ranking" },
-        ]}
-      />
+        <Breadcrumbs
+          className="mb-4"
+          items={[
+            { label: "Marketplace", href: "/marketplace" },
+            { label: "Top ranking" },
+          ]}
+        />
 
         <QueryError error={error} onRetry={refetch} />
 

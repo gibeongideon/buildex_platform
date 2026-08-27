@@ -1,5 +1,6 @@
 import type { Enquiry, EnquiryStatus } from "@/lib/schemas/enquiry";
 import { regionForCounty, type Region } from "@/lib/schemas/common";
+import { seedManufacturers } from "./manufacturers";
 import { seedProducts } from "./products";
 
 /*
@@ -121,8 +122,34 @@ const SPECS: Spec[] = [
   { productId: "prd_te_earth", shop: 0, qty: 120, status: "closed", age: 310, quote: { unitPrice: 1275, leadDays: 4 } },
 ];
 
+/**
+ * How long the supplier actually took to answer.
+ *
+ * Every answered enquiry used to be stamped at exactly twelve hours, which put
+ * the records in direct conflict with the response time each storefront
+ * advertises — Savannah promises 3h on its store page and had answered nothing
+ * inside 3h — and left the console's "past their own promise" column counting
+ * zero. Response time is now derived from that promise, with a deliberate
+ * minority answered late so the oversight column has something real to show.
+ *
+ * Keyed off the enquiry's index rather than randomised, so the seed is stable
+ * across reloads and two runs of the test suite agree.
+ */
+function responseHoursFor(promisedHours: number, index: number) {
+  const promise = promisedHours || 24;
+  // Every fourth answered enquiry misses the promise; the rest land inside it.
+  const late = index % 4 === 3;
+  const factor = late ? 2.5 + (index % 3) : 0.35 + (index % 5) * 0.12;
+  return promise * factor;
+}
+
 export function seedEnquiries(): Enquiry[] {
   const products = seedProducts();
+  // The supplier's own advertised response time is what a late reply is late
+  // against, so it has to be in scope here.
+  const promisedHours = new Map(
+    seedManufacturers().map((m) => [m.id, m.storefront.avgResponseHours]),
+  );
 
   return SPECS.map((spec, index) => {
     const product = products.find((p) => p.id === spec.productId);
@@ -149,8 +176,18 @@ export function seedEnquiries(): Enquiry[] {
 
       status: spec.status,
       createdAt: spec.age < 48 ? hoursAgo(spec.age) : daysAgo(spec.age / 24),
+      // Clamped to 90% of the enquiry's age so a reply can never land in the
+      // future, however slow the supplier's promise makes it.
       respondedAt:
-        spec.status === "new" ? null : daysAgo(Math.max(spec.age / 24 - 0.5, 0.1)),
+        spec.status === "new"
+          ? null
+          : hoursAgo(
+              spec.age -
+                Math.min(
+                  responseHoursFor(promisedHours.get(product.manufacturerId) ?? 24, index),
+                  spec.age * 0.9,
+                ),
+            ),
 
       quotedUnitPrice: spec.quote?.unitPrice ?? null,
       quotedLeadTimeDays: spec.quote?.leadDays ?? null,

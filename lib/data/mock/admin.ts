@@ -54,6 +54,11 @@ function index() {
     if (n > 0) pastSla.set(m.id, n);
   }
 
+  // Cheapest band per listing, so the value sums below stay one pass rather
+  // than a linear find per enquiry — which is what this file promises above.
+  const unitPrice = new Map<string, number>();
+  for (const p of products) unitPrice.set(p.id, priceRange(p.priceBands).min);
+
   return {
     manufacturers,
     products,
@@ -64,13 +69,8 @@ function index() {
     drafts,
     openEnquiries,
     pastSla,
+    unitPrice,
   };
-}
-
-/** Unit price for an enquiry, falling back to the listing's cheapest band. */
-function unitPriceFor(productId: string, products: ReturnType<typeof index>["products"]) {
-  const product = products.find((p) => p.id === productId);
-  return product ? priceRange(product.priceBands).min : 0;
 }
 
 export const adminRepo: AdminRepo = {
@@ -97,11 +97,11 @@ export const adminRepo: AdminRepo = {
       draftListings: [...ix.drafts.values()].reduce((a, b) => a + b, 0),
       enquiriesUnanswered: unanswered.length,
       enquiryValueInFlightKsh: quotedOrNew.reduce(
-        (sum, e) => sum + enquiryValue(e, unitPriceFor(e.productId, ix.products)),
+        (sum, e) => sum + enquiryValue(e, ix.unitPrice.get(e.productId) ?? 0),
         0,
       ),
       acceptedValueKsh: accepted.reduce(
-        (sum, e) => sum + enquiryValue(e, unitPriceFor(e.productId, ix.products)),
+        (sum, e) => sum + enquiryValue(e, ix.unitPrice.get(e.productId) ?? 0),
         0,
       ),
       activeCampaigns: ix.campaigns.filter((c) => c.status === "active").length,
@@ -191,12 +191,19 @@ export const adminRepo: AdminRepo = {
       .flatMap((enquiry) => {
         const manufacturer = ix.manufacturerById.get(enquiry.manufacturerId);
         if (!manufacturer) return [];
-        // Only an unanswered enquiry has a meaningful wait.
+        const createdAt = new Date(enquiry.createdAt).getTime();
+        /*
+          Two different measurements, and the console needs both. An unanswered
+          enquiry has a wait that is still running; an answered one has a
+          response time that is final. Reporting only the first hid every late
+          reply, because a late reply is still a reply.
+        */
         const waitedHours =
-          enquiry.status === "new"
-            ? (now - new Date(enquiry.createdAt).getTime()) / 3_600_000
-            : null;
-        return [{ enquiry, manufacturer, waitedHours }];
+          enquiry.status === "new" ? (now - createdAt) / 3_600_000 : null;
+        const responseHours = enquiry.respondedAt
+          ? (new Date(enquiry.respondedAt).getTime() - createdAt) / 3_600_000
+          : null;
+        return [{ enquiry, manufacturer, waitedHours, responseHours }];
       })
       // Longest unanswered wait first, then newest.
       .sort(

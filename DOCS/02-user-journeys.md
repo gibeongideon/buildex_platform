@@ -117,6 +117,11 @@ the whole platform timeline, every row derived from a real record.
 The manufacturer's own tracker (Journey A step 7) updates with no wiring between the two
 screens: both read the same checks, and status is derived from them.
 
+Four internal roles exist, each owning one section of the console: Operations (the
+verification queue), Risk & Compliance (the audit trail), Commercial & Accounts
+(subscriptions and campaigns) and Supplier Support (enquiries). `/admin/team` states what
+each is responsible for and what is deliberately not theirs.
+
 Not yet: authentication, so any decision is unattributed and four-eyes on rejection has to
 wait; and an SMS on each transition, which needs a provider.
 

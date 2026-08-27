@@ -130,8 +130,9 @@ shortcut it is.
    own advertised response time.
 6. `/admin/activity` — the whole platform timeline, filterable by event type, actor,
    supplier, period and free text. Every row is derived from a real record.
-7. `/admin/team` — the two internal roles and what each is for. The console has no
-   authentication and says so on every page.
+7. `/admin/team` — the four internal roles, the section each one owns, and what is
+   deliberately not theirs to do. The console has no authentication and says so on every
+   page.
 
 To see the duplicate-registration path, enter KRA PIN `P051234567M` at the company
 step — it already belongs to a seeded manufacturer. To see visibility gating, try

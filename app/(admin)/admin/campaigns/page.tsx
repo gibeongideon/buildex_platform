@@ -129,7 +129,7 @@ export default function AdminCampaignsPage() {
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search campaign, supplier or region"
+              placeholder="Campaign, supplier or region"
               aria-label="Search campaigns"
               className="h-9 pl-8"
             />

@@ -26,7 +26,25 @@ import type { OpsException } from "@/lib/rules/ops";
   a fixture directly.
 */
 
-export type Role = "guest" | "manufacturer" | "hardware" | "ops" | "risk";
+/*
+  Who is using the product.
+
+  The four internal roles are not decoration: each one owns a section of the
+  Buildex Admin console, so a role that corresponds to nothing in the product
+  never gets added here.
+*/
+export type Role =
+  | "guest"
+  | "manufacturer"
+  | "hardware"
+  /** Verification decisions, supplier standing, listing moderation. */
+  | "ops"
+  /** Exceptions, the audit trail, and Buildex Capital when it ships. */
+  | "risk"
+  /** Packages, renewals, campaigns and the account-managed VIP tier. */
+  | "commercial"
+  /** Enquiry follow-up and suppliers who are not converting. */
+  | "support";
 
 export type DemoSession = {
   role: Role;
@@ -262,8 +280,14 @@ export type ActivityFilter = {
  */
 export interface ActivityRepo {
   list(filter?: ActivityFilter): Promise<ActivityEvent[]>;
-  /** Distinct kinds present in the data, with counts — drives the filter UI. */
-  kinds(): Promise<{ kind: ActivityKind; count: number }[]>;
+  /**
+   * Distinct kinds present, with counts — drives the filter UI.
+   *
+   * Takes the same filter as `list` so the counts describe what selecting a
+   * kind will actually return. Any `kinds` in the filter is ignored: a facet
+   * count that narrowed itself would read zero for everything unselected.
+   */
+  kinds(filter?: ActivityFilter): Promise<{ kind: ActivityKind; count: number }[]>;
 }
 
 // ---------------------------------------------------------------------------
@@ -307,9 +331,21 @@ export interface AdminRepo {
   >;
   /** Every listing joined to its supplier, drafts included. */
   listingRows(): Promise<{ product: Product; manufacturer: Manufacturer }[]>;
-  /** Every enquiry joined to its supplier, plus how long it has waited. */
+  /**
+   * Every enquiry joined to its supplier, with both halves of response time.
+   *
+   * `waitedHours` is how long an *unanswered* enquiry has been waiting so far;
+   * `responseHours` is how long an answered one actually took. Both are needed:
+   * measuring only the first made a supplier who replied 40 hours late against a
+   * 3-hour promise look perfect, because by then nothing was waiting.
+   */
   enquiryRows(): Promise<
-    { enquiry: Enquiry; manufacturer: Manufacturer; waitedHours: number | null }[]
+    {
+      enquiry: Enquiry;
+      manufacturer: Manufacturer;
+      waitedHours: number | null;
+      responseHours: number | null;
+    }[]
   >;
   /** Every campaign joined to its supplier. */
   campaignRows(): Promise<{ campaign: Campaign; manufacturer: Manufacturer }[]>;

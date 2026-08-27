@@ -57,7 +57,7 @@ export function DemoPanel() {
       <DialogPrimitive.Trigger asChild>
         <button
           type="button"
-          className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-medium text-muted-foreground shadow-overlay transition-colors hover:text-foreground print:hidden"
+          className="fixed bottom-16 right-4 z-40 flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-medium text-muted-foreground shadow-overlay transition-colors hover:text-foreground print:hidden"
         >
           <FlaskConical className="size-3.5" aria-hidden="true" />
           Demo controls
@@ -66,7 +66,7 @@ export function DemoPanel() {
 
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/40" />
-        <DialogPrimitive.Content className="fixed bottom-4 right-4 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-border bg-surface shadow-overlay">
+        <DialogPrimitive.Content className="fixed bottom-16 right-4 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-border bg-surface shadow-overlay">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <DialogPrimitive.Title className="text-sm font-semibold text-foreground">
               Demo controls

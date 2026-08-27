@@ -33,14 +33,28 @@ function buildChecks(
   return VERIFICATION_CHECKS.map((meta) => {
     const s = spec[meta.key];
     const status = s?.status ?? "pending";
-    const started =
-      status === "pending" ? null : daysAgo(Math.max(submittedDaysAgo - 0.5, 0));
+
+    /*
+      A check that is pending has not been opened, and one that is `not_required`
+      never will be — so neither carries a timestamp. Stamping `not_required`
+      made the activity feed announce "Physical site visit opened" for fourteen
+      suppliers who were never going to get one: fabricated entries in an audit
+      trail, which is worse than a missing one.
+    */
+    const opened = status !== "pending" && status !== "not_required";
+
+    /*
+      Timestamps are a proportion of the application's age rather than a fixed
+      offset from submission. A fixed offset clamped to zero for anything
+      submitted in the last half day, so a fresh application's checks all read
+      "opened this minute" — and kept reading it, since the clamp resolves to
+      whenever the page happens to load.
+    */
     return {
       key: meta.key,
       status,
-      startedAt: started,
-      completedAt:
-        status === "passed" ? daysAgo(Math.max(submittedDaysAgo - 1, 0)) : null,
+      startedAt: opened ? daysAgo(submittedDaysAgo * 0.85) : null,
+      completedAt: status === "passed" ? daysAgo(submittedDaysAgo * 0.4) : null,
       note: s?.note ?? null,
       blockingDocuments: s?.blocking ?? [],
     };

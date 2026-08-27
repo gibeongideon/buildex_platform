@@ -27,7 +27,7 @@ import { useAdminRole, ROLE_META } from "./use-admin-role";
   mobile slide-over and skip link behave identically to the portal — an ops user
   and a supplier should not have to learn two different shells.
 
-  Counts in the nav are live: an admin needs to see there are three applications
+  Counts in the nav are live: an admin needs to see how many applications are
   waiting without opening the queue.
 */
 

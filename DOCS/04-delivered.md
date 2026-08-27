@@ -12,9 +12,9 @@ Covers Phase 0 (Foundation), Phase 1 (manufacturer onboarding), Phase 2
 | Onboarding steps | 9, all resumable and deep-linkable |
 | Seeded manufacturers / products | 16 / 72 |
 | Seeded enquiries / campaigns | 50 / 12 |
-| Derived activity events | 483, spanning a year |
+| Derived activity events | 469, spanning a year |
 | Bundled product photos | 22 across 13 categories (CC / public domain) |
-| End-to-end specs | 32, all passing |
+| End-to-end specs | 35, all passing |
 | TypeScript | `tsc --noEmit` clean |
 | ESLint | 0 errors, 6 warnings (all upstream) |
 | Production build | Clean |
@@ -304,6 +304,14 @@ submitted.
 records is how the two end up disagreeing. What replaces them on the manufacturer's own
 verification screen is a signpost to the reviewer, honest about being a prototype shortcut.
 
+**Four internal roles, each owning a section.** Operations (John Gitahi) owns the
+verification queue; Risk & Compliance (Daniel Otieno) owns the audit trail; Commercial &
+Accounts (Franklin Wanyama) owns subscriptions and campaigns; Supplier Support (Mercy
+Chebet) owns enquiries. That is the test for adding a role — a role owning no screen is an
+org chart, not a permission model — and no responsibility appears under two of them, which
+a spec asserts. The switcher changes the view, not permissions, and the console says so on
+every page.
+
 **Credit pages are absent on purpose.** The requirements list an Admin / Risk dashboard with
 portfolio monitoring at P1, and none of that data exists yet. The overview says so in
 writing rather than showing an empty shell — the requirements are explicit that credit
@@ -371,8 +379,11 @@ admin.spec.ts
   ✓ the console sections all render their real data
   ✓ the manufacturer record moves between its tabs with the keyboard
   ✓ the decision panel is operable with the keyboard alone
+  ✓ the four internal roles each own a section
+  ✓ text clears AA with margin in light mode
+  ✓ text clears AA with margin in dark mode
 
-32 passed
+35 passed
 ```
 
 The happy-path onboarding spec drives all nine steps, uploads six documents through the real
@@ -435,6 +446,9 @@ Tab order on the account step, verified programmatically:
 - All upload dropzones are keyboard-focusable (they are real `<button>` elements wrapping a
   hidden file input, not drag-only divs)
 - Light and dark verified by screenshot at 375px and 1440px
+- Text and border contrast measured on every run in both themes — see
+  [03 — Architecture](./03-architecture.md#text-and-border-contrast-measured). The check
+  was verified to fail on the previous token values before being relied on
 
 ### Backend readiness
 
@@ -595,6 +609,90 @@ function over `rows`: the compiler memoizes it correctly, and the dependency tha
 matters is the one the query already tracks.
 
 `app/(admin)/admin/enquiries/page.tsx`
+
+### 14. Secondary text and borders were too faint to read
+
+Reported from a screenshot: "the site look faint, words no clear to the eye." Measuring it
+found secondary text at 5.63:1 and 4.54:1 on white — both passing AA, the second by 0.04 —
+carrying most of the prose on every page, including 12px uppercase KPI labels. Card borders
+were 1.27:1, so surfaces meant to be separated by a 1px border had no visible edge and the
+whole interface read as one flat wash.
+
+Passing a standard is not the same as being legible. The three text levels are now 14.09,
+8.04 and 6.29 on white with matching lifts in dark mode, borders are 1.58:1, and the KPI
+label takes the stronger of the two secondary tones at semibold rather than the faintest.
+A spec measures all of it on every run.
+
+`app/globals.css`, `components/shared/stat-card.tsx`
+
+### 15. Fourteen site visits that never happened
+
+`buildChecks` stamped `startedAt` on any check that was not `pending` — including
+`not_required`. Fourteen suppliers therefore carried a start time on a site visit nobody
+would ever make, and the activity feed dutifully announced "Physical site visit opened
+for…" for each one. Fabricated entries in an audit trail are worse than missing ones.
+
+Found by reading the console's own recent-activity panel and not believing it.
+
+`lib/data/fixtures/manufacturers.ts`
+
+### 16. Fresh applications were permanently "opened this minute"
+
+The same builder offset check timestamps a fixed half-day back from submission, clamped at
+zero. Anything submitted inside the last twelve hours therefore resolved to *now* — so the
+two newest applications showed their checks opening "this minute", and kept showing it,
+because the clamp re-resolved to whenever the page happened to load. Timestamps are now a
+proportion of the application's age, which scales correctly at any age.
+
+`lib/data/fixtures/manufacturers.ts`
+
+### 17. Every enquiry was answered in exactly twelve hours
+
+The fixture stamped `respondedAt` at a flat twelve hours after arrival, for all 34 answered
+enquiries. Savannah Cement's storefront advertises a three-hour reply and had, by its own
+records, never once met it — and the console's "past their own promise" column counted zero,
+because it measured only enquiries still waiting. A late reply is still a reply.
+
+Response times are now derived from each supplier's advertised hours, with a deliberate
+minority genuinely late; `enquiryRows()` returns the response time alongside the wait; and
+the console counts both. Ten of 34 replies are now visibly late, against the promise each
+supplier makes on its own storefront.
+
+`lib/data/fixtures/enquiries.ts`, `lib/data/mock/admin.ts`, `app/(admin)/admin/enquiries/page.tsx`
+
+### 18. Facet counts described a different dataset
+
+The activity filter's per-kind counts came from every event on record while the list they
+sat beside was scoped to a period — so a chip could read 112 inside a 30-day window holding
+three. `kinds()` now takes the same filter as `list()`, minus the kind selection itself, so
+the number describes what clicking it returns.
+
+`lib/data/types.ts`, `lib/data/mock/activity.ts`, `app/(admin)/admin/activity/page.tsx`
+
+### 19. Money tiles read "KSh 0" while loading
+
+Three overview tiles fell back to `?? 0`, so a page still fetching stated that nothing was
+in flight, nothing had been accepted and nothing had been spent. The same defect as category
+counts showing 0 during load, fixed once already: an unknown number has to look unknown.
+
+`app/(admin)/admin/page.tsx`
+
+### 20. Two roles claimed the same powers
+
+The team page exists to say who owns what, and shipped with "set a package" and "pause a
+campaign" listed under both Operations and Commercial & Accounts. Both are commercial
+decisions and now sit with Commercial alone; a spec asserts no duty text appears twice.
+
+`app/(admin)/admin/team/page.tsx`
+
+### Also: the Next.js dev indicator sat on the user block
+
+Next 16's dev overlay defaults to bottom-left, which is exactly where `AppShell` puts the
+signed-in user's name and role — so in development it covered them on every portal and
+console page. Moved to the corner that only carries demo chrome, with the Demo controls
+button lifted above it.
+
+`next.config.ts`, `components/shared/demo-panel.tsx`
 
 ### Also addressed: React Compiler correctness
 

@@ -73,7 +73,18 @@ export default function AdminActivityPage() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  const { data: kindCounts } = useQuery(() => activityRepo.kinds(), []);
+  // Counts describe what the *current* period and filters hold, so they match
+  // what clicking a chip returns.
+  const { data: kindCounts } = useQuery(
+    () =>
+      activityRepo.kinds({
+        actorTypes: actorType ? [actorType as ActivityActorType] : undefined,
+        manufacturerId: manufacturerId || undefined,
+        since: days ? new Date(Date.now() - days * 86_400_000).toISOString() : undefined,
+        query: debounced.trim() || undefined,
+      }),
+    [actorType, manufacturerId, days, debounced],
+  );
   const { data: suppliers } = useQuery(() => manufacturerRepo.list({}), []);
 
   const kindKey = [...kinds].sort().join(",");
@@ -275,9 +286,9 @@ export default function AdminActivityPage() {
             <p className="text-sm text-muted-foreground text-numeric">
               {loading && !events
                 ? "Loading events…"
-                : `${rows.length} event${rows.length === 1 ? "" : "s"}${
-                    totalEvents ? ` of ${totalEvents} on record` : ""
-                  }`}
+                : totalEvents > rows.length
+                  ? `Showing ${rows.length} of ${totalEvents} matching events`
+                  : `${rows.length} event${rows.length === 1 ? "" : "s"}`}
             </p>
             {rows.length >= 400 ? (
               <p className="text-xs text-muted-foreground">

@@ -235,7 +235,15 @@ export const manufacturerRepo: ManufacturerRepo = {
         checks,
         documents,
         status: nextStatus,
-        verifiedAt: derived === "approved" ? (m.verifiedAt ?? now()) : null,
+        /*
+          `verifiedAt` records that verification *happened*, so it is only ever
+          set, never cleared. Clearing it when a later check reopened rewrote
+          history: the activity feed derives the "cleared verification" event
+          from this timestamp, so the event vanished from the audit trail and the
+          record no longer showed the supplier had ever been live. Present state
+          is `status`; this is the historic fact.
+        */
+        verifiedAt: derived === "approved" ? (m.verifiedAt ?? now()) : m.verifiedAt,
         reviewNotes:
           status === "action_needed" && options.note
             ? [...new Set([...m.reviewNotes, options.note])]
@@ -264,7 +272,17 @@ export const manufacturerRepo: ManufacturerRepo = {
           startedAt: check.startedAt ?? now(),
         };
       });
-      return { ...m, documents, checks, status: deriveStatus(checks) };
+      /*
+        Same hold as `setCheckStatus`: a suspended manufacturer re-uploading a
+        document must not be quietly put back in business by a status re-derive.
+      */
+      const derived = deriveStatus(checks);
+      return {
+        ...m,
+        documents,
+        checks,
+        status: isAdministrativeHold(m.status) ? m.status : derived,
+      };
     });
   },
 

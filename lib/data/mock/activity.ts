@@ -17,7 +17,7 @@ import { getSnapshot } from "./db";
   events table — the same principle as `InsightsRepo`. Three consequences worth
   knowing:
 
-    · It is populated the moment it exists (~330 events from the current seed
+    · It is populated the moment it exists (~480 events from the current seed
       data, spanning about a year), so the console is never an empty shell.
     · It can never disagree with the records it describes, because it *is* those
       records read a different way.
@@ -35,7 +35,6 @@ function event(e: ActivityEvent): ActivityEvent {
   return e;
 }
 
-/** Every event the current data implies, newest first. */
 /**
  * Who a verification check belongs to.
  *
@@ -52,6 +51,7 @@ function checkActor(authority: string): ActivityEvent["actor"] {
   };
 }
 
+/** Every event the current data implies, newest first. */
 function deriveEvents(): ActivityEvent[] {
   const { manufacturers, products, enquiries, campaigns } = getSnapshot();
   const byId = new Map(manufacturers.map((m) => [m.id, m]));
@@ -298,10 +298,19 @@ export const activityRepo: ActivityRepo = {
     return filter.limit ? matched.slice(0, filter.limit) : matched;
   },
 
-  async kinds() {
+  async kinds(filter: ActivityFilter = {}) {
     await sleep(NORMAL);
+    const owners = ownerIndex();
+    /*
+      Counted against everything except the kind selection itself — standard
+      facet behaviour. Counting the whole dataset instead meant a chip could
+      read 112 inside a 30-day window that held three, so the number described
+      nothing the click would produce.
+    */
+    const scope: ActivityFilter = { ...filter, kinds: undefined, limit: undefined };
     const counts = new Map<ActivityKind, number>();
     for (const e of deriveEvents()) {
+      if (!matches(e, scope, owners)) continue;
       counts.set(e.kind, (counts.get(e.kind) ?? 0) + 1);
     }
     return [...counts.entries()]

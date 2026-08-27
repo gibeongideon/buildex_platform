@@ -47,6 +47,12 @@
 
   Semantic warning is ORANGE (#B23C0B), not yellow, so that a warning can
   never be mistaken for a call to action.
+
+  Body and secondary text clear AA with room to spare rather than sitting on
+  the line — 14.09:1, 8.04:1 and 6.29:1 on white for the three levels. AA's
+  4.5:1 is a floor for large, well-spaced text; at the 12–14px this product
+  lives at, and for uppercase labels especially, text that only just passes
+  still reads as faint.
 */
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -143,12 +149,19 @@
   --surface-muted: #f2f2f6;
   --surface-raised: #ffffff;
 
-  --border: #e3e4ec;
-  --border-strong: #8e93b5; /* 3.00:1 on white — control boundaries */
+  --border: #cbcddd; /* 1.58:1 on white — a hairline you can actually see */
+  --border-strong: #7f84a9; /* 3.64:1 on white — control boundaries */
 
-  --fg: #1f265c; /* 14.3:1 on white */
-  --fg-muted: #5e6495; /* 5.63:1 on white */
-  --fg-subtle: #6e73a0; /* 4.54:1 on white */
+  /*
+    Three text levels, each a clear step apart and none of them close to the
+    AA floor. The earlier values sat at 5.63 and 4.54 — legal, but the second
+    was *exactly* the 4.5:1 minimum, and it carried 12px uppercase labels,
+    which is the worst case for legibility. Text at the limit of the standard
+    is text at the limit of readability.
+  */
+  --fg: #1f265c; /* 14.09:1 on white */
+  --fg-muted: #474d7a; /* 8.04:1 on white, 7.20 on surface-muted */
+  --fg-subtle: #585d88; /* 6.29:1 on white, 5.64 on surface-muted */
 
   /* Blue: navigation and structure. */
   --brand: #262e70;
@@ -170,7 +183,7 @@
   --danger-soft: #f9eeed;
   --info: #262e70;
   --info-soft: #eeeef4;
-  --neutral: #5e6495;
+  --neutral: #474d7a;
   --neutral-soft: #f2f2f6;
 }
 
@@ -187,12 +200,12 @@
   --surface-muted: #0e112b;
   --surface-raised: #12152f;
 
-  --border: #181d45;
-  --border-strong: #565c8f; /* 3.04:1 on surface */
+  --border: #272d5d; /* 1.48:1 on surface */
+  --border-strong: #6a70a0; /* 4.07:1 on surface */
 
-  --fg: #f2f2f6;
-  --fg-muted: #b5b8ce;
-  --fg-subtle: #9296b8;
+  --fg: #f2f2f6; /* 17.23:1 on surface */
+  --fg-muted: #c4c7da; /* 11.48:1 */
+  --fg-subtle: #a4a8c6; /* 8.24:1 */
 
   /*
     #262E70 is invisible as text on a near-black ground, so structural blue
@@ -218,7 +231,7 @@
   --danger-soft: #23101f;
   --info: #979bba;
   --info-soft: #0f122a;
-  --neutral: #b5b8ce;
+  --neutral: #c4c7da;
   --neutral-soft: #0e112b;
 }
 

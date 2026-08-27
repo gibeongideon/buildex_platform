@@ -36,6 +36,13 @@ import { cn, formatRelative } from "@/lib/utils";
   advertised time, because that is the promise a hardware shop chose them on.
 */
 
+type EnquiryRow = {
+  enquiry: Enquiry;
+  manufacturer: Manufacturer;
+  waitedHours: number | null;
+  responseHours: number | null;
+};
+
 type SupplierSummary = {
   id: string;
   name: string;
@@ -46,12 +53,10 @@ type SupplierSummary = {
   rate: number;
 };
 
-function summariseSuppliers(
-  rows: { enquiry: Enquiry; manufacturer: Manufacturer; waitedHours: number | null }[],
-): SupplierSummary[] {
+function summariseSuppliers(rows: EnquiryRow[]): SupplierSummary[] {
   const map = new Map<string, Omit<SupplierSummary, "id" | "rate">>();
 
-  for (const { enquiry, manufacturer, waitedHours } of rows) {
+  for (const { enquiry, manufacturer, waitedHours, responseHours } of rows) {
     const entry =
       map.get(manufacturer.id) ??
       {
@@ -63,7 +68,14 @@ function summariseSuppliers(
       };
     entry.total += 1;
     if (enquiry.status !== "new") entry.answered += 1;
-    if (waitedHours !== null && waitedHours > entry.promisedHours) entry.overdue += 1;
+    /*
+      A late reply is still a late reply. Counting only enquiries currently
+      waiting meant a supplier who answered everything eventually — hours past
+      what they advertise — scored a clean sheet, which is the opposite of what
+      this column is for.
+    */
+    const elapsed = waitedHours ?? responseHours;
+    if (elapsed !== null && elapsed > entry.promisedHours) entry.overdue += 1;
     map.set(manufacturer.id, entry);
   }
 
@@ -98,6 +110,11 @@ export default function AdminEnquiriesPage() {
 
   const unanswered = all.filter((r) => r.enquiry.status === "new");
   const answered = all.filter((r) => r.enquiry.status !== "new");
+  const lateReplies = all.filter(
+    (r) =>
+      r.responseHours !== null &&
+      r.responseHours > (r.manufacturer.storefront.avgResponseHours || 24),
+  ).length;
 
   // Response performance per supplier, worst answer-rate first. Left as a plain
   // derivation rather than a useMemo: `rows` only changes when the data does, so
@@ -135,7 +152,11 @@ export default function AdminEnquiriesPage() {
         <StatCard
           label="Answer rate"
           value={<Pct value={all.length ? (answered.length / all.length) * 100 : 0} />}
-          hint="Across every supplier"
+          hint={
+            lateReplies
+              ? `${lateReplies} answered later than promised`
+              : "All replies inside the promise"
+          }
           icon={<TrendingUp className="size-4" />}
         />
         <StatCard
@@ -157,7 +178,7 @@ export default function AdminEnquiriesPage() {
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search shop, product or supplier"
+                placeholder="Shop, product or supplier"
                 aria-label="Search enquiries"
                 className="h-9 pl-8"
               />
@@ -206,9 +227,12 @@ export default function AdminEnquiriesPage() {
               />
             ) : (
               <ul className="divide-y divide-border">
-                {filtered.slice(0, 60).map(({ enquiry, manufacturer, waitedHours }) => {
+                {filtered
+                  .slice(0, 60)
+                  .map(({ enquiry, manufacturer, waitedHours, responseHours }) => {
                   const promised = manufacturer.storefront.avgResponseHours || 24;
-                  const overdue = waitedHours !== null && waitedHours > promised;
+                  const elapsed = waitedHours ?? responseHours;
+                  const overdue = elapsed !== null && elapsed > promised;
 
                   return (
                     <li key={enquiry.id} className="px-4 py-3">
@@ -233,18 +257,24 @@ export default function AdminEnquiriesPage() {
                             {enquiry.county} · {formatRelative(enquiry.createdAt)}
                           </p>
                         </div>
-                        {waitedHours !== null ? (
+                        {elapsed !== null ? (
                           <div className="shrink-0 text-right">
                             <p
                               className={cn(
                                 "inline-flex items-center gap-1 text-sm font-medium text-numeric",
-                                overdue ? "text-danger" : "text-muted-foreground",
+                                overdue
+                                  ? "text-danger"
+                                  : waitedHours !== null
+                                    ? "text-muted-foreground"
+                                    : "text-success",
                               )}
                             >
                               {overdue ? (
                                 <AlertTriangle className="size-3.5" aria-hidden="true" />
                               ) : null}
-                              {Math.round(waitedHours)}h waiting
+                              {waitedHours !== null
+                                ? `${Math.round(waitedHours)}h waiting`
+                                : `answered in ${Math.round(responseHours ?? 0)}h`}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               advertises {promised}h
@@ -254,7 +284,7 @@ export default function AdminEnquiriesPage() {
                       </div>
                     </li>
                   );
-                })}
+                  })}
               </ul>
             )}
             {filtered.length > 60 ? (

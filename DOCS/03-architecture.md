@@ -136,7 +136,7 @@ Component  ──►  lib/data (repository interface)  ──►  mock implement
 | `CampaignRepo` | Regional visibility campaigns |
 | `InsightsRepo` | Derived performance — see below |
 | `OnboardingRepo` | Load, save and clear the in-progress application draft |
-| `SessionRepo` | Which demo role and manufacturer is "signed in" |
+| `SessionRepo` | Which demo role and manufacturer is "signed in" — four internal roles, each owning a console section |
 | `ActivityRepo` | The platform-wide timeline, filterable by kind, actor, supplier, date and text — derived, see below |
 | `AdminRepo` | Cross-entity counts, the exceptions list, and the joined rows the console's tables need |
 
@@ -354,10 +354,33 @@ Guideline constraints honoured: white or transparent backgrounds; the reversed w
 variant on dark grounds; the descriptor never rendered below 10px; no stretching,
 recolouring or shadows.
 
+### Text and border contrast, measured
+
+Three text levels, three border weights, all measured rather than eyeballed:
+
+| Token | Light | On white | Dark | On dark surface |
+| --- | --- | --- | --- | --- |
+| `--fg` | `#1F265C` | 14.09:1 | `#F2F2F6` | 17.23:1 |
+| `--fg-muted` | `#474D7A` | 8.04:1 | `#C4C7DA` | 11.48:1 |
+| `--fg-subtle` | `#585D88` | 6.29:1 | `#A4A8C6` | 8.24:1 |
+| `--border` | `#CBCDDD` | 1.58:1 | `#272D5D` | 1.48:1 |
+| `--border-strong` | `#7F84A9` | 3.64:1 | `#6A70A0` | 4.07:1 |
+
+The two secondary levels used to sit at 5.63:1 and 4.54:1. Both passed AA — the second by
+0.04 — and the interface still read as faint, because AA's 4.5:1 is a floor written for
+larger, well-spaced text and this product lives at 12–14px with uppercase labels. Borders
+were worse: at 1.27:1 a card had no visible edge, so everything floated on one flat wash.
+
+`e2e/admin.spec.ts` measures this in both themes on every run, resolving colours by
+painting them onto a canvas rather than parsing the string — Tailwind v4 emits `oklab()`
+for anything carrying an alpha modifier, and it composites translucent grounds the way a
+reader actually sees them. Headings must clear 10:1, `muted` 7:1 and `subtle` 5.5:1.
+
 ### Foundation
 
 - **Surfaces are separated by 1px borders, not shadows.** Shadows are reserved for true
-  overlays.
+  overlays. The border has to be visible for that to work, which is why `--border` is a
+  measured value and not the lightest tint that still looked tidy.
 - **Density:** 8pt grid, 40px controls, 44px dense table rows.
 - **Blue dominance:** the 70/20/10 ratio is about brand expression, so the public site
   uses blue grounds (the `.on-brand` utility, e.g. the footer) while the portals stay

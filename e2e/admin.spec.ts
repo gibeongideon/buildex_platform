@@ -329,3 +329,155 @@ test("the decision panel is operable with the keyboard alone", async ({ page }) 
   await page.keyboard.press("Enter");
   await expect(page.getByText(/Reject recorded/)).toBeVisible({ timeout: 20_000 });
 });
+
+test("the four internal roles each own a section", async ({ page }) => {
+  await page.goto("/admin/team");
+  await expect(page.getByRole("heading", { name: "Operations" })).toBeVisible({
+    timeout: 20_000,
+  });
+
+  for (const [role, person, owns] of [
+    ["Operations", "John Gitahi", "/admin/verification"],
+    ["Risk & Compliance", "Daniel Otieno", "/admin/activity"],
+    ["Commercial & Accounts", "Franklin Wanyama", "/admin/subscriptions"],
+    ["Supplier Support", "Mercy Chebet", "/admin/enquiries"],
+  ]) {
+    await expect(page.getByRole("heading", { name: role })).toBeVisible();
+    // The current role's name also appears in the shell's user block.
+    await expect(page.getByText(person).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: owns })).toBeVisible();
+  }
+
+  // No responsibility may appear under two roles — the page is worthless if the
+  // cards contradict each other about who owns a power.
+  const duties = await page
+    .locator('[role="checkbox"], li')
+    .filter({ hasText: /^(Approve|Set a package|Pause or resume|Suspend)/ })
+    .allTextContents();
+  const trimmed = duties.map((d) => d.trim());
+  expect(new Set(trimmed).size).toBe(trimmed.length);
+
+  // Switching view changes who the console says you are.
+  await page.getByRole("button", { name: /View as Commercial & Accounts/ }).click();
+  await expect(
+    page.getByText("You are viewing the console as Commercial & Accounts."),
+  ).toBeVisible({ timeout: 20_000 });
+});
+
+/*
+  A contrast regression test.
+
+  The console shipped once with secondary text at 4.54:1 — legal under AA, and
+  genuinely hard to read at the 12px uppercase those labels use. A ratio that
+  close to the floor is a defect waiting to be reintroduced by anyone tuning a
+  token, so it is measured rather than left to review.
+
+  Colours are resolved by painting them onto a canvas rather than parsing the
+  string: Tailwind v4 emits `oklab()` for anything with an alpha modifier, and
+  regex-parsing that yields nonsense. Painting also composites translucency
+  against the real ground, which is what a reader actually sees.
+*/
+const MIN_RATIO = { heading: 10, body: 7, secondary: 5.5 };
+
+test.describe("text is legible, measured", () => {
+  for (const theme of ["light", "dark"] as const) {
+    test(`text clears AA with margin in ${theme} mode`, async ({ browser }) => {
+      const context = await browser.newContext({ colorScheme: theme });
+      const page = await context.newPage();
+      await page.goto("/admin");
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
+        timeout: 20_000,
+      });
+
+      const measured = await page.evaluate(() => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1;
+        canvas.height = 1;
+        const ctx = canvas.getContext("2d")!;
+
+        /** Any CSS colour → sRGB, composited over `base` so alpha is honoured. */
+        const paint = (color: string, base: string) => {
+          ctx.clearRect(0, 0, 1, 1);
+          ctx.fillStyle = base;
+          ctx.fillRect(0, 0, 1, 1);
+          ctx.fillStyle = color;
+          ctx.fillRect(0, 0, 1, 1);
+          const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+          return [r, g, b] as const;
+        };
+
+        const lum = ([r, g, b]: readonly [number, number, number]) => {
+          const [lr, lg, lb] = [r, g, b].map((v) => {
+            const c = v / 255;
+            return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+          });
+          return 0.2126 * lr + 0.7152 * lg + 0.0722 * lb;
+        };
+
+        const pageGround = getComputedStyle(document.documentElement).backgroundColor;
+        const opaqueBase = "#ffffff";
+        const rootRgb = paint(pageGround, opaqueBase);
+        const rootHex = `rgb(${rootRgb.join(",")})`;
+
+        /** First ancestor that paints something, composited down to the root. */
+        const groundOf = (el: Element) => {
+          const stack: string[] = [];
+          let node: Element | null = el;
+          while (node) {
+            const bg = getComputedStyle(node).backgroundColor;
+            if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") stack.push(bg);
+            node = node.parentElement;
+          }
+          let base = rootHex;
+          for (const layer of stack.reverse()) {
+            base = `rgb(${paint(layer, base).join(",")})`;
+          }
+          return base;
+        };
+
+        const ratio = (fg: string, bg: string) => {
+          const [hi, lo] = [lum(paint(fg, bg)), lum(paint(bg, opaqueBase))].sort(
+            (a, b) => b - a,
+          );
+          return (hi + 0.05) / (lo + 0.05);
+        };
+
+        const worst = (selector: string) => {
+          let low = Infinity;
+          let sample = "";
+          for (const el of document.querySelectorAll(selector)) {
+            // Contrast on something nobody can see is meaningless — this skips
+            // sr-only labels and anything hidden at this breakpoint.
+            if (!el.getClientRects().length) continue;
+            const text = el.textContent?.trim();
+            if (!text) continue;
+            const style = getComputedStyle(el);
+            const r = ratio(style.color, groundOf(el));
+            if (r < low) {
+              low = r;
+              sample = text.slice(0, 40);
+            }
+          }
+          return { ratio: low === Infinity ? null : low, sample };
+        };
+
+        return {
+          heading: worst("h1, h2, h3"),
+          body: worst(".text-muted-foreground"),
+          secondary: worst(".text-subtle-foreground"),
+        };
+      });
+
+      for (const key of ["heading", "body", "secondary"] as const) {
+        const row = measured[key];
+        if (row.ratio === null) continue;
+        expect(
+          row.ratio,
+          `${key} text too faint in ${theme} mode ("${row.sample}" at ${row.ratio.toFixed(2)}:1)`,
+        ).toBeGreaterThanOrEqual(MIN_RATIO[key]);
+      }
+
+      await context.close();
+    });
+  }
+});

@@ -172,7 +172,9 @@ export default function AdminManufacturerRecordPage() {
     { key: "enquiries", label: "Enquiries", count: inbox.length },
     { key: "campaigns", label: "Campaigns", count: ads.length },
     { key: "verification", label: "Verification" },
-    { key: "activity", label: "Activity", count: events?.length },
+    // No count: the feed is capped at 40, so a number here would read as "this
+    // supplier has exactly 40 events" whenever they have more.
+    { key: "activity", label: "Activity" },
   ];
 
   return (

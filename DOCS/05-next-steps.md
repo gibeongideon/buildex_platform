@@ -135,6 +135,7 @@ Small items worth picking up alongside feature work.
 | Move the onboarding draft server-side at cutover | "Save & exit" should survive a device change. `OnboardingRepo` already has the right shape |
 | Fold the overflow sweep into CI | Phase 3 ran it as a one-off script across 13 routes × 4 widths × both themes. It belongs in the suite, not in a scratch file |
 | Add one Playwright spec per journey as each phase lands | Journey A has four specs; keep that ratio |
+| Keep the contrast spec in CI | It measures text and border ratios in both themes, and was verified to fail on the previous token values. Cheap insurance against a token tune that quietly makes the product faint again |
 | Revisit React Hook Form compiler compatibility | 6 lint warnings today. Harmless, but worth re-checking when RHF ships compiler support |
-| Bump `buildex.mock.v5` when fixture shape changes | Otherwise stale persisted data wins over new seeds. Bumped to v5 when Phase 3 added four in-flight suppliers |
+| Bump `buildex.mock.v6` when fixture shape changes | Otherwise stale persisted data wins over new seeds. v5 added four in-flight suppliers, v6 corrected the seeded check and response timestamps |
 | Keep the seam greps in CI | `grep -rn "fixtures" app/ components/` returning anything means the cutover is no longer a one-file change |

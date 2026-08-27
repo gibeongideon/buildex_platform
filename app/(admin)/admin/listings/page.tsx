@@ -136,7 +136,7 @@ export default function AdminListingsPage() {
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search listing, SKU or supplier"
+              placeholder="Listing, SKU or supplier"
               aria-label="Search listings"
               className="h-9 pl-8"
             />

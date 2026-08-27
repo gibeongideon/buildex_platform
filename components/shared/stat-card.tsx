@@ -24,7 +24,12 @@ export function StatCard({
   return (
     <div className={cn("rounded-lg border border-border bg-surface p-4", className)}>
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-medium uppercase tracking-wider text-subtle-foreground">
+        {/*
+          Uppercase 12px is the least legible text on any of these screens, and
+          it is the label for every number — so it takes the stronger of the two
+          secondary tones and a heavier weight, not the faintest.
+        */}
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {label}
         </p>
         {icon ? <span className="text-subtle-foreground">{icon}</span> : null}

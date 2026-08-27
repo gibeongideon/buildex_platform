@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Check, Lock, ShieldCheck, UserCog } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -24,8 +25,10 @@ import { cn, initials } from "@/lib/utils";
 /*
   Team & roles.
 
-  Two internal roles exist in the data model today — Operations and Risk &
-  Compliance — and this is where the console says out loud what each one is for.
+  Four internal roles exist in the data model, and each one owns a section of
+  this console — that is the test for adding one, since a role that owns no
+  screen is an org chart rather than a permission model. This page says out loud
+  what each is for, and what is deliberately not theirs to do.
   The switcher changes the *view*, not permissions: there is no authentication in
   a prototype, and pretending otherwise would be the one dishonest screen in the
   build.
@@ -33,18 +36,24 @@ import { cn, initials } from "@/lib/utils";
 
 /** What each role is responsible for, and what it cannot do yet. */
 const RESPONSIBILITIES: Record<AdminRole, { can: string[]; cannot: string[] }> = {
+  /*
+    No responsibility appears under two roles. A page whose purpose is "who owns
+    what" is worth nothing if two cards claim the same power, and the pair that
+    did — setting a package and pausing a campaign — are commercial decisions,
+    so they sit with Commercial & Accounts alone.
+  */
   ops: {
     can: [
       "Approve, reject or hold a manufacturer application",
       "Name the exact documents a rejection requires",
       "Suspend or reinstate a supplier",
       "Unpublish a listing without touching the supplier",
-      "Pause or resume a paid campaign",
-      "Set a package for an account-managed agreement",
+      "Decide whether an application needs a site visit",
     ],
     cannot: [
       "Change a supplier's own pricing or MOQ — that stays theirs",
       "Answer an enquiry on a supplier's behalf",
+      "Set a package or pause a campaign — Commercial owns both",
     ],
   },
   risk: {
@@ -52,11 +61,36 @@ const RESPONSIBILITIES: Record<AdminRole, { can: string[]; cannot: string[] }> =
       "Read every exception and the full audit trail",
       "See which checks are past SLA and by how long",
       "Review directors and shareholding reconciliation",
-      "Flag an application for a site visit",
+      "Raise a concern that sends an application to a site visit",
     ],
     cannot: [
       "Approve an application — that is an Operations decision",
       "Score credit or set limits until Buildex Capital ships",
+    ],
+  },
+  commercial: {
+    can: [
+      "Set a package for an account-managed agreement",
+      "See what renews in the next 30 days",
+      "Pause or resume a campaign that is overspending",
+      "Read campaign delivery and conversion across every supplier",
+    ],
+    cannot: [
+      "Decide a verification outcome",
+      "Change a supplier's own pricing — that stays theirs",
+      "Invoice or take payment; billing is not in the prototype",
+    ],
+  },
+  support: {
+    can: [
+      "See every enquiry a supplier has left unanswered, and for how long",
+      "Compare a supplier's answer rate against the time they advertise",
+      "Spot suppliers cleared to sell but publishing nothing",
+      "Read one supplier's whole record before making the call",
+    ],
+    cannot: [
+      "Answer an enquiry on a supplier's behalf",
+      "Suspend a supplier — that is an Operations decision",
     ],
   },
 };
@@ -74,7 +108,7 @@ export default function AdminTeamPage() {
     <>
       <PageHeader
         title="Team & roles"
-        description="Who inside Buildex does what, and which view you are using."
+        description="Who inside Buildex does what, which section they own, and which view you are using."
         breadcrumbs={[
           { label: "Buildex Admin", href: "/admin" },
           { label: "Team & roles" },
@@ -132,6 +166,15 @@ export default function AdminTeamPage() {
                     </div>
                     <p className="text-sm text-muted-foreground">{meta.person}</p>
                     <p className="mt-2 text-sm text-muted-foreground">{meta.scope}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Owns{" "}
+                      <Link
+                        href={meta.owns}
+                        className="font-medium text-brand hover:underline"
+                      >
+                        {meta.owns}
+                      </Link>
+                    </p>
                   </div>
                 </div>
 

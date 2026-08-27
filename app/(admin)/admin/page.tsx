@@ -43,10 +43,7 @@ import { cn } from "@/lib/utils";
 */
 
 export default function AdminOverviewPage() {
-  const { data: summary, loading: loadingSummary } = useQuery(
-    () => adminRepo.summary(),
-    [],
-  );
+  const { data: summary } = useQuery(() => adminRepo.summary(), []);
   const { data: exceptions, loading: loadingExceptions } = useQuery(
     () => adminRepo.exceptions(),
     [],
@@ -81,7 +78,8 @@ export default function AdminOverviewPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Awaiting decision"
-          value={loadingSummary && !summary ? "—" : summary?.applicationsAwaitingDecision}
+          loading={!summary}
+          value={summary?.applicationsAwaitingDecision}
           hint={
             summary?.checksPastSla
               ? `${summary.checksPastSla} checks past SLA`
@@ -91,7 +89,8 @@ export default function AdminOverviewPage() {
         />
         <StatCard
           label="Verified suppliers"
-          value={loadingSummary && !summary ? "—" : summary?.verifiedSuppliers}
+          loading={!summary}
+          value={summary?.verifiedSuppliers}
           hint={
             summary
               ? `${summary.suppliersTotal} onboarded · ${verifiedShare.toFixed(0)}% cleared`
@@ -101,7 +100,8 @@ export default function AdminOverviewPage() {
         />
         <StatCard
           label="Live listings"
-          value={loadingSummary && !summary ? "—" : <Num value={summary?.liveListings ?? 0} />}
+          loading={!summary}
+          value={<Num value={summary?.liveListings ?? 0} />}
           hint={
             summary?.draftListings
               ? `${summary.draftListings} held as drafts`
@@ -111,33 +111,44 @@ export default function AdminOverviewPage() {
         />
         <StatCard
           label="Unanswered enquiries"
-          value={loadingSummary && !summary ? "—" : summary?.enquiriesUnanswered}
+          loading={!summary}
+          value={summary?.enquiriesUnanswered}
           hint="Across every supplier"
           icon={<MessageSquare className="size-4" />}
         />
       </div>
 
+      {/*
+        `?? 0` on a money tile renders "KSh 0" while the figure is still loading,
+        which reads as a fact — no value in flight, nothing accepted, no spend.
+        Same defect as category counts showing 0 during load: an unknown number
+        has to look unknown, so these use the card's own loading state.
+      */}
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Enquiry value in flight"
+          loading={!summary}
           value={<Currency value={summary?.enquiryValueInFlightKsh ?? 0} compact />}
           hint="New and quoted, at enquiry quantity"
           icon={<TrendingUp className="size-4" />}
         />
         <StatCard
           label="Accepted value"
+          loading={!summary}
           value={<Currency value={summary?.acceptedValueKsh ?? 0} compact />}
           hint="Converted to orders, lifetime"
           icon={<CircleCheck className="size-4" />}
         />
         <StatCard
           label="Active campaigns"
-          value={loadingSummary && !summary ? "—" : summary?.activeCampaigns}
+          loading={!summary}
+          value={summary?.activeCampaigns}
           hint="Regional visibility running now"
           icon={<Megaphone className="size-4" />}
         />
         <StatCard
           label="Campaign spend"
+          loading={!summary}
           value={<Currency value={summary?.campaignSpendKsh ?? 0} compact />}
           hint="Lifetime, all suppliers"
           icon={<Activity className="size-4" />}

@@ -63,13 +63,26 @@ export default function MarketplaceLayout({
     A sentinel element plus IntersectionObserver rather than a scroll listener,
     so this costs nothing per frame.
   */
-  const sentinelRef = React.useRef<HTMLDivElement>(null);
+  const brandedHeaderRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
-    const node = sentinelRef.current;
+    const node = brandedHeaderRef.current;
     if (!node) return;
+    /*
+      Observing the branded header itself rather than a sentinel placed after it.
+
+      The collapsed bar carries a BUILDEX lockup, and so does this header — so
+      the one rule that matters is that they are never on screen together. A
+      proxy sentinel only approximates that, and the approximation broke on the
+      way back up: the observer fires asynchronously, so by the time it said
+      "not stuck" the header had already slid back under the bar and both were
+      visible. Watching the element that actually holds the other logo makes the
+      rule structural instead of a matter of timing.
+
+      Threshold 0: any part of it visible at all means the bar stands down.
+    */
     const observer = new IntersectionObserver(
       ([entry]) => setStuck(!entry.isIntersecting),
-      { rootMargin: "0px" },
+      { threshold: 0 },
     );
     observer.observe(node);
     return () => observer.disconnect();
@@ -97,16 +110,27 @@ export default function MarketplaceLayout({
           Skip to content
         </a>
 
-        <PromoStrip />
-        <UtilityBar region={region} onRegionChange={setRegion} />
-        {/* Crossing this marks the point where the header collapses. */}
-        <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+        <div ref={brandedHeaderRef}>
+          <PromoStrip />
+          <UtilityBar region={region} onRegionChange={setRegion} />
+        </div>
 
         {/* The collapsed bar: logo + inline search, only once scrolled past. */}
         <div
           className={cn(
-            "fixed inset-x-0 top-0 z-40 border-b border-border bg-surface/95 backdrop-blur transition-transform duration-200",
-            stuck ? "translate-y-0 shadow-overlay" : "-translate-y-full",
+            "fixed inset-x-0 top-0 z-40 border-b border-border bg-surface/95 backdrop-blur",
+            /*
+              Animated in, but removed instantly.
+
+              Sliding it *out* over 200ms means that when you scroll back up the
+              bar animates away across the header that is sliding back in, and
+              for those 200ms two BUILDEX lockups and two search fields are on
+              screen at once. Long enough to see, and long enough to screenshot.
+              Nobody misses a header appearing too fast; everybody notices two.
+            */
+            stuck
+              ? "translate-y-0 shadow-overlay transition-transform duration-200"
+              : "-translate-y-full",
           )}
           aria-hidden={!stuck}
         >
@@ -197,6 +221,7 @@ export default function MarketplaceLayout({
             </div>
           </div>
         )}
+
 
         <main id="main" className="flex-1">
           {children}

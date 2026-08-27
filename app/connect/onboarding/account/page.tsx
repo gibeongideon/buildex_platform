@@ -8,6 +8,7 @@ import { Card, CardBody, CheckboxRow, Separator } from "@/components/ui/primitiv
 import { Field, FieldHint, Input, Label } from "@/components/ui/field";
 import { accountStepSchema, type AccountStep } from "@/lib/schemas/manufacturer";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
+import { SectionGuide } from "@/components/shared/section-guide";
 import { StepShell, StepSkeleton } from "../step-frame";
 
 export default function AccountStepPage() {
@@ -67,6 +68,7 @@ export default function AccountStepPage() {
       submitting={saving || form.formState.isSubmitting}
       primaryLabel="Create account"
     >
+      <SectionGuide sectionKey="onboarding" />
       <Card>
         <CardBody className="space-y-5">
           <Field error={errors.contactName?.message}>

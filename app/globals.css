@@ -187,7 +187,13 @@
   --primary-border: #a38c02;
 
   --success: #0f7a3d;
-  --success-soft: #e5f0ea; /* success text on it 4.65:1 */
+  /*
+    Lighter than the other softs by necessity, not preference. Success green is
+    dark, so a deeper tint pushed secondary text on it below the 7:1 the rest of
+    the interface holds — caught by the contrast spec at 6.89:1 on the guidance
+    banners. At 10% both hold: muted 7.01:1, success text 4.73:1.
+  */
+  --success-soft: #e7f2ec;
   --warning: #b23c0b; /* orange, not yellow — see header note */
   --warning-soft: #f3e0d8; /* warning text on it 4.65:1 */
   --danger: #b3261e;

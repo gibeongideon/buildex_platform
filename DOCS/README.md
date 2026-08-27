@@ -87,6 +87,19 @@ shortcut it is.
 
 ### Walking the demo
 
+**Start at `/`.** The home page now carries a *Walk the build* section: one card
+per audience — manufacturer onboarding, the manufacturer dashboard, Buildex
+Admin, the marketplace, and the supplier ledger — each with a green line saying
+what that section does and whose screen it is. Every one of those sections
+repeats the same explanation as a small green banner at its top, so anyone
+arriving by a deep link is not left guessing which of the four audiences they
+are looking at.
+
+Both read one definition in `components/shared/section-guide.tsx`, so a section
+cannot describe itself differently in two places. Adding a section to the tour is
+one entry in `DEMO_SECTIONS` plus a `<SectionGuide sectionKey="…" />` on the page.
+
+
 **As a buyer (hardware shop):**
 
 1. `/marketplace` — the storefront home. Hover **All categories** for the mega menu,

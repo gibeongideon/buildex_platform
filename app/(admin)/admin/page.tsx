@@ -16,6 +16,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
+import { SectionGuide } from "@/components/shared/section-guide";
 import { StatCard } from "@/components/shared/stat-card";
 import { Currency, Num } from "@/components/shared/format";
 import { ActivityRow, ActivityRowSkeleton } from "@/components/admin/activity-row";
@@ -74,6 +75,8 @@ export default function AdminOverviewPage() {
           </Button>
         }
       />
+
+      <SectionGuide sectionKey="admin" />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

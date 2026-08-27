@@ -7,7 +7,7 @@ GitHub Actions on every push to `main`.
 | --- | --- |
 | Host | `143.244.137.254` (`blxconnectprotoype`, Ubuntu 24.04.4) |
 | Resources | 1 vCPU · 961 MB RAM · 24 GB disk |
-| Public URLs | `https://buildexconnect.dibon.co.ke` and `http://143.244.137.254` |
+| Public URL | `http://143.244.137.254` (IP only for now — see TLS below) |
 | Runtime | Node 22 · Next.js standalone · systemd unit `buildex` |
 | Proxy | nginx 1.24 on :80/:443 → `127.0.0.1:3000` |
 
@@ -64,18 +64,23 @@ sudo /usr/local/bin/buildex-activate <older-sha>
 `buildex-activate` runs the same health check on the way back, so a rollback that does not
 come up healthy tells you rather than leaving you guessing.
 
-## The two entry points
+## Entry points
 
-A certificate cannot be issued for a bare IP address, so the two addresses are served
-differently and on purpose:
+Today the site is served on the bare IP over HTTP only. A certificate cannot be issued for
+an IP address, so there is no TLS until a domain is pointed here.
 
 | Address | Scheme | nginx block |
 | --- | --- | --- |
-| `buildexconnect.dibon.co.ke` | HTTPS, HSTS, HTTP redirects up | `server_name` match |
-| `143.244.137.254` | HTTP only | `default_server` catch-all |
+| `143.244.137.254` | HTTP | `default_server` catch-all |
 
-The domain block must never be the `default_server`, or the IP would inherit its redirect
-to a hostname it has no certificate for.
+`deploy/nginx-buildex.conf` already contains the HTTPS and redirect blocks for
+`buildexconnect.dibon.co.ke`; `provision.sh` installs only the catch-all until a
+certificate exists, and the full config the moment one does. So adding the domain later is
+a DNS record, one certbot command and a re-run of the script — no config authoring.
+
+One rule that must survive that change: the domain block must never be the
+`default_server`, or the IP would inherit its redirect to a hostname it has no certificate
+for, and the IP entry point would break.
 
 ## Repository secrets
 
@@ -88,9 +93,10 @@ Settings → Secrets and variables → Actions.
 | `DEPLOY_SSH_KEY` | Private half of the deploy-only keypair, `-----BEGIN` line through `-----END` line |
 | `SSH_KNOWN_HOSTS` | Output of `ssh-keyscan -t ed25519,rsa 143.244.137.254`, pinning the host key |
 
-Optional variable (not a secret): `PUBLIC_URL`, e.g. `https://buildexconnect.dibon.co.ke`.
-Without it the post-deploy check falls back to `http://$DEPLOY_HOST`, so the pipeline still
-verifies before DNS and TLS are in place.
+Optional variable (not a secret): `PUBLIC_URL`. Unset today, so the post-deploy check and
+the environment link both fall back to `http://$DEPLOY_HOST` — which is exactly what is
+wanted while the site is IP-only. Set it to `https://buildexconnect.dibon.co.ke` when the
+domain is live and nothing else in the pipeline changes.
 
 If any secret is missing the deploy job **skips with a note** rather than failing — an
 unconfigured repository should not report a broken build.
@@ -135,7 +141,14 @@ ssh root@143.244.137.254 'cd /tmp && tar -xzf deploy.tar.gz && bash deploy/provi
 Idempotent: it adds swap only if absent, installs Node only if the major version differs,
 and installs the HTTPS nginx config only once a certificate exists.
 
-## TLS
+## TLS — not enabled yet
+
+The site is deliberately IP-only for now, so **traffic is unencrypted**. That is
+acceptable for a prototype demo and not for anything carrying real data; the moment this
+serves anything sensitive, the domain and certificate below stop being optional.
+
+Certbot 2.9.0 and the nginx reload hook are already installed, so issuance is one command
+once DNS points here.
 
 Issued with the webroot challenge so certbot never edits the nginx config, which keeps
 `deploy/nginx-buildex.conf` the single source of truth:
@@ -158,7 +171,9 @@ chmod +x /etc/letsencrypt/renewal-hooks/deploy/nginx
 **This requires an A record for `buildexconnect` pointing at `143.244.137.254`.** At the
 time of writing the name resolves to `198.54.120.132` — the `dibon.co.ke` apex, via a
 wildcard — so the HTTP-01 challenge would be answered by the wrong host and issuance would
-fail.
+fail. Checked against both `8.8.8.8` and `1.1.1.1`.
+
+Then set the `PUBLIC_URL` repository variable so the pipeline verifies against the domain.
 
 ## Health and logs
 

@@ -91,7 +91,7 @@ jobs:
   # Runs on a push to main, and on a manual dispatch from main — so a redeploy
   # or a rollback-by-rerun does not require an empty commit.
   deploy:
-    name: Deploy to buildexconnect.dibon.co.ke
+    name: Deploy to production
     needs: verify
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
@@ -103,7 +103,9 @@ jobs:
       cancel-in-progress: false
     environment:
       name: production
-      url: https://buildexconnect.dibon.co.ke
+      # Bare IP for now. Set the `PUBLIC_URL` repository variable when a domain
+      # and certificate are in place — nothing else here needs to change.
+      url: ${{ vars.PUBLIC_URL || 'http://143.244.137.254' }}
     steps:
       - name: Preflight — are the deploy secrets configured?
         id: preflight
@@ -182,8 +184,7 @@ jobs:
       - name: Confirm the new release is the one serving
         if: steps.preflight.outputs.ready == 'true'
         env:
-          # Falls back to the bare IP so this still verifies before DNS and TLS
-          # are in place.
+          # Bare IP today; set the `PUBLIC_URL` variable to switch to a domain.
           PUBLIC_URL: ${{ vars.PUBLIC_URL || format('http://{0}', secrets.DEPLOY_HOST) }}
         run: |
           set -euo pipefail

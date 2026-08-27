@@ -55,9 +55,13 @@ export function PortalShell({
       sections={SECTIONS}
       user={{
         name: manufacturer?.tradingName ?? "Buildex Connect",
-        subtitle: manufacturer?.subscription
-          ? `${packageMeta(manufacturer.subscription.package).name} plan`
-          : "No package selected",
+        // "No package selected" is a claim about the account. Only make it
+        // once the account has actually been read.
+        subtitle: manufacturer
+          ? manufacturer.subscription
+            ? `${packageMeta(manufacturer.subscription.package).name} plan`
+            : "No package selected"
+          : undefined,
         status: manufacturer
           ? {
               label: STATUS_LABELS[manufacturer.status],

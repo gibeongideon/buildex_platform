@@ -33,7 +33,8 @@ export type NavSection = {
 
 export type ShellUser = {
   name: string;
-  subtitle: string;
+  /** Omitted while the account is unknown — better blank than a wrong claim. */
+  subtitle?: string;
   status?: { label: string; tone: Tone };
 };
 
@@ -119,7 +120,9 @@ function SidebarContent({
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
-            <p className="truncate text-xs text-muted-foreground">{user.subtitle}</p>
+            {user.subtitle ? (
+              <p className="truncate text-xs text-muted-foreground">{user.subtitle}</p>
+            ) : null}
           </div>
         </div>
         {user.status ? (

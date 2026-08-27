@@ -8,7 +8,9 @@ import { SUBSCRIPTION_PACKAGES } from "@/lib/schemas/subscription";
 import { STEPS } from "@/app/connect/onboarding/steps";
 
 export const metadata: Metadata = {
-  title: "Sell on Buildex Connect",
+  // The root template appends "· Buildex Connect", so the brand does not
+  // belong here too — this read "Sell on Buildex Connect · Buildex Connect".
+  title: "For manufacturers",
   description:
     "List your products to Kenya's hardware network. Verified onboarding, regional targeting and market intelligence for manufacturers.",
 };

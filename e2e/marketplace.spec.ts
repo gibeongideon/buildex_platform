@@ -105,6 +105,36 @@ test("an enquiry sent from a listing reaches the manufacturer's inbox", async ({
   );
 });
 
+test("the enquiry tiles report the whole inbox, not the filtered view", async ({
+  page,
+}) => {
+  /*
+    The tiles used to be derived from the same filtered query as the table, so
+    a search term that matched nothing rendered "Needs a reply 0 — Inbox clear"
+    while enquiries were in fact waiting. The count beside the filter is the
+    only number allowed to move.
+  */
+  await page.goto("/connect/orders");
+  const search = page.getByPlaceholder("Search shop, contact or product");
+  await search.waitFor({ timeout: 15_000 });
+
+  const tiles = page.locator("main").getByText(/Needs a reply/i).first();
+  await expect(tiles).toBeVisible({ timeout: 15_000 });
+
+  const waiting = page.getByRole("heading", { level: 1 });
+  await expect(waiting).toContainText(/Orders & enquiries/);
+
+  const before = await page.locator("body").innerText();
+  const tileRegion = (text: string) =>
+    text.slice(text.indexOf("NEEDS A REPLY"), text.indexOf("ACCEPTED") + 40);
+
+  await search.fill("zzz-matches-nothing");
+  await expect(page.getByText(/^0 of \d+$/)).toBeVisible({ timeout: 15_000 });
+
+  const after = await page.locator("body").innerText();
+  expect(tileRegion(after)).toBe(tileRegion(before));
+});
+
 test("an unverified manufacturer has no public storefront", async ({ page }) => {
   // Kakamega Hardware is still in review, so nothing of theirs is published.
   await page.goto("/marketplace/manufacturer/mfr_kakamega_hardware");

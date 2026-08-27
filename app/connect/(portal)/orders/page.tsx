@@ -169,6 +169,18 @@ export default function EnquiriesPage() {
     [manufacturerId, statusFilter, query],
   );
 
+  /*
+    The four tiles describe the whole book of business, so they read the
+    unfiltered list. Deriving them from `enquiries` instead meant a search term
+    that matched nothing reported "Needs a reply 0 — Inbox clear" while three
+    enquiries were in fact waiting. This query is keyed on the manufacturer
+    alone, so it does not re-run as you type.
+  */
+  const { data: everyEnquiry } = useQuery(
+    async () => (manufacturerId ? enquiryRepo.list({ manufacturerId }) : []),
+    [manufacturerId],
+  );
+
   const { data: products } = useQuery(
     async () => (manufacturerId ? productRepo.listByManufacturer(manufacturerId) : []),
     [manufacturerId],
@@ -185,9 +197,10 @@ export default function EnquiriesPage() {
   if (!current) return null;
 
   const byId = new Map((products ?? []).map((p) => [p.id, p]));
+  /** What the table shows — filtered by the toolbar. */
   const rows = enquiries ?? [];
-
-  const all = rows;
+  /** What the tiles count — everything, filter or no filter. */
+  const all = everyEnquiry ?? [];
   const needsReply = all.filter((e) => e.status === "new");
   const accepted = all.filter((e) => e.status === "accepted");
 
@@ -288,7 +301,7 @@ export default function EnquiriesPage() {
               ))}
             </Select>
             <p className="whitespace-nowrap text-sm text-muted-foreground text-numeric">
-              {rows.length} shown
+              {rows.length} of {all.length}
             </p>
           </div>
         </div>

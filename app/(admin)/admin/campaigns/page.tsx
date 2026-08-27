@@ -2,13 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Megaphone, Pause, Play, Search, Target } from "lucide-react";
+import { Megaphone, Pause, Play, Target } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Currency, Num, Pct } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
-import { Input, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
 import {
   Alert,
   Card,
@@ -27,6 +27,7 @@ import {
   type Campaign,
 } from "@/lib/schemas/campaign";
 import { cn, formatRelative } from "@/lib/utils";
+import { FilterBar } from "@/components/ui/filter-bar";
 
 /*
   Campaign oversight.
@@ -127,20 +128,16 @@ export default function AdminCampaignsPage() {
       </Alert>
 
       <Card className="mt-6">
-        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center">
-          <div className="relative sm:w-72">
-            <Search
-              className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Campaign, supplier or region"
-              aria-label="Search campaigns"
-              className="h-9 pl-8"
-            />
-          </div>
+        <FilterBar
+          search={{
+            value: query,
+            onChange: setQuery,
+            placeholder: "Campaign, supplier or region",
+            label: "Search campaigns",
+          }}
+          shown={filtered.length}
+          total={all.length}
+        >
           <Select
             value={status}
             onChange={(event) => setStatus(event.target.value)}
@@ -154,10 +151,7 @@ export default function AdminCampaignsPage() {
               </option>
             ))}
           </Select>
-          <p className="whitespace-nowrap text-sm text-muted-foreground text-numeric sm:ml-auto">
-            {filtered.length} of {all.length}
-          </p>
-        </div>
+        </FilterBar>
 
         <CardBody className="p-0">
           {loading && !rows ? (

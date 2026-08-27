@@ -2,17 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import {
-  CheckCircle2,
-  Clock,
-  Inbox,
-  MapPin,
-  MessageSquare,
-  Package,
-  Search,
-  Send,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle2, Clock, Inbox, MapPin, MessageSquare, Package, Send, XCircle } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Currency, Num } from "@/components/shared/format";
@@ -38,6 +28,7 @@ import {
 import { priceAtQuantity, priceRange } from "@/lib/schemas/product";
 import { cn, formatDate, formatRelative } from "@/lib/utils";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
+import { FilterBar } from "@/components/ui/filter-bar";
 
 /*
   The enquiry inbox.
@@ -273,38 +264,29 @@ export default function EnquiriesPage() {
       </div>
 
       <Card className="mt-6">
-        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative sm:w-72">
-            <Search
-              className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search shop, contact or product"
-              aria-label="Search enquiries"
-              className="h-9 pl-8"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Select
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value)}
-              aria-label="Filter by status"
-              className="h-9 w-auto"
-            >
-              {FILTERS.map((f) => (
-                <option key={f.value} value={f.value}>
-                  {f.label}
-                </option>
-              ))}
-            </Select>
-            <p className="whitespace-nowrap text-sm text-muted-foreground text-numeric">
-              {rows.length} of {all.length}
-            </p>
-          </div>
-        </div>
+        <FilterBar
+          search={{
+            value: query,
+            onChange: setQuery,
+            placeholder: "Search shop, contact or product",
+            label: "Search enquiries",
+          }}
+          shown={rows.length}
+          total={all.length}
+        >
+          <Select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+            aria-label="Filter by status"
+            className="h-9 w-auto"
+          >
+            {FILTERS.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </Select>
+        </FilterBar>
 
         <CardBody className="p-0">
           {loading && rows.length === 0 ? (

@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { AlertTriangle, FileText, Search, Wallet } from "lucide-react";
+import { AlertTriangle, FileText, Wallet } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
-import { Input, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
 import {
   Alert,
   Card,
@@ -35,6 +35,7 @@ import {
   outstanding,
 } from "@/lib/schemas/supplier";
 import { cn, formatDate, formatMoney } from "@/lib/utils";
+import { FilterBar } from "@/components/ui/filter-bar";
 
 /*
   Vendor bills — accounts payable for Buildex Interiors.
@@ -169,20 +170,17 @@ export default function AdminVendorBillsPage() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] [&>*]:min-w-0">
         <Card>
-          <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center">
-            <div className="relative sm:w-64">
-              <Search
-                className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-                aria-hidden="true"
-              />
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Reference or vendor"
-                aria-label="Search bills"
-                className="h-9 pl-8"
-              />
-            </div>
+          <FilterBar
+            search={{
+              value: query,
+              onChange: setQuery,
+              placeholder: "Reference or vendor",
+              label: "Search bills",
+              width: "sm:w-64",
+            }}
+            shown={filtered.length}
+            total={all.length}
+          >
             <Select
               value={status}
               onChange={(event) => setStatus(event.target.value)}
@@ -203,10 +201,7 @@ export default function AdminVendorBillsPage() {
             >
               Overdue only
             </Button>
-            <p className="whitespace-nowrap text-sm text-muted-foreground text-numeric sm:ml-auto">
-              {filtered.length} of {all.length}
-            </p>
-          </div>
+          </FilterBar>
 
           <CardBody className="p-0">
             {loading && !bills ? (

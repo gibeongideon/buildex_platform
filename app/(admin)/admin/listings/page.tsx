@@ -2,14 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { EyeOff, ExternalLink, Package, RotateCcw, Search } from "lucide-react";
+import { EyeOff, ExternalLink, Package, RotateCcw } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Currency } from "@/components/shared/format";
 import { ProductThumb } from "@/components/shared/product-thumb";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
-import { Input, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
 import {
   Alert,
   Card,
@@ -22,6 +22,7 @@ import { adminRepo, productRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import { PRODUCT_CATEGORIES } from "@/lib/schemas/common";
 import {
+  PRODUCT_STATUSES,
   PRODUCT_STATUS_LABELS,
   PRODUCT_STATUS_TONE,
   priceRange,
@@ -29,6 +30,7 @@ import {
 } from "@/lib/schemas/product";
 import { canListProducts } from "@/lib/schemas/verification";
 import { cn } from "@/lib/utils";
+import { FilterBar } from "@/components/ui/filter-bar";
 
 /*
   Listing moderation.
@@ -38,7 +40,6 @@ import { cn } from "@/lib/utils";
   supplier. Unpublishing an active listing is the one write here — it is the
   lighter tool than suspending the whole supplier.
 */
-
 
 export default function AdminListingsPage() {
   const { data: rows, loading, error, refetch } = useQuery(() => adminRepo.listingRows(), []);
@@ -131,20 +132,16 @@ export default function AdminListingsPage() {
       ) : null}
 
       <Card className="mt-6">
-        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center">
-          <div className="relative sm:w-72">
-            <Search
-              className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Listing, SKU or supplier"
-              aria-label="Search listings"
-              className="h-9 pl-8"
-            />
-          </div>
+        <FilterBar
+          search={{
+            value: query,
+            onChange: setQuery,
+            placeholder: "Listing, SKU or supplier",
+            label: "Search listings",
+          }}
+          shown={filtered.length}
+          total={all.length}
+        >
           <Select
             value={status}
             onChange={(event) => setStatus(event.target.value)}
@@ -152,10 +149,11 @@ export default function AdminListingsPage() {
             className="h-9 w-auto"
           >
             <option value="">All statuses</option>
-            <option value="active">Live</option>
-            <option value="draft">Draft</option>
-            <option value="out_of_stock">Out of stock</option>
-            <option value="archived">Archived</option>
+            {PRODUCT_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {PRODUCT_STATUS_LABELS[s]}
+              </option>
+            ))}
           </Select>
           <Select
             value={category}
@@ -170,10 +168,7 @@ export default function AdminListingsPage() {
               </option>
             ))}
           </Select>
-          <p className="whitespace-nowrap text-sm text-muted-foreground text-numeric sm:ml-auto">
-            {filtered.length} of {all.length}
-          </p>
-        </div>
+        </FilterBar>
 
         <CardBody className="p-0">
           {loading && !rows ? (

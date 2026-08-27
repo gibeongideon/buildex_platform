@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { AlertTriangle, ChevronRight, MapPin, Search, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ChevronRight, MapPin, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
-import { Input, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
 import { QueryError } from "@/components/ui/query-state";
 import {
   Card,
@@ -24,6 +24,7 @@ import {
   slaHoursRemaining,
 } from "@/lib/schemas/verification";
 import { cn, formatRelative } from "@/lib/utils";
+import { FilterBar } from "@/components/ui/filter-bar";
 
 /*
   The ops verification queue.
@@ -103,35 +104,27 @@ export default function VerificationQueuePage() {
       <QueryError error={error} onRetry={refetch} />
 
       <Card>
-        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative sm:w-80">
-            <Search
-              className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search company, county, KRA PIN or BRS number"
-              aria-label="Search applications"
-              className="h-9 pl-8"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Select
-              value={scope}
-              onChange={(event) => setScope(event.target.value as typeof scope)}
-              aria-label="Which applications to show"
-              className="h-9 w-auto"
-            >
-              <option value="in_flight">In flight</option>
-              <option value="all">All manufacturers</option>
-            </Select>
-            <p className="whitespace-nowrap text-sm text-muted-foreground text-numeric">
-              {filtered.length} shown
-            </p>
-          </div>
-        </div>
+        <FilterBar
+          search={{
+            value: query,
+            onChange: setQuery,
+            placeholder: "Search company, county, KRA PIN or BRS number",
+            label: "Search applications",
+            width: "sm:w-80",
+          }}
+          shown={filtered.length}
+          total={(rows ?? []).length}
+        >
+          <Select
+            value={scope}
+            onChange={(event) => setScope(event.target.value as typeof scope)}
+            aria-label="Which applications to show"
+            className="h-9 w-auto"
+          >
+            <option value="in_flight">In flight</option>
+            <option value="all">All manufacturers</option>
+          </Select>
+        </FilterBar>
 
         <CardBody className="p-0">
           {loading && !rows ? (

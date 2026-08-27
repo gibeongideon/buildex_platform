@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Activity, Filter, Search, X } from "lucide-react";
+import { Activity, Filter, X } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
-import { Input, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
 import {
   Card,
   CardBody,
@@ -23,6 +23,7 @@ import { activityRepo, manufacturerRepo } from "@/lib/data";
 import type { ActivityActorType, ActivityEvent, ActivityKind } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import { cn, formatDate } from "@/lib/utils";
+import { SearchField } from "@/components/ui/filter-bar";
 
 /*
   The full platform timeline.
@@ -161,19 +162,12 @@ export default function AdminActivityPage() {
               >
                 Search
               </label>
-              <div className="relative">
-                <Search
-                  className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-                  aria-hidden="true"
-                />
-                <Input
-                  id="activity-search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Supplier, product, shop"
-                  className="h-9 pl-8"
-                />
-              </div>
+              <SearchField
+                id="activity-search"
+                value={query}
+                onChange={setQuery}
+                placeholder="Supplier, product, shop"
+              />
             </div>
 
             <div>

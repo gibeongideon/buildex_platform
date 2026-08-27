@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { AlertTriangle, Clock, MessageSquare, Search, TrendingUp } from "lucide-react";
+import { AlertTriangle, Clock, MessageSquare, TrendingUp } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Num, Pct } from "@/components/shared/format";
-import { Input, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
 import { QueryError } from "@/components/ui/query-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ import {
 } from "@/lib/schemas/enquiry";
 import type { Manufacturer } from "@/lib/schemas/manufacturer";
 import { cn, formatRelative } from "@/lib/utils";
+import { FilterBar } from "@/components/ui/filter-bar";
 
 /*
   Platform-wide enquiry oversight.
@@ -176,20 +177,17 @@ export default function AdminEnquiriesPage() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] [&>*]:min-w-0">
         <Card>
-          <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center">
-            <div className="relative sm:w-64">
-              <Search
-                className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-                aria-hidden="true"
-              />
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Shop, product or supplier"
-                aria-label="Search enquiries"
-                className="h-9 pl-8"
-              />
-            </div>
+          <FilterBar
+            search={{
+              value: query,
+              onChange: setQuery,
+              placeholder: "Shop, product or supplier",
+              label: "Search enquiries",
+              width: "sm:w-64",
+            }}
+            shown={filtered.length}
+            total={all.length}
+          >
             <Select
               value={status}
               onChange={(event) => setStatus(event.target.value)}
@@ -203,10 +201,7 @@ export default function AdminEnquiriesPage() {
                 </option>
               ))}
             </Select>
-            <p className="whitespace-nowrap text-sm text-muted-foreground text-numeric sm:ml-auto">
-              {filtered.length} of {all.length}
-            </p>
-          </div>
+          </FilterBar>
 
           <CardBody className="p-0">
             {loading && !rows ? (

@@ -2,21 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import {
-  AlertTriangle,
-  Building2,
-  Mail,
-  MapPin,
-  Phone,
-  Search,
-  Truck,
-} from "lucide-react";
+import { AlertTriangle, Building2, Mail, MapPin, Phone, Truck } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
-import { Input, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
 import {
   Alert,
   Card,
@@ -35,6 +27,7 @@ import {
   VENDOR_TYPES,
 } from "@/lib/schemas/supplier";
 import { cn, formatDate, formatMoney } from "@/lib/utils";
+import { FilterBar } from "@/components/ui/filter-bar";
 
 /*
   Buildex Interiors' suppliers — the companies Buildex buys from.
@@ -91,7 +84,6 @@ export default function AdminSuppliersPage() {
       />
 
       <QueryError error={error} onRetry={refetch} />
-
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -160,20 +152,16 @@ export default function AdminSuppliersPage() {
       ) : null}
 
       <Card className="mt-6">
-        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center">
-          <div className="relative sm:w-72">
-            <Search
-              className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Name, email, phone or city"
-              aria-label="Search suppliers"
-              className="h-9 pl-8"
-            />
-          </div>
+        <FilterBar
+          search={{
+            value: query,
+            onChange: setQuery,
+            placeholder: "Name, email, phone or city",
+            label: "Search suppliers",
+          }}
+          shown={filtered.length}
+          total={all.length}
+        >
           <Select
             value={country}
             onChange={(event) => setCountry(event.target.value)}
@@ -200,10 +188,7 @@ export default function AdminSuppliersPage() {
               </option>
             ))}
           </Select>
-          <p className="whitespace-nowrap text-sm text-muted-foreground text-numeric sm:ml-auto">
-            {filtered.length} of {all.length}
-          </p>
-        </div>
+        </FilterBar>
 
         <CardBody className="p-0">
           {loading && !rows ? (

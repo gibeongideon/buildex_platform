@@ -14,8 +14,9 @@ import { BuildexMark } from "@/components/shared/brand";
 import { Currency, DetailRow, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
-import { Input, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
 import { BackLink } from "@/components/shared/back-link";
+import { SearchField } from "@/components/ui/filter-bar";
 import {
   Alert,
   Card,
@@ -246,19 +247,13 @@ export default function ManufacturerStorefrontPage() {
                 Product range
               </h2>
               <div className="flex flex-wrap items-center gap-2">
-                <div className="relative">
-                  <Search
-                    className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-                    aria-hidden="true"
-                  />
-                  <Input
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Search this store"
-                    aria-label={`Search ${manufacturer.tradingName} products`}
-                    className="h-9 w-full pl-8 sm:w-48"
-                  />
-                </div>
+                <SearchField
+                  value={query}
+                  onChange={setQuery}
+                  placeholder="Search this store"
+                  label={`Search ${manufacturer.tradingName} products`}
+                  className="w-full sm:w-48"
+                />
                 <Select
                   value={category}
                   onChange={(event) => setCategory(event.target.value)}

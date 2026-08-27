@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { BadgeCheck, Ban, MapPin, RotateCcw, Search, Store } from "lucide-react";
+import { BadgeCheck, Ban, MapPin, RotateCcw, Store } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
-import { Input, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
 import {
   Card,
   CardBody,
@@ -26,6 +26,7 @@ import {
   deriveStatus,
 } from "@/lib/schemas/verification";
 import { cn } from "@/lib/utils";
+import { FilterBar } from "@/components/ui/filter-bar";
 
 /*
   The manufacturer directory — every supplier, whatever their state.
@@ -89,20 +90,16 @@ export default function AdminManufacturersPage() {
       <QueryError error={error} onRetry={refetch} />
 
       <Card>
-        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center">
-          <div className="relative sm:w-72">
-            <Search
-              className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search suppliers"
-              aria-label="Search manufacturers"
-              className="h-9 pl-8"
-            />
-          </div>
+        <FilterBar
+          search={{
+            value: query,
+            onChange: setQuery,
+            placeholder: "Search suppliers",
+            label: "Search manufacturers",
+          }}
+          shown={filtered.length}
+          total={rows?.length ?? 0}
+        >
           <Select
             value={status}
             onChange={(event) => setStatus(event.target.value)}
@@ -129,10 +126,7 @@ export default function AdminManufacturersPage() {
               </option>
             ))}
           </Select>
-          <p className="whitespace-nowrap text-sm text-muted-foreground text-numeric sm:ml-auto">
-            {filtered.length} of {rows?.length ?? 0}
-          </p>
-        </div>
+        </FilterBar>
 
         <CardBody className="p-0">
           {loading && !rows ? (

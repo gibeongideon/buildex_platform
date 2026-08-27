@@ -2,23 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import {
-  Archive,
-  ExternalLink,
-  Eye,
-  Package,
-  Pencil,
-  Plus,
-  RotateCcw,
-  Search,
-  Store,
-} from "lucide-react";
+import { Archive, ExternalLink, Eye, Package, Pencil, Plus, RotateCcw, Store } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Currency } from "@/components/shared/format";
 import { ProductThumb } from "@/components/shared/product-thumb";
 import { Button } from "@/components/ui/button";
-import { Input, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
 import {
   Alert,
   Card,
@@ -29,6 +19,7 @@ import {
 } from "@/components/ui/primitives";
 import { productRepo } from "@/lib/data";
 import {
+  PRODUCT_STATUSES,
   PRODUCT_STATUS_LABELS,
   PRODUCT_STATUS_TONE,
   formatLeadTime,
@@ -40,6 +31,7 @@ import { canListProducts } from "@/lib/schemas/verification";
 import { cn, formatDate } from "@/lib/utils";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
 import { QueryError } from "@/components/ui/query-state";
+import { FilterBar } from "@/components/ui/filter-bar";
 
 /*
   Catalogue management.
@@ -50,7 +42,6 @@ import { QueryError } from "@/components/ui/query-state";
   rather than being destroyed — an archived SKU still appears on historic
   enquiries.
 */
-
 
 export default function CataloguePage() {
   const { data, loading, error, refetch } = useCurrentManufacturer();
@@ -181,38 +172,30 @@ export default function CataloguePage() {
       </div>
 
       <Card className="mt-6">
-        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative sm:w-72">
-            <Search
-              className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search by name, SKU or category"
-              aria-label="Search catalogue"
-              className="h-9 pl-8"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Select
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value)}
-              aria-label="Filter by status"
-              className="h-9 w-auto"
-            >
-              <option value="">All statuses</option>
-              <option value="active">Live</option>
-              <option value="draft">Draft</option>
-              <option value="out_of_stock">Out of stock</option>
-              <option value="archived">Archived</option>
-            </Select>
-            <p className="whitespace-nowrap text-sm text-muted-foreground text-numeric">
-              {filtered.length} of {products.length}
-            </p>
-          </div>
-        </div>
+        <FilterBar
+          search={{
+            value: query,
+            onChange: setQuery,
+            placeholder: "Search by name, SKU or category",
+            label: "Search catalogue",
+          }}
+          shown={filtered.length}
+          total={products.length}
+        >
+          <Select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+            aria-label="Filter by status"
+            className="h-9 w-auto"
+          >
+            <option value="">All statuses</option>
+            {PRODUCT_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {PRODUCT_STATUS_LABELS[s]}
+              </option>
+            ))}
+          </Select>
+        </FilterBar>
 
         <CardBody className="p-0">
           {filtered.length === 0 ? (

@@ -2,16 +2,17 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { Search, Store } from "lucide-react";
+import { Store } from "lucide-react";
 import { marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import { PRODUCT_CATEGORIES, REGIONS } from "@/lib/schemas/common";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
-import { Input, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
 import { Card, CardBody, EmptyState, Skeleton } from "@/components/ui/primitives";
 import { priceRange, type Product } from "@/lib/schemas/product";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
+import { SearchField } from "@/components/ui/filter-bar";
 import {
   ManufacturerRow,
   ManufacturerRowSkeleton,
@@ -109,19 +110,13 @@ function ManufacturersDirectoryInner() {
       </p>
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative sm:w-72">
-          <Search
-            className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
-            aria-hidden="true"
-          />
-          <Input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search suppliers"
-            aria-label="Search suppliers"
-            className="h-9 pl-8"
-          />
-        </div>
+        <SearchField
+          value={query}
+          onChange={setQuery}
+          placeholder="Search suppliers"
+          label="Search suppliers"
+          className="sm:w-72"
+        />
         <Select
           value={category}
           onChange={(event) => setCategory(event.target.value)}

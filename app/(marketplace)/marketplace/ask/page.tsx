@@ -19,7 +19,6 @@ import { ProductCard, ProductCardSkeleton } from "@/components/shared/product-ca
 import { Currency, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, EmptyState, Skeleton } from "@/components/ui/primitives";
-import { cn } from "@/lib/utils";
 
 /*
   Ask AI — the sourcing assistant.

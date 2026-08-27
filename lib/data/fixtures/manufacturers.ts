@@ -510,6 +510,179 @@ const SEEDS: Seed[] = [
       site_visit: { status: "not_required" },
     },
   },
+  /*
+    Four more applications in flight.
+
+    With only three, the ops queue rendered almost empty — which made the
+    console look like a screen nobody needs. These four are unverified, so they
+    add nothing to the marketplace and do not touch the eight suppliers whose
+    listings are live; what they add is a queue with something in it, and the
+    states that are easy to get wrong: a check badly past SLA, a site visit
+    running alongside an unfinished desk check, shareholding that does not
+    reconcile, and an application nobody has picked up yet.
+
+    Their storefront trading figures are zeroed rather than scaled off age, the
+    same way `createFromDraft` starts a real new manufacturer. A supplier that
+    has never been cleared to sell has no response record to advertise, and the
+    enquiries console now reads exactly that number.
+  */
+  {
+    id: "mfr_meru_pipes",
+    status: "in_review",
+    contactName: "Purity Gakii",
+    email: "p.gakii@merupipeworks.co.ke",
+    phone: "+254706334128",
+    legalName: "Meru Pipe Works Limited",
+    tradingName: "Meru Pipe Works",
+    brsNumber: "PVT-2SVN6KD",
+    kraPin: "P061557203X",
+    yearEstablished: 2021,
+    physicalAddress: "Gakoromone Industrial Plot 12, Meru",
+    county: "Meru",
+    website: "",
+    categories: ["Plumbing & Sanitaryware"],
+    capacityBand: "under_5m",
+    distributionRegions: ["Eastern", "Central"],
+    directors: [
+      { name: "Purity Gakii", id: "32771045", role: "Managing Director", own: 65, phone: "+254706334128" },
+      { name: "Dennis Murithi", id: "31009887", role: "Director", own: 35, phone: "+254717442310" },
+    ],
+    submittedDaysAgo: 4,
+    subscription: null,
+    store: { responseRatePercent: 0, avgResponseHours: 0, ordersFulfilled: 0, certifications: [] },
+    checkSpec: {
+      document_completeness: { status: "passed" },
+      brs_lookup: { status: "passed" },
+      // Sitting well past its 24h target: this is the row the queue should
+      // surface first.
+      kra_pin_validation: { status: "in_review" },
+      iprs_director_id: { status: "pending" },
+      site_visit: { status: "not_required" },
+    },
+  },
+  {
+    id: "mfr_malindi_blocks",
+    status: "in_review",
+    contactName: "Omar Bakari",
+    email: "omar@malindiblocks.co.ke",
+    phone: "+254724880116",
+    legalName: "Malindi Block & Paving Limited",
+    tradingName: "Malindi Blocks",
+    brsNumber: "PVT-7LDG9XB",
+    kraPin: "P062003914Y",
+    yearEstablished: 2019,
+    physicalAddress: "Kisumu Ndogo Road, Malindi",
+    county: "Kilifi",
+    website: "https://malindiblocks.co.ke",
+    categories: ["Cement & Concrete", "Tiles & Flooring"],
+    capacityBand: "20m_100m",
+    distributionRegions: ["Coast"],
+    directors: [
+      { name: "Omar Bakari", id: "28114509", role: "Managing Director", own: 50, phone: "+254724880116" },
+      { name: "Halima Bakari", id: "29330178", role: "Director", own: 30, phone: "+254733551209" },
+      { name: "Suleiman Juma", id: "26884301", role: "Shareholder", own: 20, phone: "+254701887654" },
+    ],
+    submittedDaysAgo: 7,
+    subscription: null,
+    riskFlagged: true,
+    store: { responseRatePercent: 0, avgResponseHours: 0, ordersFulfilled: 0, certifications: [] },
+    checkSpec: {
+      document_completeness: { status: "passed" },
+      brs_lookup: { status: "passed" },
+      kra_pin_validation: { status: "passed" },
+      // A site visit running while a desk check is still open — the case where
+      // the status is in_review even though the field team is already engaged.
+      iprs_director_id: { status: "in_review" },
+      site_visit: {
+        status: "in_review",
+        note: "Field team travelling from Mombasa; capacity claim needs confirming at the yard.",
+      },
+    },
+  },
+  {
+    id: "mfr_kitui_lime",
+    status: "action_needed",
+    contactName: "Agnes Mwikali",
+    email: "a.mwikali@kituilime.co.ke",
+    phone: "+254715906443",
+    legalName: "Kitui Lime & Aggregates Limited",
+    tradingName: "Kitui Lime",
+    brsNumber: "PVT-1FQZ4RH",
+    kraPin: "P063881470Z",
+    yearEstablished: 2022,
+    physicalAddress: "Mutomo Road, Kitui",
+    county: "Kitui",
+    website: "",
+    categories: ["Cement & Concrete"],
+    capacityBand: "under_5m",
+    distributionRegions: ["Eastern"],
+    directors: [
+      // Declares 95%. Shareholding that does not reconcile to 100 is the
+      // commonest signal of a fabricated structure, and the reviewer states it
+      // rather than leaving ops to add up.
+      { name: "Agnes Mwikali", id: "33440921", role: "Managing Director", own: 60, phone: "+254715906443" },
+      { name: "Francis Kilonzo", id: "31775208", role: "Shareholder", own: 35, phone: "+254728110934" },
+    ],
+    submittedDaysAgo: 6,
+    subscription: null,
+    store: { responseRatePercent: 0, avgResponseHours: 0, ordersFulfilled: 0, certifications: [] },
+    reviewNotes: [
+      "Declared shareholding totals 95%. Send a current CR12 showing the full ownership split.",
+      "National ID 31775208 did not match the name provided to IPRS.",
+    ],
+    checkSpec: {
+      document_completeness: { status: "passed" },
+      brs_lookup: { status: "passed" },
+      kra_pin_validation: { status: "passed" },
+      iprs_director_id: {
+        status: "action_needed",
+        note: "Second director's National ID did not match. Re-upload the ID and a current CR12.",
+        blocking: ["director_id", "cr12"],
+      },
+      site_visit: { status: "not_required" },
+    },
+    docOverrides: {
+      kebs_permit: {
+        status: "expired",
+        expiresAt: daysAgo(12),
+        note: "Standardisation permit lapsed 12 days ago.",
+      },
+    },
+  },
+  {
+    id: "mfr_bungoma_ceilings",
+    status: "submitted",
+    contactName: "Elijah Barasa",
+    email: "e.barasa@bungomaceilings.co.ke",
+    phone: "+254702551877",
+    legalName: "Bungoma Ceilings & Cornices Limited",
+    tradingName: "Bungoma Ceilings",
+    brsNumber: "BN-6TPR8VC",
+    kraPin: "P064119055A",
+    yearEstablished: 2024,
+    physicalAddress: "Kanduyi Junction, Bungoma",
+    county: "Bungoma",
+    website: "",
+    categories: ["Interior Finishes", "Insulation"],
+    capacityBand: "under_5m",
+    distributionRegions: ["Western", "Nyanza"],
+    directors: [
+      { name: "Elijah Barasa", id: "34220867", role: "Managing Director", own: 100, phone: "+254702551877" },
+    ],
+    submittedDaysAgo: 0.2,
+    subscription: null,
+    store: { responseRatePercent: 0, avgResponseHours: 0, ordersFulfilled: 0, certifications: [] },
+    // Every check still pending: nobody inside Buildex has touched this one.
+    // `deriveStatus` reads that as `submitted`, and no SLA clock has started —
+    // which is exactly the application that quietly goes stale.
+    checkSpec: {
+      document_completeness: { status: "pending" },
+      brs_lookup: { status: "pending" },
+      kra_pin_validation: { status: "pending" },
+      iprs_director_id: { status: "pending" },
+      site_visit: { status: "not_required" },
+    },
+  },
 ];
 
 export function seedManufacturers(): Manufacturer[] {

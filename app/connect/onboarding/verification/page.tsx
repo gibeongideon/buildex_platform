@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { FlaskConical } from "lucide-react";
 import {
   Alert,
   Card,
@@ -27,7 +26,7 @@ import {
 import type { DocumentTypeKey } from "@/lib/schemas/document";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
 import { StepShell, StepSkeleton } from "../step-frame";
-import { DemoScenarios } from "./demo-scenarios";
+import { OpsReviewNote } from "@/components/shared/ops-review-note";
 
 const STATUS_MESSAGE: Record<string, string> = {
   submitted:
@@ -173,15 +172,7 @@ export default function VerificationStepPage() {
           </p>
         ) : null}
 
-        <Card>
-          <CardHeader className="flex items-center gap-2">
-            <FlaskConical className="size-4 text-subtle-foreground" aria-hidden="true" />
-            <CardTitle>Demo scenarios</CardTitle>
-          </CardHeader>
-          <CardBody>
-            <DemoScenarios manufacturerId={manufacturer.id} checks={manufacturer.checks} />
-          </CardBody>
-        </Card>
+        <OpsReviewNote manufacturerId={manufacturer.id} status={manufacturer.status} />
       </div>
     </StepShell>
   );

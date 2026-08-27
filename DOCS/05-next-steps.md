@@ -1,40 +1,45 @@
 # 05 — Next Steps
 
-## Recommended next slice: Phase 3
+## Recommended next slice: Phase 4
 
-Phase 2 shipped the marketplace and the manufacturer portal. The gap it leaves is the
-other side of the counter: verification still advances only through demo buttons, so the
-Buildex Connect loop is not yet closed by a real actor.
+Phase 3 closed the Connect loop: a manufacturer signs up, **Buildex Operations verifies
+them in `/admin`**, the listings they were holding go live, and a buyer can find them. The
+console also gave the platform its first internal view — one activity timeline, one
+exceptions list, one place where suspension, listing moderation and package overrides
+happen.
 
-Phase 3 closes it — a manufacturer signs up, **ops verifies them**, their listings go
-live, and a hardware shop can find them.
+What is still missing is the *other* side of the counter. The marketplace can be browsed and
+enquired against, but a hardware shop has no account, no cart and no order. Everything
+downstream depends on that: Buildex Capital cannot score credit without transaction
+history, and consumer intelligence has no POS data to read.
 
-### Phase 3 — Ops & verification console
+### Phase 4 — Buildex Interiors: hardware shop portal & supply
 
 | Screen | Scope |
 | --- | --- |
-| `/console/queue` | Verification queue sorted by SLA breach risk. `slaHoursRemaining()` already computes the ageing |
-| `/console/queue/[id]` | Document reviewer — document alongside extracted fields |
-| `/console/queue/[id]/decide` | Approve · reject with reasons · request more info · flag for site visit |
-| `/console/manufacturers` | Directory with status, region and package filters |
-| `/console/subscriptions` | Package administration and overrides |
-| `/console/audit` | Immutable trail of who decided what and when |
+| `/shop/onboarding` | Hardware KYB plus owner ID verification — the same five-check pipeline shape, different document pack |
+| `/shop/dashboard` | Orders in flight, spend to date, credit eligibility progress (read-only until Phase 5) |
+| `/shop/cart` | Multi-supplier basket. Quantity bands already price per line; the open question is whether one order can span suppliers |
+| `/shop/orders/[id]` | Order tracking, delivery notes, dispute path |
+| `/shop/inventory` | Stock and movement records — the data Phase 6's scoring model needs |
+| `/admin/shops` | The hardware directory in the console, alongside the manufacturer one |
 
-Most of the machinery exists: `manufacturerRepo.setCheckStatus()` already handles
-transitions, marks blocking documents and re-derives status. The console is largely a new
-surface over existing operations, plus an `AuditRepo`.
+Most of the seam is already shaped for it: `EnquiryRepo` proves the buyer→supplier round
+trip, `publicListings()` already governs what a shop can see, and the console's table and
+exception patterns transfer directly. What is genuinely new is an `OrderRepo` and a
+`WalletRepo` stub — and the decision above about multi-supplier orders, which changes the
+schema.
 
-This is also where the demo scenario buttons get retired — the console becomes the real way
-to move an application.
+**Rough order:** `OrderRepo` interface → hardware onboarding → cart and checkout → order
+tracking → the console's hardware directory → inventory.
 
-**Rough order:** `AuditRepo` interface → console shell and queue → document reviewer →
-decision actions → directories → retire the demo scenario controls.
+### Also outstanding from earlier phases
 
-### Also outstanding from Phase 2
-
-Bulk CSV price-list import (`/connect/catalogue/import`) — a preview table with a per-row
-error report. Deferred because it is a self-contained addition to a page that already
-works.
+| Item | Note |
+| --- | --- |
+| Bulk CSV price-list import (`/connect/catalogue/import`) | A preview table with a per-row error report. Self-contained addition to a page that already works |
+| Four-eyes on rejection | A rejection costs a supplier days. The decision path already records what happened; what it needs is a second reviewer, which needs authentication first |
+| Hardware-facing exceptions in the console | Shops that stop ordering, disputes ageing. Nothing to show until Phase 4 |
 
 ---
 
@@ -105,15 +110,16 @@ repayment before increasing limits.
 
 ## Decisions the demo can now support
 
-The requirements list nine decisions awaiting management. Phase 1 makes three of them
-concrete enough to settle, and Phases 2–3 will cover a fourth:
+The requirements list nine decisions awaiting management. Phases 1–3 make four of them
+concrete enough to settle:
 
 | Decision | What to look at |
 | --- | --- |
 | Manufacturer onboarding requirements | Walk Journey A. The seven-document KYB pack, five-check pipeline and site-visit trigger rule are all visible and adjustable |
 | Manufacturer packages and pricing | `/connect/subscription` — the feature matrix is the commercial proposal in concrete form. Prices are placeholders |
-| First release scope for the Manufacturer Portal | Phases 1–3 as scoped above |
-| Regional visibility pricing | Phase 2 campaign builder |
+| First release scope for the Manufacturer Portal | Phases 1–3, all shipped — walk the portal and the console back to back |
+| Regional visibility pricing | `/connect/campaigns` to buy it, `/admin/campaigns` to see what 12 campaigns actually returned. CPM and reach are modelled placeholders, labelled as such |
+| Verification SLAs and who owns each check | `/admin/verification` shows the four-hour document check and the 24/48/120-hour registry and site-visit targets against real ageing. Eight applications are in flight, eleven checks already past target |
 
 The remaining five (six-month qualification, the 80% turnover threshold, pilot entry limit,
 5/10/14-day cycles, wallet architecture) depend on Phases 5–6 and the regulatory review.
@@ -127,8 +133,8 @@ Small items worth picking up alongside feature work.
 | Item | Why |
 | --- | --- |
 | Move the onboarding draft server-side at cutover | "Save & exit" should survive a device change. `OnboardingRepo` already has the right shape |
-| Add a `768px` screenshot to the review routine | Currently checked at 375 and 1440; the tablet breakpoint is where the portal grid switches |
+| Fold the overflow sweep into CI | Phase 3 ran it as a one-off script across 13 routes × 4 widths × both themes. It belongs in the suite, not in a scratch file |
 | Add one Playwright spec per journey as each phase lands | Journey A has four specs; keep that ratio |
-| Revisit React Hook Form compiler compatibility | 4 lint warnings today. Harmless, but worth re-checking when RHF ships compiler support |
-| Bump `buildex.mock.v2` when fixture shape changes | Otherwise stale persisted data wins over new seeds |
+| Revisit React Hook Form compiler compatibility | 6 lint warnings today. Harmless, but worth re-checking when RHF ships compiler support |
+| Bump `buildex.mock.v5` when fixture shape changes | Otherwise stale persisted data wins over new seeds. Bumped to v5 when Phase 3 added four in-flight suppliers |
 | Keep the seam greps in CI | `grep -rn "fixtures" app/ components/` returning anything means the cutover is no longer a one-file change |

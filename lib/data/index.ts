@@ -33,6 +33,9 @@ export {
   insightsRepo,
 } from "./mock/marketplace";
 
+export { activityRepo } from "./mock/activity";
+export { adminRepo } from "./mock/admin";
+
 export {
   subscribe as subscribeToData,
   getVersion as getDataVersion,
@@ -40,6 +43,13 @@ export {
 } from "./mock/db";
 
 export type {
+  ActivityActorType,
+  ActivityEntityType,
+  ActivityEvent,
+  ActivityFilter,
+  ActivityKind,
+  ActivityRepo,
+  AdminRepo,
   BrowsingRepo,
   CampaignRepo,
   DemoSession,
@@ -58,6 +68,7 @@ export type {
   OnboardingDraft,
   OnboardingRepo,
   OnboardingStepId,
+  PlatformSummary,
   ProductPerformance,
   ProductRepo,
   RegionDemand,

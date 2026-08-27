@@ -3,6 +3,7 @@ import type { Product } from "@/lib/schemas/product";
 import type { UploadedDocument } from "@/lib/schemas/document";
 import type { BillingCycle, PackageKey } from "@/lib/schemas/subscription";
 import type { CheckStatus, VerificationCheckKey } from "@/lib/schemas/verification";
+import { draftsToPublishOnClearing, isAdministrativeHold } from "@/lib/rules/ops";
 import { deriveStatus } from "@/lib/schemas/verification";
 import { regionForCounty } from "@/lib/schemas/common";
 import {
@@ -41,16 +42,49 @@ function touch(m: Manufacturer): Manufacturer {
   return { ...m, updatedAt: now() };
 }
 
+/**
+ * Applies an update to one manufacturer, and with it the one side effect a
+ * status change has elsewhere in the store.
+ *
+ * Clearing a supplier to list publishes the drafts they were never allowed to
+ * publish — see `draftsToPublishOnClearing`. Doing it here rather than in the
+ * console means it happens however the status moved: an ops decision, a
+ * reinstatement, or the manufacturer's own resubmission clearing the last check.
+ */
 function replaceManufacturer(id: string, update: (m: Manufacturer) => Manufacturer) {
   let updated: Manufacturer | undefined;
-  mutate((db) => ({
-    ...db,
-    manufacturers: db.manufacturers.map((m) => {
+
+  mutate((db) => {
+    let before: Manufacturer | undefined;
+    const manufacturers = db.manufacturers.map((m) => {
       if (m.id !== id) return m;
+      before = m;
       updated = touch(update(m));
       return updated;
-    }),
-  }));
+    });
+    if (!before || !updated) return db;
+
+    const promote = new Set(
+      draftsToPublishOnClearing(
+        before.status,
+        updated.status,
+        db.products.filter((p) => p.manufacturerId === id),
+      ),
+    );
+
+    return {
+      ...db,
+      manufacturers,
+      products: promote.size
+        ? db.products.map((p) =>
+            promote.has(p.id)
+              ? { ...p, status: "active" as const, updatedAt: now() }
+              : p,
+          )
+        : db.products,
+    };
+  });
+
   if (!updated) throw new Error(`Manufacturer not found: ${id}`);
   return updated;
 }
@@ -177,7 +211,13 @@ export const manufacturerRepo: ManufacturerRepo = {
         };
       });
 
-      const nextStatus = deriveStatus(checks);
+      /*
+        `deriveStatus()` reads only the checks, so a check movement after a
+        suspension would silently un-suspend the manufacturer. Suspension is an
+        administrative hold, not a derived state — it outranks the pipeline.
+      */
+      const derived = deriveStatus(checks);
+      const nextStatus = isAdministrativeHold(m.status) ? m.status : derived;
       // Once a document is implicated in a failing check, reflect that on the
       // document itself so the upload screen can point straight at it.
       const documents = m.documents.map((doc) => {
@@ -195,7 +235,7 @@ export const manufacturerRepo: ManufacturerRepo = {
         checks,
         documents,
         status: nextStatus,
-        verifiedAt: nextStatus === "approved" ? (m.verifiedAt ?? now()) : null,
+        verifiedAt: derived === "approved" ? (m.verifiedAt ?? now()) : null,
         reviewNotes:
           status === "action_needed" && options.note
             ? [...new Set([...m.reviewNotes, options.note])]

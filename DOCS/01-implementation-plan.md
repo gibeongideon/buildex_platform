@@ -87,14 +87,28 @@ editable company settings.
 
 Deferred from this phase: bulk CSV price-list import.
 
-### Phase 3 — Buildex Console: Ops & Verification
+### Phase 3 — Buildex Admin: Ops & Verification — **delivered**
 
-Verification queue with SLA ageing, document reviewer (document alongside extracted
-fields), approve / reject-with-reasons / request-more-info / flag-for-site-visit,
-manufacturer and hardware directories, subscription administration, audit trail.
+Verification queue with SLA ageing, the reviewer (declared company, directors with
+shareholding reconciliation, KYB documents), and the four decisions — approve /
+reject-with-named-documents / request-more-info / flag-for-site-visit. Plus manufacturer
+directory with suspend and reinstate, listing moderation, platform-wide enquiry oversight,
+campaign pause/resume, subscription administration, a filterable activity timeline, and
+team & roles.
 
 Closes the Connect loop end-to-end against Phase 1: a manufacturer submits, ops decides,
-the manufacturer's tracker updates.
+the manufacturer's tracker updates and the listings they were holding go live. The demo
+scenario buttons that used to advance verification from the manufacturer's own screen are
+retired — with a real ops actor, two ways to move the same records is how the two end up
+disagreeing.
+
+**Deliberately not in this phase:** the credit portfolio, loan tracker, DPD/NPL buckets,
+wallet reconciliation and the §15 pilot metrics. None of that data exists yet, and the
+requirements are explicit that credit figures must not be invented. Those arrive with
+Phases 5–6, and the console says so on its overview rather than showing an empty shell.
+
+The hardware-shop directory also waits: hardware shops are Phase 4, so there is nothing
+to direct yet.
 
 ### Phase 4 — Buildex Interiors: Hardware Shop Portal & Supply
 

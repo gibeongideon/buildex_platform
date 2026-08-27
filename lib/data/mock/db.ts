@@ -18,7 +18,7 @@ import { seedCampaigns } from "@/lib/data/fixtures/campaigns";
 */
 
 /* Bump when the shape of seeded data changes, or old persisted data wins. */
-const STORAGE_KEY = "buildex.mock.v4";
+const STORAGE_KEY = "buildex.mock.v5";
 
 export type MockDb = {
   manufacturers: Manufacturer[];

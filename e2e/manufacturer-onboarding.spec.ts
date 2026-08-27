@@ -132,7 +132,24 @@ test("a manufacturer can complete onboarding end to end", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /Verification in progress/i })).toBeVisible();
   await expect(page.getByText("Document completeness", { exact: true })).toBeVisible();
 
-  await page.getByRole("button", { name: "Approve everything" }).click();
+  /*
+    Verification no longer advances from this screen — Buildex Operations owns
+    that decision now. So the loop closes the way it will in production: the
+    applicant waits, ops approves in the console, and the applicant's own
+    tracker updates without anyone wiring the two together.
+  */
+  await page.getByRole("link", { name: /Open the reviewer/i }).click();
+  await expect(page).toHaveURL(/\/admin\/verification\/mfr_/, { timeout: 20_000 });
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    COMPANY.tradingName,
+    { timeout: 20_000 },
+  );
+
+  await page.getByRole("button", { name: /Pass every outstanding check/ }).click();
+  await page.getByRole("button", { name: /^Record approve$/i }).click();
+  await expect(page.getByText(/Approve recorded/)).toBeVisible({ timeout: 20_000 });
+
+  await page.goto("/connect/onboarding/verification");
   await expect(page.getByText("Verified").first()).toBeVisible({ timeout: 20_000 });
 
   await page.getByRole("button", { name: /Continue to packages/i }).click();

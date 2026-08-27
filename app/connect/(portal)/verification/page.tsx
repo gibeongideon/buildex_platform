@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { FlaskConical } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import {
   Alert,
@@ -16,7 +15,7 @@ import { VerificationTracker } from "@/components/shared/verification-tracker";
 import { DocumentCard } from "@/components/shared/document-card";
 import type { PickedFile } from "@/components/shared/file-dropzone";
 import { DetailRow } from "@/components/shared/format";
-import { DemoScenarios } from "@/app/connect/onboarding/verification/demo-scenarios";
+import { OpsReviewNote } from "@/components/shared/ops-review-note";
 import { manufacturerRepo } from "@/lib/data";
 import { buildUploadedDocument } from "@/lib/rules/documents";
 import { blockingDocumentTypes } from "@/lib/rules/onboarding";
@@ -151,15 +150,10 @@ export default function VerificationPage() {
             </CardBody>
           </Card>
 
-          <Card>
-            <CardHeader className="flex items-center gap-2">
-              <FlaskConical className="size-4 text-subtle-foreground" aria-hidden="true" />
-              <CardTitle>Demo scenarios</CardTitle>
-            </CardHeader>
-            <CardBody>
-              <DemoScenarios manufacturerId={manufacturer.id} checks={manufacturer.checks} />
-            </CardBody>
-          </Card>
+          <OpsReviewNote
+            manufacturerId={manufacturer.id}
+            status={manufacturer.status}
+          />
         </div>
       </div>
     </>

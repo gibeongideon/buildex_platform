@@ -1,22 +1,23 @@
 # 04 — Delivered
 
-Covers Phase 0 (Foundation), Phase 1 (manufacturer onboarding) and Phase 2
-(the marketplace and manufacturer portal).
+Covers Phase 0 (Foundation), Phase 1 (manufacturer onboarding), Phase 2
+(the marketplace and manufacturer portal) and Phase 3 (Buildex Admin).
 
 ## Summary
 
 | Metric | Value |
 | --- | --- |
-| Source files | 88 (`app/`, `components/`, `lib/`, `e2e/`) |
-| Routes | 32 (plus `/_not-found`) |
+| Source files | 107 (`app/`, `components/`, `lib/`, `e2e/`) |
+| Routes | 43 (plus `/_not-found`) |
 | Onboarding steps | 9, all resumable and deep-linkable |
-| Seeded manufacturers / products | 12 / 72 |
+| Seeded manufacturers / products | 16 / 72 |
 | Seeded enquiries / campaigns | 50 / 12 |
+| Derived activity events | 483, spanning a year |
 | Bundled product photos | 22 across 13 categories (CC / public domain) |
-| End-to-end specs | 21, all passing |
+| End-to-end specs | 32, all passing |
 | TypeScript | `tsc --noEmit` clean |
-| ESLint | 0 errors |
-| Production build | Clean, all routes prerendered as static |
+| ESLint | 0 errors, 6 warnings (all upstream) |
+| Production build | Clean |
 
 ---
 
@@ -253,6 +254,81 @@ one looks the same as one added a year later.
 
 ---
 
+## Phase 3 — Buildex Admin
+
+Before this phase, everything built was one of two things: a manufacturer running their own
+storefront, or a buyer browsing the marketplace. Nobody inside Buildex had a place to stand,
+which left the Connect loop open at exactly the point the requirements care most about —
+verification only advanced through demo buttons on the manufacturer's own page.
+
+### The nine sections
+
+| Route | What it answers |
+| --- | --- |
+| `/admin` | Eight KPIs, then the exceptions panel and the recent timeline |
+| `/admin/verification` | What is about to breach SLA — the queue, ordered by risk not arrival |
+| `/admin/verification/[id]` | Does the paperwork support the claim, and what does each decision do |
+| `/admin/manufacturers` | Every supplier in any state; suspend and reinstate |
+| `/admin/manufacturers/[id]` | One supplier: company, catalogue, enquiries, campaigns, verification, history |
+| `/admin/listings` | All 72 listings including drafts; which are held behind verification |
+| `/admin/enquiries` | Who is answering and who is not, platform-wide |
+| `/admin/campaigns` | Spend, delivery and conversion; pause and resume |
+| `/admin/subscriptions` | Who is on what, what renews when, and the account-managed override |
+| `/admin/activity` | The full timeline, filterable and grouped by day |
+| `/admin/team` | The two internal roles and what each is for |
+
+### Decisions worth calling out
+
+**Exceptions come before the feed.** A timeline says what happened; an exceptions list says
+what to do. The overview leads with the second: checks past SLA, applications sitting in
+`action_needed`, expired documents, and enquiries left longer than the supplier's own
+advertised response time. Every row links to the record it is about.
+
+**Response time is measured against the supplier's own promise, not a flat platform SLA.** A
+hardware shop partly chose them on "replies within 3h", so that is the number worth holding
+them to — and it is the number the enquiries console shows beside every wait.
+
+**The reviewer states the consequence before the click.** Selecting a decision renders the
+exact checks it will move, to what status, and the resulting manufacturer state. Rejection
+will not record until the reviewer has named at least one document *and* written a note,
+because the manufacturer's targeted-resubmit flow is built to ask for exactly what was
+ticked.
+
+**Suspension is an administrative hold, not a derived state.** `deriveStatus()` reads only
+the checks, so a later check movement would have silently un-suspended a suspended supplier.
+`isAdministrativeHold()` now outranks the pipeline, and reinstating recomputes from the
+checks so a previously verified supplier comes back verified rather than resetting to
+submitted.
+
+**The demo scenario buttons are gone.** With a real ops actor, two ways to move the same
+records is how the two end up disagreeing. What replaces them on the manufacturer's own
+verification screen is a signpost to the reviewer, honest about being a prototype shortcut.
+
+**Credit pages are absent on purpose.** The requirements list an Admin / Risk dashboard with
+portfolio monitoring at P1, and none of that data exists yet. The overview says so in
+writing rather than showing an empty shell — the requirements are explicit that credit
+figures must not be invented.
+
+### Four more applications in the seed
+
+The real status spread left only three applications in flight, which made the queue look
+like a screen nobody needs. Four more were added — all unverified, so they add nothing to the
+marketplace and do not touch the eight suppliers whose 66 listings are live. What they add is
+the states that are easy to get wrong:
+
+| Supplier | State | What it exercises |
+| --- | --- | --- |
+| Meru Pipe Works | In review | A KRA check 60h past its 24h target — the row the queue must lead with |
+| Malindi Blocks | In review | A site visit running alongside an unfinished desk check |
+| Kitui Lime | Action needed | Shareholding declared at 95%, plus an expired KEBS permit |
+| Bungoma Ceilings | Submitted | Every check still pending — nobody has picked it up, and no SLA clock has started |
+
+Their storefront trading figures are zeroed rather than scaled off company age, the same way
+`createFromDraft` starts a real new manufacturer: a supplier never cleared to sell has no
+response record to advertise, and the enquiries console reads exactly that number.
+
+---
+
 ## Verification
 
 ### End-to-end (`npm run test:e2e`)
@@ -277,21 +353,47 @@ marketplace.spec.ts
   ✓ browsing a listing populates the history rail on the home page
   ✓ Ask AI parses a requirement and shows its working
   ✓ the manufacturers tab lists suppliers with their product strips
+  ✓ the four scope tabs navigate and carry the query
+  ✓ the Regions tab actually searches
+  ✓ the hero's category scope narrows the results
+  ✓ the mega menu stays open when a mouse user clicks the trigger
+  ✓ the home page leads with the product grid, no dead columns
 
-16 passed
+admin.spec.ts
+  ✓ the overview counts what is actually in the data
+  ✓ the verification queue leads with the worst SLA breach
+  ✓ approving a supplier publishes the drafts it was holding
+  ✓ rejection names only the documents that are wrong
+  ✓ a site visit clears listing but holds transacting
+  ✓ suspending a supplier pulls its listings out of the marketplace
+  ✓ the activity feed reflects a decision that was actually taken
+  ✓ every exception on the overview links to something real
+  ✓ the console sections all render their real data
+  ✓ the manufacturer record moves between its tabs with the keyboard
+  ✓ the decision panel is operable with the keyboard alone
+
+32 passed
 ```
 
-The happy-path spec drives all nine steps, uploads six documents through the real file
-chooser, approves the application through the demo controls, selects a package, creates a
-listing with quantity price bands, asserts the preview shows `KSh 735`, and lands on the
-dashboard with the activation checklist rendered.
+The happy-path onboarding spec drives all nine steps, uploads six documents through the real
+file chooser, then **closes the loop the way production will**: it follows the applicant's
+own link into `/admin/verification/[id]`, records an approval there, returns to the
+applicant's tracker and asserts it reads Verified — with nothing wiring the two screens
+together beyond the shared repository. It then selects a package, creates a listing with
+quantity price bands, asserts the preview shows `KSh 735`, and lands on the dashboard.
+
+The admin specs each take a real decision and check the consequence somewhere else in the
+product. Approving Kakamega Hardware is asserted three times over: the reviewer reads
+Verified, the supplier's storefront comes up with stock, and their previously drafted Wire
+Nails listing appears in the central catalogue — all three reading the same
+`publicListings()` rule.
 
 ### Build and static analysis
 
 - `npx tsc --noEmit` — clean
-- `npx eslint .` — 0 errors, 4 warnings (all `react-hooks/incompatible-library`: the React
+- `npx eslint .` — 0 errors, 6 warnings (all `react-hooks/incompatible-library`: the React
   Compiler declines to optimise components using React Hook Form. Upstream, not a defect)
-- `npx next build` — clean, 21 routes prerendered
+- `npx next build` — clean, 43 routes (41 static, 2 dynamic on `[id]`)
 
 ### Responsive
 
@@ -300,9 +402,15 @@ Horizontal page scroll measured on the **production build** by attempting
 
 | Width | Result |
 | --- | --- |
-| 375px | All 18 pages OK |
-| 768px | All 18 pages OK |
-| 1440px | All 18 pages OK |
+| 375px | All pages OK |
+| 768px | All pages OK |
+| 1440px | All pages OK |
+| 1900px | All pages OK |
+
+The Phase 3 routes were measured again separately — 13 admin and verification paths × 4
+widths × light and dark, 104 measurements, reading `documentElement.scrollWidth -
+clientWidth` after data had landed so tables were at their real width. No overflow
+anywhere. Every wide table sits inside its own `.scroll-x` container.
 
 Wide tables confirmed to still scroll inside their own container (326px box, 672px
 content, 346px of internal scroll) — the fix clips paint, not content.
@@ -431,6 +539,63 @@ every page at three widths.
 
 `app/(public)/layout.tsx`
 
+### 10. A check movement silently un-suspended a suspended supplier
+
+`deriveStatus()` reads only the checks, by design — it is what keeps ops, the wizard and the
+manufacturer's tracker in agreement. But suspension is not derived from checks: it is an
+administrative hold. So any later check movement on a suspended manufacturer recomputed
+status from the pipeline and quietly put them back in business, with no error anywhere and
+nothing on screen to notice.
+
+Found while building the console, because the console is the first surface that can suspend
+and then keep reviewing the same record. `isAdministrativeHold()` now outranks the derived
+value, and `verifiedAt` is still driven by the derived state so it cannot claim a
+verification that has been withdrawn.
+
+`lib/rules/ops.ts`, `lib/data/mock/repos.ts`
+
+### 11. Three screens promised drafts publish themselves; nothing did it
+
+The onboarding first-listing step, the manufacturer's verification tracker and the admin
+listings queue all state that a draft goes live the moment its supplier clears — "you do not
+need to come back and publish it". Nothing implemented it. A listing created before
+verification stayed a draft forever, so the first thing a newly approved manufacturer would
+have found is an empty storefront and a promise the product had broken.
+
+`draftsToPublishOnClearing()` now makes it true, applied in `replaceManufacturer()` — the one
+write path that changes a manufacturer's status — so it happens however the status moved: an
+ops decision, a reinstatement, or the manufacturer's own resubmission clearing the last
+check. It fires only on the transition *into* a listable state from one where publishing was
+impossible, which is what stops it from publishing drafts a supplier deliberately parked, and
+why reinstating a suspended supplier pushes nothing live.
+
+Now asserted end to end: approving Kakamega Hardware puts their Wire Nails listing in the
+public catalogue.
+
+`lib/rules/ops.ts`, `lib/data/mock/repos.ts`
+
+### 12. The audit trail could not show what Buildex had done
+
+Every verification check was attributed to `system`. Two of the five are Buildex's own
+work — document completeness sits with Operations, the site visit with the field team — and
+the other three are external registry lookups. With all five marked `system`, filtering the
+timeline to Buildex Operations returned almost nothing, which made the Team page's audit
+panel structurally unable to answer the only question it exists for.
+
+A check's actor now follows its declared authority.
+
+`lib/data/mock/activity.ts`
+
+### 13. React Compiler: memoization could not be preserved
+
+The enquiries console derived its per-supplier answer rates in a `useMemo` keyed on
+`rows ?? []` — a fresh array every render, so the memo never held and the compiler refused
+to compile the component at all (an error, not a warning). Rewritten as a plain top-level
+function over `rows`: the compiler memoizes it correctly, and the dependency that actually
+matters is the one the query already tracks.
+
+`app/(admin)/admin/enquiries/page.tsx`
+
 ### Also addressed: React Compiler correctness
 
 Next.js 16 ships React Compiler lint rules, which flagged genuine hazards rather than
@@ -453,6 +618,8 @@ These are intentional for a mockup, listed so nobody mistakes them for oversight
 | Uploaded files are discarded | Only name, size and type are recorded. Enough to drive completeness, review and expiry without holding megabytes of scanned certificates in `localStorage` |
 | Data is per-browser | Clearing site data resets everything |
 | Package prices are placeholders | Labelled "indicative" in the UI, pending commercial approval |
-| Verification is simulated | Advanced through demo controls. Real BRS / KRA / IPRS adapters are Phase 9 |
+| Verification decisions are unauthenticated | Ops decides in `/admin`, but anyone can open it. Real roles and four-eyes on rejection arrive with authentication at the cutover |
+| Registry lookups are simulated | BRS, KRA and IPRS results come from the fixtures. Real adapters are Phase 9 |
 | OTP accepts any six digits | The code is displayed on screen in demo mode |
-| React Compiler skips form components | React Hook Form is not yet compiler-compatible; 4 warnings, no functional impact |
+| React Compiler skips form components | React Hook Form is not yet compiler-compatible; 6 warnings, no functional impact |
+| No hardware-shop directory in the console | Hardware shops are Phase 4, so there is nothing to administer yet |

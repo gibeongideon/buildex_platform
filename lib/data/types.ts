@@ -5,6 +5,7 @@ import type { CheckStatus, VerificationCheckKey } from "@/lib/schemas/verificati
 import type { BillingCycle, PackageKey } from "@/lib/schemas/subscription";
 import type { Enquiry } from "@/lib/schemas/enquiry";
 import type { Campaign } from "@/lib/schemas/campaign";
+import type { OpsException } from "@/lib/rules/ops";
 
 /*
   ===========================================================================
@@ -204,6 +205,114 @@ export interface MarketplaceRepo {
   relatedFromManufacturer(productId: string, limit?: number): Promise<Product[]>;
   /** Comparable listings from other manufacturers in the same category. */
   similarFromOthers(productId: string, limit?: number): Promise<MarketplaceListing[]>;
+}
+
+// ---------------------------------------------------------------------------
+// Platform activity — Buildex Admin
+// ---------------------------------------------------------------------------
+
+export type ActivityKind =
+  | "application_submitted"
+  | "check_started"
+  | "check_passed"
+  | "manufacturer_verified"
+  | "document_uploaded"
+  | "listing_created"
+  | "listing_updated"
+  | "enquiry_received"
+  | "enquiry_quoted"
+  | "campaign_launched"
+  | "campaign_ended"
+  | "subscription_started";
+
+export type ActivityActorType = "manufacturer" | "buyer" | "ops" | "system";
+export type ActivityEntityType = "manufacturer" | "product" | "enquiry" | "campaign";
+
+export type ActivityEvent = {
+  id: string;
+  at: string;
+  kind: ActivityKind;
+  actor: { type: ActivityActorType; label: string };
+  entity: { type: ActivityEntityType; id: string; label: string };
+  summary: string;
+  /** Where an admin goes to act on it. Null when nothing is actionable. */
+  href: string | null;
+};
+
+export type ActivityFilter = {
+  kinds?: ActivityKind[];
+  actorTypes?: ActivityActorType[];
+  manufacturerId?: string;
+  since?: string;
+  query?: string;
+  limit?: number;
+};
+
+/**
+ * The platform-wide timeline.
+ *
+ * Derived from the timestamps already on every record rather than a separate
+ * events table — the same principle as `InsightsRepo`. That means the feed can
+ * never disagree with the records it describes, it is populated from day one,
+ * and anything a user does in the app appears without event plumbing to
+ * remember.
+ *
+ * At the backend cutover this becomes a real append-only event log; the
+ * interface does not move.
+ */
+export interface ActivityRepo {
+  list(filter?: ActivityFilter): Promise<ActivityEvent[]>;
+  /** Distinct kinds present in the data, with counts — drives the filter UI. */
+  kinds(): Promise<{ kind: ActivityKind; count: number }[]>;
+}
+
+// ---------------------------------------------------------------------------
+// Admin overview
+// ---------------------------------------------------------------------------
+
+export type PlatformSummary = {
+  applicationsAwaitingDecision: number;
+  checksPastSla: number;
+  verifiedSuppliers: number;
+  suppliersTotal: number;
+  liveListings: number;
+  draftListings: number;
+  enquiriesUnanswered: number;
+  enquiryValueInFlightKsh: number;
+  acceptedValueKsh: number;
+  activeCampaigns: number;
+  campaignSpendKsh: number;
+};
+
+/**
+ * Cross-entity figures and the exceptions list.
+ *
+ * These span manufacturers, listings, enquiries and campaigns, so deriving them
+ * in a page component would put business rules in the UI and fire a repository
+ * call per entity. One pass behind the seam instead, the way
+ * `publicListings()` already does for the marketplace.
+ */
+export interface AdminRepo {
+  summary(): Promise<PlatformSummary>;
+  exceptions(): Promise<OpsException[]>;
+  /** Every manufacturer with the counts an admin table needs beside it. */
+  manufacturerRows(): Promise<
+    {
+      manufacturer: Manufacturer;
+      liveListings: number;
+      draftListings: number;
+      openEnquiries: number;
+      pastSlaChecks: number;
+    }[]
+  >;
+  /** Every listing joined to its supplier, drafts included. */
+  listingRows(): Promise<{ product: Product; manufacturer: Manufacturer }[]>;
+  /** Every enquiry joined to its supplier, plus how long it has waited. */
+  enquiryRows(): Promise<
+    { enquiry: Enquiry; manufacturer: Manufacturer; waitedHours: number | null }[]
+  >;
+  /** Every campaign joined to its supplier. */
+  campaignRows(): Promise<{ campaign: Campaign; manufacturer: Manufacturer }[]>;
 }
 
 /**

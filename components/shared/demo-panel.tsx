@@ -24,11 +24,13 @@ const ENABLED = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
 
 const SHORTCUTS = [
   { href: "/", label: "Ecosystem home" },
+  { href: "/marketplace", label: "Marketplace — buyer's view" },
   { href: "/manufacturers", label: "Connect — manufacturer acquisition" },
   { href: "/connect/onboarding/account", label: "Start onboarding" },
   { href: "/connect/dashboard", label: "Manufacturer dashboard" },
   { href: "/connect/verification", label: "Verification status" },
-  { href: "/connect/subscription", label: "Subscription packages" },
+  { href: "/admin", label: "Buildex Admin — internal console" },
+  { href: "/admin/verification", label: "Verification queue (ops)" },
 ];
 
 export function DemoPanel() {
@@ -40,14 +42,10 @@ export function DemoPanel() {
 
   function reset() {
     setResetting(true);
+    // The in-progress application lives in the same store as the seeded data,
+    // so one reset clears both. The theme preference is a separate key and
+    // deliberately survives.
     resetDemoData();
-    try {
-      // The wizard's own draft lives in the same store, but the theme
-      // preference is a separate key and deliberately survives a reset.
-      window.localStorage.removeItem("buildex.mock.v2");
-    } catch {
-      // Blocked storage — the in-memory reset above still took effect.
-    }
     setOpen(false);
     setResetting(false);
     router.push("/");

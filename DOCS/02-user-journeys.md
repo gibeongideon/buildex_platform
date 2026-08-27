@@ -89,13 +89,36 @@ and regional targeting is Premium-and-above. Bulk CSV import is the one piece de
 
 ---
 
-## Journey C — Buildex Ops Verification (Phase 3)
+## Journey C — Buildex Ops Verification ✅ Built (Phase 3)
 
-Console → verification queue sorted by SLA breach risk → open a submission → review each
-document alongside its extracted fields → run the BRS / KRA / IPRS checks → decide:
-approve, reject with reasons, request more information, or flag for a site visit →
-decision written to the audit trail → the manufacturer's tracker (Journey A step 7)
-updates and an SMS goes out.
+`/admin` → the exceptions panel names what needs a human: checks past SLA, applications
+waiting on the manufacturer, expired documents, enquiries left longer than the supplier's own
+advertised response time → `/admin/verification`, ordered by SLA breach risk rather than
+arrival → open an application → the declared company sits beside its directors (with
+shareholding reconciled to 100% or flagged) and the KYB pack, each document with its status
+and expiry → choose a decision and the panel states, *before* the click, exactly which checks
+will move and what status results → record it.
+
+Four decisions, and what each one means:
+
+| Decision | Effect |
+| --- | --- |
+| **Approve** | Every open check passes. The supplier becomes Verified, and the listings they were holding as drafts go live at that moment |
+| **Flag for site visit** | Desk checks clear, the visit stays open. Conditionally approved: they may list, but not transact |
+| **Request more information** | Document completeness moves to action needed with a note. Nothing is failed |
+| **Reject** | The same, but naming the documents. The manufacturer's resubmit flow then asks for exactly those and nothing else |
+
+Then: `/admin/manufacturers` to suspend a supplier — storefront dark, listings out of the
+catalogue — or reinstate one, which recomputes from the checks so a previously verified
+supplier comes back verified. `/admin/listings` to unpublish a single listing without
+touching the supplier. `/admin/enquiries` to see who is not replying. `/admin/activity` for
+the whole platform timeline, every row derived from a real record.
+
+The manufacturer's own tracker (Journey A step 7) updates with no wiring between the two
+screens: both read the same checks, and status is derived from them.
+
+Not yet: authentication, so any decision is unattributed and four-eyes on rejection has to
+wait; and an SMS on each transition, which needs a provider.
 
 ---
 

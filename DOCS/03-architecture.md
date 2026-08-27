@@ -402,6 +402,20 @@ painting them onto a canvas rather than parsing the string — Tailwind v4 emits
 for anything carrying an alpha modifier, and it composites translucent grounds the way a
 reader actually sees them. Headings must clear 10:1, `muted` 7:1 and `subtle` 5.5:1.
 
+### The marketplace groups by category, not one long grid
+
+A single continuous grid of every listing makes a buyer scan forty unrelated products to
+find the two they care about. The home page renders a rail per category instead — demand
+first, then the deepest categories — and each rail scrolls sideways, so a category with
+twelve products costs the same vertical space as one with three.
+
+The arrows are an affordance, not the mechanism. Each rail is an ordinary scroll container,
+so a trackpad, a touchscreen and the keyboard all work without them; the buttons are
+`aria-hidden` and `tabIndex={-1}` precisely because exposing them would add two controls
+that duplicate what the container already does natively.
+
+Card design is unchanged — this is a grouping change, not a redesign.
+
 ### Comparison is driven by quantity, not price
 
 On this marketplace a price is a set of quantity bands, not a number, so "who is

@@ -26,7 +26,10 @@ import { PRODUCT_CATEGORIES, REGIONS } from "@/lib/schemas/common";
 import { REGION_REACH } from "@/lib/schemas/campaign";
 import { priceRange } from "@/lib/schemas/product";
 import { ProductThumb, categoryIcon } from "@/components/shared/product-thumb";
-import { ProductCard, ProductCardSkeleton } from "@/components/shared/product-card";
+import {
+  ProductRail,
+  ProductRailSkeleton,
+} from "@/components/marketplace/product-rail";
 import { Currency, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
 import { StatusPill } from "@/components/ui/primitives";
@@ -278,6 +281,19 @@ export default function MarketplaceHomePage() {
 
   const mostWanted = spreadBy(listings, 4, (l) => l.product.category);
 
+  /*
+    One rail per category that actually has listings, deepest first — a category
+    with one product is a thin row and belongs below the ones worth browsing.
+    `listings` arrives demand-ranked, so each rail is ordered by demand too
+    without a second sort.
+  */
+  const categoryRails = PRODUCT_CATEGORIES.map((category) => ({
+    category,
+    items: listings.filter((l) => l.product.category === category),
+  }))
+    .filter(({ items }) => items.length > 0)
+    .sort((a, b) => b.items.length - a.items.length);
+
   const panels: React.ReactNode[] = [];
 
   if (recent && recent.length > 0) {
@@ -458,32 +474,49 @@ export default function MarketplaceHomePage() {
         </div>
       </section>
 
-      <div className="mt-8 space-y-10">
-          <section id="listings">
-            <SectionHeading
-              title="Most in demand"
-              icon={Flame}
-              href="/marketplace/search"
-              linkLabel="See all listings"
-            />
+      <div className="mt-8 space-y-6">
+          {/*
+            Grouped into per-category rails rather than one continuous grid. A
+            single grid of every listing makes a buyer scan forty unrelated
+            products to find the two they care about; a rail per category turns
+            the page into a set of answerable questions, and each one scrolls
+            sideways so a deep category costs no more vertical space than a
+            shallow one.
+          */}
+          <section id="listings" className="space-y-6">
             {loading && listings.length === 0 ? (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1700px]:grid-cols-7">
-                {Array.from({ length: 24 }).map((_, i) => (
-                  <ProductCardSkeleton key={i} />
-                ))}
-              </div>
+              <>
+                <ProductRailSkeleton title="Most in demand" />
+                <ProductRailSkeleton title="Cement & Concrete" />
+                <ProductRailSkeleton title="Steel & Reinforcement" />
+              </>
             ) : (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1700px]:grid-cols-7">
-                {listings.slice(0, 42).map(({ product, manufacturer, enquiryCount }, index) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    manufacturer={manufacturer}
-                    enquiryCount={enquiryCount}
-                    priority={index < 6}
+              <>
+                {/*
+                  Demand first: it is the one ranking the platform can defend,
+                  and it cuts across every category.
+                */}
+                <ProductRail
+                  title="Most in demand"
+                  subtitle="Ranked by real enquiry volume, not paid placement"
+                  icon={Flame}
+                  href="/marketplace/top-ranking"
+                  linkLabel="See ranking"
+                  listings={listings.slice(0, 12)}
+                  priority
+                />
+
+                {categoryRails.map(({ category, items }) => (
+                  <ProductRail
+                    key={category}
+                    title={category}
+                    subtitle={`${items.length} listing${items.length === 1 ? "" : "s"}`}
+                    icon={categoryIcon(category)}
+                    href={`/marketplace/search?category=${encodeURIComponent(category)}`}
+                    listings={items}
                   />
                 ))}
-              </div>
+              </>
             )}
           </section>
 

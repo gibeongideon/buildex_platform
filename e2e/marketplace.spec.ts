@@ -183,14 +183,19 @@ test("the All categories mega menu opens on hover and links through", async ({ p
     timeout: 15_000,
   });
   await page.getByRole("tab", { name: "Electrical" }).hover();
+
+  /*
+    Scoped to the menu itself. The home page now carries a rail per category, so
+    an <h3> reading "Electrical" exists on the page as well — an unscoped match
+    finds both and trips strict mode, but only once the rail data has loaded,
+    which made this intermittently red rather than reliably so.
+  */
+  const menu = page.getByRole("group", { name: "All categories" });
   await expect(
-    page.getByRole("heading", { name: "Electrical", exact: true }),
+    menu.getByRole("heading", { name: "Electrical", exact: true }),
   ).toBeVisible({ timeout: 15_000 });
 
-  await page
-    .getByRole("link", { name: "View all" })
-    .first()
-    .click();
+  await menu.getByRole("link", { name: "View all" }).first().click();
   await expect(page).toHaveURL(/\/marketplace\/search\?category=Electrical/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Electrical");
 });

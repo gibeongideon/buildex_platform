@@ -1,0 +1,3 @@
+Compare feature should Compare same product fro different manufactures
+
+We can also have Suggest feature to sugest alternative product

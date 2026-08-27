@@ -231,6 +231,14 @@ export function CategoryMegaMenu() {
             onMouseEnter={scheduleClose}
           />
           <div
+            /*
+              Named, because a full-width overlay carrying the whole category
+              tree is a distinct region and was reaching screen readers as an
+              anonymous div. It also gives anything that needs to address the
+              menu — a test, a shortcut — something to address it by.
+            */
+            role="group"
+            aria-label="All categories"
             className="absolute inset-x-0 z-40 border-y border-border bg-surface shadow-overlay"
             onMouseEnter={cancelClose}
             onMouseLeave={scheduleClose}

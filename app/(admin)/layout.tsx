@@ -4,11 +4,13 @@ import * as React from "react";
 import {
   Activity,
   BadgeCheck,
+  Building2,
   CreditCard,
   Factory,
   LayoutDashboard,
   Megaphone,
   MessageSquare,
+  Receipt,
   Package,
   ShieldCheck,
   Users,
@@ -70,6 +72,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       title: "Commercial",
       items: [
         { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
+      ],
+    },
+    {
+      /*
+        Buildex Interiors buys from these vendors; Connect's manufacturers sell
+        through the platform. Opposite ends of the business and opposite
+        directions of money, so they get their own group rather than sharing
+        "Network" and inviting the two to be confused.
+      */
+      title: "Procurement",
+      items: [
+        { href: "/admin/suppliers", label: "Suppliers", icon: Building2 },
+        { href: "/admin/vendor-bills", label: "Vendor bills", icon: Receipt },
       ],
     },
     {

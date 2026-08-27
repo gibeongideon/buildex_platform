@@ -126,3 +126,37 @@ export function spreadBy<T>(items: T[], take: number, keyOf: (item: T) => string
   }
   return picked;
 }
+
+/**
+ * Money in its own currency.
+ *
+ * Procurement crosses borders — Kenyan mills invoice in shillings, Ugandan
+ * ones in Ugandan shillings — and the platform holds no exchange rates. So
+ * amounts are shown as billed and never converted: a single "total payable"
+ * across currencies would be a number nobody could reconcile against an
+ * invoice. Totals are kept per currency instead.
+ */
+export function formatMoney(
+  amount: number,
+  currency: string,
+  options: { compact?: boolean; decimals?: boolean } = {},
+) {
+  const { compact = false, decimals = false } = options;
+  const formatted = new Intl.NumberFormat("en-KE", {
+    style: "currency",
+    currency,
+    currencyDisplay: "narrowSymbol",
+    notation: compact ? "compact" : "standard",
+    minimumFractionDigits: decimals ? 2 : 0,
+    maximumFractionDigits: decimals ? 2 : 0,
+  }).format(amount);
+
+  // Intl renders KES as "KES"/"Ksh" depending on locale data; the brand writes
+  // it "KSh", and the other currencies read better with an explicit code than a
+  // symbol a Kenyan reader would not recognise.
+  return formatted
+    .replace(/^KES\s?/, "KSh ")
+    .replace(/^Ksh\s?/, "KSh ")
+    .replace(/^UGX\s?/, "UGX ")
+    .replace(/^TZS\s?/, "TZS ");
+}

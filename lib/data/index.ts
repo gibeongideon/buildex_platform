@@ -34,6 +34,7 @@ export {
 } from "./mock/marketplace";
 
 export { activityRepo } from "./mock/activity";
+export { supplierRepo } from "./mock/suppliers";
 export { adminRepo } from "./mock/admin";
 
 export {
@@ -50,6 +51,7 @@ export type {
   ActivityKind,
   ActivityRepo,
   AdminRepo,
+  BillFilter,
   BrowsingRepo,
   CampaignRepo,
   DemoSession,
@@ -74,4 +76,6 @@ export type {
   RegionDemand,
   Role,
   SessionRepo,
+  SupplierRepo,
+  VendorFilter,
 } from "./types";

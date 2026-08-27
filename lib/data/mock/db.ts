@@ -2,11 +2,13 @@ import type { Manufacturer } from "@/lib/schemas/manufacturer";
 import type { Product } from "@/lib/schemas/product";
 import type { Enquiry } from "@/lib/schemas/enquiry";
 import type { Campaign } from "@/lib/schemas/campaign";
+import type { Vendor, VendorBill } from "@/lib/schemas/supplier";
 import type { DemoSession, OnboardingDraft } from "@/lib/data/types";
 import { seedManufacturers } from "@/lib/data/fixtures/manufacturers";
 import { seedProducts } from "@/lib/data/fixtures/products";
 import { seedEnquiries } from "@/lib/data/fixtures/enquiries";
 import { seedCampaigns } from "@/lib/data/fixtures/campaigns";
+import { seedVendorBills, seedVendors } from "@/lib/data/fixtures/suppliers";
 
 /*
   In-memory database for the mockup, persisted to localStorage so a demo
@@ -18,13 +20,16 @@ import { seedCampaigns } from "@/lib/data/fixtures/campaigns";
 */
 
 /* Bump when the shape of seeded data changes, or old persisted data wins. */
-const STORAGE_KEY = "buildex.mock.v6";
+const STORAGE_KEY = "buildex.mock.v7";
 
 export type MockDb = {
   manufacturers: Manufacturer[];
   products: Product[];
   enquiries: Enquiry[];
   campaigns: Campaign[];
+  /** Buildex Interiors' own purchase ledger. */
+  vendors: Vendor[];
+  vendorBills: VendorBill[];
   draft: OnboardingDraft | null;
   session: DemoSession;
   /** Product ids, most recent first. Powers the browsing-history rail. */
@@ -53,6 +58,8 @@ function seed(): MockDb {
     products: seedProducts(),
     enquiries: seedEnquiries(),
     campaigns: seedCampaigns(),
+    vendors: seedVendors(),
+    vendorBills: seedVendorBills(),
     draft: null,
     session: { role: "guest", manufacturerId: null },
     recentProductIds: [],

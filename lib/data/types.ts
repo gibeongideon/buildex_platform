@@ -5,6 +5,7 @@ import type { CheckStatus, VerificationCheckKey } from "@/lib/schemas/verificati
 import type { BillingCycle, PackageKey } from "@/lib/schemas/subscription";
 import type { Enquiry } from "@/lib/schemas/enquiry";
 import type { Campaign } from "@/lib/schemas/campaign";
+import type { Vendor, VendorBill } from "@/lib/schemas/supplier";
 import type { OpsException } from "@/lib/rules/ops";
 
 /*
@@ -223,6 +224,50 @@ export interface MarketplaceRepo {
   relatedFromManufacturer(productId: string, limit?: number): Promise<Product[]>;
   /** Comparable listings from other manufacturers in the same category. */
   similarFromOthers(productId: string, limit?: number): Promise<MarketplaceListing[]>;
+}
+
+// ---------------------------------------------------------------------------
+// Procurement — Buildex Interiors' own suppliers
+// ---------------------------------------------------------------------------
+
+export type VendorFilter = {
+  query?: string;
+  country?: string;
+  type?: string;
+  status?: Vendor["status"];
+  /** Only vendors whose record has something wrong with it. */
+  incompleteOnly?: boolean;
+};
+
+export type BillFilter = {
+  query?: string;
+  vendorId?: string;
+  status?: VendorBill["status"];
+  overdueOnly?: boolean;
+};
+
+/**
+ * The purchase ledger: who Buildex Interiors buys from, and what it owes them.
+ *
+ * Separate from `ManufacturerRepo` because it is a different relationship
+ * entirely — these vendors sell *to* Buildex, and the money runs the other way.
+ */
+export interface SupplierRepo {
+  listVendors(filter?: VendorFilter): Promise<Vendor[]>;
+  getVendor(id: string): Promise<Vendor | null>;
+  updateVendor(id: string, patch: Partial<Vendor>): Promise<Vendor>;
+  listBills(filter?: BillFilter): Promise<VendorBill[]>;
+  /** Every vendor with the figures a payables table needs beside it. */
+  vendorRows(filter?: VendorFilter): Promise<
+    {
+      vendor: Vendor;
+      bills: number;
+      /** Outstanding in the vendor's own currency — never converted. */
+      outstanding: number;
+      overdueBills: number;
+      lastBillAt: string | null;
+    }[]
+  >;
 }
 
 // ---------------------------------------------------------------------------

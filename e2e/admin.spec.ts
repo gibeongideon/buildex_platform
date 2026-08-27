@@ -481,3 +481,84 @@ test.describe("text is legible, measured", () => {
     });
   }
 });
+
+test("the supplier ledger shows what is owed, per currency, and what is wrong", async ({
+  page,
+}) => {
+  await page.goto("/admin/suppliers");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Suppliers", {
+    timeout: 20_000,
+  });
+
+  // Vendors captured verbatim from the purchase ledger, incomplete ones included.
+  await expect(page.getByRole("link", { name: "Primeply Industries Ltd" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Border Clearance-Imports-UG" })).toBeVisible();
+
+  /*
+    Money is never summed across currencies — the platform holds no exchange
+    rates, so a single "total payable" would reconcile against nothing. Both a
+    shilling and a Ugandan-shilling figure have to be on screen at once.
+  */
+  await expect(page.getByText(/KSh/).first()).toBeVisible();
+  await expect(page.getByText(/UGX/).first()).toBeVisible();
+
+  // The record with a Kampala address filed under Kenya is flagged, not fixed.
+  await page.getByRole("link", { name: "Border Clearance-Imports-UG" }).click();
+  await expect(page).toHaveURL(/\/admin\/suppliers\/ven_/);
+  await expect(page.getByText(/Country contradicts the city/)).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect(page.getByText(/Kampala is in Uganda, but the record says Kenya/)).toBeVisible();
+  // And it is still displayed as captured, rather than silently corrected.
+  await expect(page.getByText("Kenya").first()).toBeVisible();
+
+  // Bills carry an ageing view.
+  await page.goto("/admin/vendor-bills");
+  await expect(page.getByRole("heading", { name: "Ageing" })).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect(
+    page.getByText(/Amounts are never converted between currencies/),
+  ).toBeVisible();
+  await expect(page.locator("tbody tr").first()).toBeVisible();
+
+  /*
+    The buckets must reconcile with what is outstanding. This shipped once
+    counting a bill due *today* as both overdue and not-yet-due, because
+    `isOverdue` compared instants while the ageing view compared whole days — so
+    the same money appeared twice and "overdue value" equalled the full payable.
+    If a bucket says something is not yet due, overdue cannot be the whole of it.
+  */
+  const ageing = page.locator("li").filter({ hasText: "Not yet due" });
+  if ((await ageing.count()) > 0) {
+    const outstandingCard = page
+      .locator("div.rounded-lg.border")
+      .filter({ hasText: "OUTSTANDING" })
+      .first();
+    const overdueCard = page
+      .locator("div.rounded-lg.border")
+      .filter({ hasText: "OVERDUE VALUE" })
+      .first();
+    const owed = (await outstandingCard.innerText()).replace(/\s+/g, " ");
+    const late = (await overdueCard.innerText()).replace(/\s+/g, " ");
+    expect(
+      late.replace("OVERDUE VALUE", ""),
+      "overdue value must not equal the whole payable while some bills are not yet due",
+    ).not.toBe(owed.replace("OUTSTANDING", ""));
+  }
+
+  /*
+    A bill is late the day after it was due, never "0 days late". Matched
+    exactly: the default substring match finds "0 days late" inside "30 days
+    late", which would make this assertion fail on correct output.
+  */
+  await expect(page.getByText("0 days late", { exact: true })).toHaveCount(0);
+
+  // Overdue-only narrows the table.
+  const before = await page.locator("tbody tr").count();
+  await page.getByRole("button", { name: /Overdue only/ }).click();
+  await expect
+    .poll(async () => page.locator("tbody tr").count(), { timeout: 15_000 })
+    .toBeLessThan(before);
+  await expect(page.getByText(/days late/).first()).toBeVisible();
+});

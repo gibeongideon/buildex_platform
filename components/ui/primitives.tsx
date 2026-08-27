@@ -107,7 +107,9 @@ export function StatusPill({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium",
+        // A status is a label, not prose: wrapping it mid-phrase inside the pill
+        // reads as a rendering fault rather than a two-word status.
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium",
         TONE_CLASSES[tone],
         className,
       )}

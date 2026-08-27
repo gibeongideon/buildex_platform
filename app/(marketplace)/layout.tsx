@@ -53,6 +53,7 @@ export default function MarketplaceLayout({
   const showCompactSearch = !ownsSearch;
   const [region, setRegion] = React.useState("");
   const [stuck, setStuck] = React.useState(false);
+  const barRef = React.useRef<HTMLDivElement>(null);
 
   /*
     The reference site collapses its header on scroll: the promo strip and the
@@ -67,25 +68,57 @@ export default function MarketplaceLayout({
   React.useEffect(() => {
     const node = brandedHeaderRef.current;
     if (!node) return;
+
     /*
-      Observing the branded header itself rather than a sentinel placed after it.
+      Driven by scroll position, not IntersectionObserver.
 
-      The collapsed bar carries a BUILDEX lockup, and so does this header — so
-      the one rule that matters is that they are never on screen together. A
-      proxy sentinel only approximates that, and the approximation broke on the
-      way back up: the observer fires asynchronously, so by the time it said
-      "not stuck" the header had already slid back under the bar and both were
-      visible. Watching the element that actually holds the other logo makes the
-      rule structural instead of a matter of timing.
+      The observer was correct about *where* the threshold is and wrong about
+      *when*: its callback is delivered asynchronously, so flicking back to the
+      top with Home or a fast wheel left the collapsed bar on screen for a
+      couple of frames while the real header was already back — long enough to
+      see two BUILDEX lockups, and long enough to screenshot. Measured at two
+      frames before this change, none after.
 
-      Threshold 0: any part of it visible at all means the bar stands down.
+      A scroll handler resolves in the same frame. It does one number comparison
+      and is passive, so it costs nothing that matters; correctness is worth
+      more here than avoiding a per-frame read.
     */
-    const observer = new IntersectionObserver(
-      ([entry]) => setStuck(!entry.isIntersecting),
-      { threshold: 0 },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
+    let threshold = node.offsetTop + node.offsetHeight;
+    const measure = () => {
+      threshold = node.offsetTop + node.offsetHeight;
+    };
+    const onScroll = () => {
+      const next = window.scrollY > threshold;
+      /*
+        Written straight to the DOM as well as to state.
+
+        A React state update lands on the *next* frame however it is triggered,
+        so the bar stayed on screen for a frame after the page had already
+        returned to the top — with the real header back underneath it. Setting
+        the attribute here happens inside the scroll event, before paint, so the
+        two can never be drawn together. State still drives what is *inside* the
+        bar, where a frame's delay costs nothing.
+      */
+      barRef.current?.setAttribute("data-stuck", String(next));
+      barRef.current?.setAttribute("aria-hidden", String(!next));
+      setStuck(next);
+    };
+
+    // Not called synchronously here: setState inside an effect body is the
+    // pattern the React Compiler rejects, and a frame later is soon enough for
+    // a page restored mid-scroll.
+    const initial = requestAnimationFrame(() => {
+      measure();
+      onScroll();
+    });
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", measure, { passive: true });
+    return () => {
+      cancelAnimationFrame(initial);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", measure);
+    };
   }, []);
 
   return (
@@ -117,8 +150,13 @@ export default function MarketplaceLayout({
 
         {/* The collapsed bar: logo + inline search, only once scrolled past. */}
         <div
+          ref={barRef}
+          data-stuck={stuck}
           className={cn(
             "fixed inset-x-0 top-0 z-40 border-b border-border bg-surface/95 backdrop-blur",
+            // Position comes from the attribute, which the scroll handler sets
+            // synchronously — not from the class list, which waits for a render.
+            "data-[stuck=false]:-translate-y-full data-[stuck=true]:translate-y-0",
             /*
               Animated in, but removed instantly.
 
@@ -128,9 +166,15 @@ export default function MarketplaceLayout({
               screen at once. Long enough to see, and long enough to screenshot.
               Nobody misses a header appearing too fast; everybody notices two.
             */
-            stuck
-              ? "translate-y-0 shadow-overlay transition-transform duration-200"
-              : "-translate-y-full",
+            /*
+              No transition. Sliding the bar in or out means 200ms during which
+              it is painted across the header that is arriving or leaving — and
+              400ms of doubled header, measured, is long enough to see and to
+              screenshot. The bar's position is now driven entirely by the
+              attribute above, which the scroll handler sets before paint, so it
+              is either there or it is not.
+            */
+            stuck ? "shadow-overlay" : "",
           )}
           aria-hidden={!stuck}
         >

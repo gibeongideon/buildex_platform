@@ -519,54 +519,66 @@ test("a buyer can compare the same material across suppliers, priced at their qu
   await expect(page.getByText("Cheapest at this quantity")).toHaveCount(0);
 });
 
-test("the collapsed header only appears once the branded header is gone", async ({
-  page,
-}) => {
+test("the collapsed header is never painted over the real one", async ({ page }) => {
   await page.goto("/marketplace/search");
   await expect(page.locator("article h3 a").first()).toBeVisible({ timeout: 15_000 });
 
   /*
     Both the collapsed bar and the page header carry a BUILDEX lockup, so the
-    rule is simply that they are never on screen together. Asserted as an
-    invariant rather than by hunting for a moment where it looks wrong: whenever
-    the bar is showing, the branded header must be entirely above the viewport.
+    rule is that they are never painted together.
 
-    This used to be approximated by a sentinel placed after the header, and the
-    approximation broke on the way back up — the observer fires asynchronously,
-    so the header had already slid back under the bar before the bar was told to
-    stand down.
+    Watched every animation frame while scrolling for real, because this defect
+    only ever existed in motion: earlier versions slid the bar in and out over
+    200ms, which painted it across the header that was arriving or leaving. Four
+    hundred milliseconds of doubled header — long enough to see, and long enough
+    to screenshot, which is how it was reported. Sampling at fixed scroll
+    offsets steps straight over it, so this samples continuously instead.
   */
-  const state = () =>
-    page.evaluate(() => {
-      const bar = document.querySelector<HTMLElement>("div.fixed.inset-x-0.top-0");
-      const shown = bar?.getAttribute("aria-hidden") === "false";
-      // The branded header is whatever holds the other lockup.
-      const lockup = [...document.querySelectorAll<HTMLElement>("*")].find((el) => {
-        if (el.children.length) return false;
-        if (el.textContent?.trim() !== "BUILDEX") return false;
-        if (bar?.contains(el)) return false;
-        const r = el.getBoundingClientRect();
-        return r.height > 4;
-      });
-      const r = lockup?.getBoundingClientRect();
-      return {
-        shown,
-        headerVisible: r ? r.bottom > 0 && r.top < window.innerHeight : false,
-      };
-    });
+  await page.evaluate(() => {
+    (window as unknown as { __doubled: number }).__doubled = 0;
+    const tick = () => {
+      const bar = document.querySelector("div.fixed.inset-x-0.top-0");
+      if (bar && bar.getBoundingClientRect().bottom > 4) {
+        const other = [...document.querySelectorAll("*")].find((el) => {
+          if (el.children.length || el.textContent?.trim() !== "BUILDEX") return false;
+          if (bar.contains(el)) return false;
+          const r = el.getBoundingClientRect();
+          // Header strip only: the footer lockup lower down is legitimate.
+          return r.height > 4 && r.bottom > 0 && r.top < 220;
+        });
+        if (other) (window as unknown as { __doubled: number }).__doubled += 1;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
 
-  for (const y of [0, 40, 80, 100, 140, 200, 400, 800, 400, 200, 140, 100, 80, 40, 0]) {
-    await page.evaluate((v) => window.scrollTo(0, v), y);
-    await page.waitForTimeout(250);
-    const { shown, headerVisible } = await state();
-    expect(
-      shown && headerVisible,
-      `collapsed bar and branded header both on screen at scrollY=${y}`,
-    ).toBe(false);
+  await page.mouse.move(700, 400);
+  for (let i = 0; i < 10; i += 1) {
+    await page.mouse.wheel(0, 120);
+    await page.waitForTimeout(30);
   }
+  for (let i = 0; i < 12; i += 1) {
+    await page.mouse.wheel(0, -120);
+    await page.waitForTimeout(30);
+  }
+  // The worst case: a flick straight back to the top from far down the page.
+  await page.evaluate(() => window.scrollTo({ top: 1500, behavior: "instant" }));
+  await page.waitForTimeout(200);
+  await page.keyboard.press("Home");
+  await page.waitForTimeout(900);
 
-  // And it does appear once past the header, rather than never showing.
-  await page.evaluate(() => window.scrollTo(0, 800));
-  await page.waitForTimeout(500);
-  expect((await state()).shown).toBe(true);
+  const doubled = await page.evaluate(
+    () => (window as unknown as { __doubled: number }).__doubled,
+  );
+  expect(doubled, "frames where both headers were painted at once").toBe(0);
+
+  // And it still appears at all once past the header.
+  await page.evaluate(() => window.scrollTo(0, 1200));
+  await page.waitForTimeout(400);
+  await expect(page.locator("div.fixed.inset-x-0.top-0").first()).toHaveAttribute(
+    "data-stuck",
+    "true",
+  );
 });
+

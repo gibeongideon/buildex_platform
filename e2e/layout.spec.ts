@@ -61,8 +61,13 @@ for (const theme of ["light", "dark"] as const) {
       const overflowing: string[] = [];
       for (const path of PATHS) {
         await page.goto(path);
-        // Let the mock latency resolve, so tables and rails are actually there.
-        await page.waitForTimeout(350);
+        /*
+          Longer than SLOW (420ms) in lib/data/mock/latency.ts, deliberately.
+          Sampling before the repositories resolve would measure a page of
+          skeletons and pass — and skeletons are exactly the content that
+          cannot overflow.
+        */
+        await page.waitForTimeout(700);
         const overflow = await page.evaluate(() => {
           const root = document.documentElement;
           return root.scrollWidth - root.clientWidth;

@@ -233,20 +233,59 @@ test("the All categories mega menu opens on hover and links through", async ({ p
 test("a request for quotation reaches every matching supplier", async ({ page }) => {
   await page.goto("/marketplace/rfq");
 
-  await page.getByLabel(/^Category/).selectOption("Cement & Concrete");
-  await page.getByLabel(/^Delivery county/).selectOption("Machakos");
+  /*
+    The brief is the whole first step: one sentence, read for category, county
+    and quantity. If the parse regresses, the buyer is dropped into an empty
+    form rather than being told — so assert what it filled in, not just that
+    the form appeared.
+  */
+  await page
+    .getByPlaceholder(/400 bags of cement/)
+    .fill("500 bags of cement delivered to Machakos");
+  await page.getByRole("button", { name: /Write RFQ details/ }).click();
+
+  await expect(page.getByLabel(/^Category/)).toHaveValue("Cement & Concrete", {
+    timeout: 15_000,
+  });
+  await expect(page.getByLabel(/^Delivery county/)).toHaveValue("Machakos");
+  await expect(page.getByLabel(/^Quantity/)).toHaveValue("500");
 
   // The match preview names who would receive it before anything is sent.
   await expect(page.getByText(/Savannah Cement/)).toBeVisible({ timeout: 15_000 });
 
-  await page.getByLabel(/^Quantity/).fill("500");
   await page.getByLabel(/^Hardware shop/).fill("RFQ Test Hardware");
   await page.getByLabel(/^Your name/).fill("Test Buyer");
   await page.getByLabel(/^Phone/).fill("+254712000222");
   await page.getByLabel(/^Email/).fill("rfq@testhardware.co.ke");
-  await page.getByRole("button", { name: /Send to \d+ supplier/ }).click();
+  await page.getByRole("button", { name: /Post to \d+ supplier/ }).click();
 
   await expect(page.getByText(/Your request went to/)).toBeVisible({ timeout: 20_000 });
+});
+
+test("the RFQ page offers quotes on what this browser has viewed", async ({ page }) => {
+  /*
+    The rail is browsing history, not a fixture, so it has to be earned: with
+    nothing viewed the section is absent rather than showing invented
+    suggestions.
+  */
+  await page.goto("/marketplace/rfq");
+  await expect(page.getByPlaceholder(/400 bags of cement/)).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(page.getByText("Get quotes for products you have browsed")).toHaveCount(0);
+
+  await page.goto("/marketplace/product/prd_rv_d12");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 15_000 });
+
+  await page.goto("/marketplace/rfq");
+  const rail = page.getByText("Get quotes for products you have browsed");
+  await expect(rail).toBeVisible({ timeout: 15_000 });
+
+  // And it starts a request in that product's category.
+  await page.getByRole("button", { name: /Get quotes/ }).first().click();
+  await expect(page.getByLabel(/^Category/)).toHaveValue("Steel & Reinforcement", {
+    timeout: 15_000,
+  });
 });
 
 test("top ranking is many leaderboards, and loads more as you scroll", async ({

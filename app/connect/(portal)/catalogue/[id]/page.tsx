@@ -7,6 +7,7 @@ import { ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { ListingForm } from "@/components/shared/listing-form";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Alert, Card, CardBody, EmptyState, Skeleton } from "@/components/ui/primitives";
 import { productRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
@@ -18,7 +19,7 @@ export default function EditListingPage() {
   const productId = params.id;
   const router = useRouter();
   const { data: current } = useCurrentManufacturer();
-  const { data: product, loading } = useQuery(
+  const { data: product, loading, error, refetch } = useQuery(
     () => productRepo.getById(productId),
     [productId],
   );
@@ -48,6 +49,8 @@ export default function EditListingPage() {
                 </Button>
               }
             />
+
+        <QueryError error={error} onRetry={refetch} />
           </CardBody>
         </Card>
       </>

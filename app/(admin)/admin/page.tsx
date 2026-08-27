@@ -20,6 +20,7 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Currency, Num } from "@/components/shared/format";
 import { ActivityRow, ActivityRowSkeleton } from "@/components/admin/activity-row";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import {
   Card,
   CardBody,
@@ -43,7 +44,7 @@ import { cn } from "@/lib/utils";
 */
 
 export default function AdminOverviewPage() {
-  const { data: summary } = useQuery(() => adminRepo.summary(), []);
+  const { data: summary, error, refetch } = useQuery(() => adminRepo.summary(), []);
   const { data: exceptions, loading: loadingExceptions } = useQuery(
     () => adminRepo.exceptions(),
     [],
@@ -74,6 +75,8 @@ export default function AdminOverviewPage() {
           </Button>
         }
       />
+
+      <QueryError error={error} onRetry={refetch} />
 
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

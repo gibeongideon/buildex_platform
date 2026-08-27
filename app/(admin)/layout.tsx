@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { AppShell, type NavSection } from "@/components/shared/app-shell";
 import { Alert } from "@/components/ui/primitives";
+import { QueryError } from "@/components/ui/query-state";
 import { adminRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import { useAdminRole, ROLE_META } from "./use-admin-role";
@@ -35,7 +36,7 @@ import { useAdminRole, ROLE_META } from "./use-admin-role";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { role } = useAdminRole();
-  const { data: summary } = useQuery(() => adminRepo.summary(), []);
+  const { data: summary, error, refetch } = useQuery(() => adminRepo.summary(), []);
 
   const sections: NavSection[] = [
     {
@@ -115,6 +116,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <BadgeCheck className="inline size-3.5 align-[-2px]" aria-hidden="true" /> Team
         &amp; roles, not a permission. Real access control arrives with the backend.
       </Alert>
+      <QueryError error={error} onRetry={refetch} />
       {children}
     </AppShell>
   );

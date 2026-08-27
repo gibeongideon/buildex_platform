@@ -9,6 +9,7 @@ import { useQuery } from "@/lib/data/hooks";
 import { Currency, Num } from "@/components/shared/format";
 import { ProductThumb } from "@/components/shared/product-thumb";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Input } from "@/components/ui/field";
 import {
   Alert,
@@ -60,7 +61,7 @@ function CompareInner() {
   );
   const key = ids.join(",");
 
-  const { data: listings, loading } = useQuery(
+  const { data: listings, loading, error, refetch } = useQuery(
     () => marketplaceRepo.listingsByIds(ids),
     [key],
   );
@@ -120,6 +121,8 @@ function CompareInner() {
           <li className="text-foreground">Compare</li>
         </ol>
       </nav>
+
+      <QueryError error={error} onRetry={refetch} />
 
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>

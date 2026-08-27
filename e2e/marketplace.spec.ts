@@ -582,3 +582,24 @@ test("the collapsed header is never painted over the real one", async ({ page })
   );
 });
 
+
+test("an unknown URL gets a real page, not a blank one", async ({ page }) => {
+  const response = await page.goto("/marketplace/this-does-not-exist");
+  expect(response?.status()).toBe(404);
+
+  await expect(
+    page.getByRole("heading", { name: /This page does not exist/ }),
+  ).toBeVisible({ timeout: 15_000 });
+
+  /*
+    Three ways out rather than one. The prototype has three audiences, and "go
+    home" is only the right destination for one of them — a hardware shop that
+    mistyped a listing URL wants the marketplace, not the corporate page.
+  */
+  for (const label of ["Home", "Marketplace", "Buildex Admin"]) {
+    await expect(page.getByRole("link", { name: label, exact: true })).toBeVisible();
+  }
+
+  await page.getByRole("link", { name: "Marketplace", exact: true }).click();
+  await expect(page).toHaveURL(/\/marketplace$/);
+});

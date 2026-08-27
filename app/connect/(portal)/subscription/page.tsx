@@ -21,9 +21,10 @@ import {
   type PackageKey,
 } from "@/lib/schemas/subscription";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
+import { QueryError } from "@/components/ui/query-state";
 
 export default function SubscriptionPage() {
-  const { data, loading } = useCurrentManufacturer();
+  const { data, loading, error, refetch } = useCurrentManufacturer();
   const [saving, setSaving] = React.useState(false);
   const [confirmed, setConfirmed] = React.useState(false);
 
@@ -74,6 +75,8 @@ export default function SubscriptionPage() {
           { label: "Subscription" },
         ]}
       />
+
+        <QueryError error={error} onRetry={refetch} />
 
       <div className="space-y-6">
         {confirmed && !changed ? (

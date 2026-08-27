@@ -26,6 +26,7 @@ import { email, kenyanPhone, countySchema } from "@/lib/schemas/common";
 import { priceAtQuantity, priceRange } from "@/lib/schemas/product";
 import { Currency, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Field, FieldHint, Input, Label, Select, Textarea } from "@/components/ui/field";
 import {
   Alert,
@@ -95,7 +96,7 @@ export default function RfqPage() {
   const region = county ? regionForCounty(county) : undefined;
 
   // Live match preview: who would receive this, and roughly what it would cost.
-  const { data: matches } = useQuery(
+  const { data: matches, error, refetch } = useQuery(
     async () =>
       category
         ? marketplaceRepo.search({
@@ -225,6 +226,8 @@ export default function RfqPage() {
           Marketplace
         </Link>
       </nav>
+
+      <QueryError error={error} onRetry={refetch} />
 
       <h1 className="flex items-center gap-2 font-display text-xl font-bold tracking-tight text-foreground">
         <FileText className="size-5 text-brand" aria-hidden="true" />

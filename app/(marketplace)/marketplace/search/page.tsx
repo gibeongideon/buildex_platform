@@ -10,6 +10,7 @@ import { PRODUCT_CATEGORIES, REGIONS } from "@/lib/schemas/common";
 import { ProductCard, ProductCardSkeleton } from "@/components/shared/product-card";
 import { Currency } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Select } from "@/components/ui/field";
 import { Card, CardBody, EmptyState, Skeleton } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
@@ -103,7 +104,7 @@ function MarketplaceSearchInner() {
   const [sort, setSort] = React.useState<MarketplaceSort>("relevance");
   const [filtersOpen, setFiltersOpen] = React.useState(false);
 
-  const { data, loading } = useQuery(
+  const { data, loading, error, refetch } = useQuery(
     () =>
       marketplaceRepo.search({
         query: submittedQuery,
@@ -152,6 +153,8 @@ function MarketplaceSearchInner() {
           <li className="text-foreground">{heading}</li>
         </ol>
       </nav>
+
+      <QueryError error={error} onRetry={refetch} />
 
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <h1 className="font-display text-xl font-bold tracking-tight text-foreground">

@@ -30,6 +30,7 @@ import { STATUS_LABELS, STATUS_TONE } from "@/lib/schemas/verification";
 import { packageMeta } from "@/lib/schemas/subscription";
 import { formatDate } from "@/lib/utils";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
+import { QueryError } from "@/components/ui/query-state";
 
 /*
   Company settings.
@@ -48,7 +49,7 @@ const TEAM = [
 ];
 
 export default function SettingsPage() {
-  const { data, loading } = useCurrentManufacturer();
+  const { data, loading, error, refetch } = useCurrentManufacturer();
   const [saving, setSaving] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
 
@@ -123,6 +124,8 @@ export default function SettingsPage() {
           </Button>
         }
       />
+
+        <QueryError error={error} onRetry={refetch} />
 
       {saved && !dirty ? (
         <Alert tone="success" className="mb-6" title="Settings saved">

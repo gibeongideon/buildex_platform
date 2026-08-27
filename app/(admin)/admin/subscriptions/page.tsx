@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Currency, Num } from "@/components/shared/format";
 import { Select } from "@/components/ui/field";
+import { QueryError } from "@/components/ui/query-state";
 import {
   Alert,
   Card,
@@ -58,7 +59,7 @@ function daysUntil(iso: string) {
 }
 
 export default function AdminSubscriptionsPage() {
-  const { data: rows, loading } = useQuery(() => adminRepo.manufacturerRows(), []);
+  const { data: rows, loading, error, refetch } = useQuery(() => adminRepo.manufacturerRows(), []);
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
   const all = rows ?? [];
@@ -111,6 +112,8 @@ export default function AdminSubscriptionsPage() {
           { label: "Subscriptions" },
         ]}
       />
+
+      <QueryError error={error} onRetry={refetch} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

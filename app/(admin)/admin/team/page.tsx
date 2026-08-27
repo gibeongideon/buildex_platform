@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Check, Lock, ShieldCheck, UserCog } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import {
   Alert,
   Card,
@@ -99,7 +100,7 @@ export default function AdminTeamPage() {
   const { role, setRole, pending } = useAdminRole();
 
   // What Buildex itself has done — the ops half of the timeline.
-  const { data: opsEvents, loading } = useQuery(
+  const { data: opsEvents, loading, error, refetch } = useQuery(
     () => activityRepo.list({ actorTypes: ["ops"], limit: 12 }),
     [],
   );
@@ -114,6 +115,8 @@ export default function AdminTeamPage() {
           { label: "Team & roles" },
         ]}
       />
+
+      <QueryError error={error} onRetry={refetch} />
 
       <Alert
         tone="warning"

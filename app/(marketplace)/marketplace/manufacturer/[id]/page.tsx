@@ -27,6 +27,7 @@ import { ProductCard, ProductCardSkeleton } from "@/components/shared/product-ca
 import { BuildexMark } from "@/components/shared/brand";
 import { Currency, DetailRow, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Input, Select } from "@/components/ui/field";
 import {
   Alert,
@@ -59,7 +60,7 @@ export default function ManufacturerStorefrontPage() {
   const params = useParams<{ id: string }>();
   const manufacturerId = params.id;
 
-  const { data, loading } = useQuery(
+  const { data, loading, error, refetch } = useQuery(
     () => marketplaceRepo.getStorefront(manufacturerId),
     [manufacturerId],
   );
@@ -79,6 +80,24 @@ export default function ManufacturerStorefrontPage() {
             ))}
           </div>
         </div>
+      </div>
+    );
+  }
+
+  /*
+    Ahead of the "not available" branch on purpose. A failed load and an
+    unverified supplier both leave `data` undefined, and falling through would
+    tell a buyer this supplier has not completed verification — a claim about
+    the supplier, made because a fetch failed.
+  */
+  if (error) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+        <QueryError
+          error={error}
+          onRetry={refetch}
+          title="Could not load this storefront"
+        />
       </div>
     );
   }

@@ -8,6 +8,7 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Currency } from "@/components/shared/format";
 import { ProductThumb } from "@/components/shared/product-thumb";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Input, Select } from "@/components/ui/field";
 import {
   Alert,
@@ -42,7 +43,7 @@ const STATUS_META: Record<Product["status"], { label: string; tone: Tone }> = {
 };
 
 export default function AdminListingsPage() {
-  const { data: rows, loading } = useQuery(() => adminRepo.listingRows(), []);
+  const { data: rows, loading, error, refetch } = useQuery(() => adminRepo.listingRows(), []);
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState("");
   const [category, setCategory] = React.useState("");
@@ -89,6 +90,8 @@ export default function AdminListingsPage() {
           { label: "Listings" },
         ]}
       />
+
+      <QueryError error={error} onRetry={refetch} />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Live on the marketplace"

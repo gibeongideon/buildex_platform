@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Num, Pct } from "@/components/shared/format";
 import { Input, Select } from "@/components/ui/field";
+import { QueryError } from "@/components/ui/query-state";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -85,7 +86,7 @@ function summariseSuppliers(rows: EnquiryRow[]): SupplierSummary[] {
 }
 
 export default function AdminEnquiriesPage() {
-  const { data: rows, loading } = useQuery(() => adminRepo.enquiryRows(), []);
+  const { data: rows, loading, error, refetch } = useQuery(() => adminRepo.enquiryRows(), []);
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState("");
 
@@ -132,6 +133,8 @@ export default function AdminEnquiriesPage() {
           { label: "Enquiries" },
         ]}
       />
+
+      <QueryError error={error} onRetry={refetch} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

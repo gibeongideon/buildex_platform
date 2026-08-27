@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlertTriangle, ChevronRight, MapPin, Search, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Input, Select } from "@/components/ui/field";
+import { QueryError } from "@/components/ui/query-state";
 import {
   Card,
   CardBody,
@@ -67,7 +68,7 @@ function SlaCell({ hours }: { hours: number | null }) {
 }
 
 export default function VerificationQueuePage() {
-  const { data: rows, loading } = useQuery(() => adminRepo.manufacturerRows(), []);
+  const { data: rows, loading, error, refetch } = useQuery(() => adminRepo.manufacturerRows(), []);
   const [query, setQuery] = React.useState("");
   const [scope, setScope] = React.useState<"in_flight" | "all">("in_flight");
 
@@ -98,6 +99,8 @@ export default function VerificationQueuePage() {
           { label: "Verification" },
         ]}
       />
+
+      <QueryError error={error} onRetry={refetch} />
 
       <Card>
         <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">

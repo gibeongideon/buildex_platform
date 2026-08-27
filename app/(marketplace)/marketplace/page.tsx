@@ -32,6 +32,7 @@ import {
 } from "@/components/marketplace/product-rail";
 import { Currency, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { StatusPill } from "@/components/ui/primitives";
 import { cn, spreadBy } from "@/lib/utils";
 
@@ -242,7 +243,7 @@ export default function MarketplaceHomePage() {
   const home = useHomeScope();
   const scope = home?.scope ?? "products";
 
-  const { data: search, loading } = useQuery(
+  const { data: search, loading, error, refetch } = useQuery(
     () => marketplaceRepo.search({ sort: "relevance" }),
     [],
   );
@@ -355,6 +356,9 @@ export default function MarketplaceHomePage() {
   return (
     <>
       {/* Welcome bar: name the platform, then the three actions that skip search. */}
+      <div className="mx-auto max-w-[112rem] px-4 pt-6 sm:px-6 lg:px-8">
+        <QueryError error={error} onRetry={refetch} className="mb-0" />
+      </div>
       <section className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-[112rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <div>

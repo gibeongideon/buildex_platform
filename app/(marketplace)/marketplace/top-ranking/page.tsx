@@ -9,6 +9,7 @@ import { useQuery } from "@/lib/data/hooks";
 import { PRODUCT_CATEGORIES, REGIONS } from "@/lib/schemas/common";
 import { formatLeadTime, priceRange } from "@/lib/schemas/product";
 import { Select } from "@/components/ui/field";
+import { QueryError } from "@/components/ui/query-state";
 import { EmptyState } from "@/components/ui/primitives";
 import {
   RankingBlock,
@@ -70,7 +71,7 @@ export default function TopRankingPage() {
 
   const metric = METRICS.find((m) => m.key === metricKey) ?? METRICS[0];
 
-  const { data, loading } = useQuery(
+  const { data, loading, error, refetch } = useQuery(
     () => marketplaceRepo.search({ sort: "relevance" }),
     [],
   );
@@ -260,6 +261,8 @@ export default function TopRankingPage() {
             <li className="text-foreground">Top ranking</li>
           </ol>
         </nav>
+
+        <QueryError error={error} onRetry={refetch} />
 
         {/* What "top" means, chosen explicitly rather than assumed. */}
         <div

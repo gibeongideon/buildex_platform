@@ -6,6 +6,7 @@ import { AlertTriangle, FileText, Search, Wallet } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Input, Select } from "@/components/ui/field";
 import {
   Alert,
@@ -46,7 +47,7 @@ import { cn, formatDate, formatMoney } from "@/lib/utils";
 */
 
 export default function AdminVendorBillsPage() {
-  const { data: bills, loading } = useQuery(() => supplierRepo.listBills(), []);
+  const { data: bills, loading, error, refetch } = useQuery(() => supplierRepo.listBills(), []);
   const { data: vendors } = useQuery(() => supplierRepo.listVendors(), []);
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState("");
@@ -100,6 +101,8 @@ export default function AdminVendorBillsPage() {
           </Button>
         }
       />
+
+      <QueryError error={error} onRetry={refetch} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

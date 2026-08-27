@@ -30,6 +30,7 @@ import {
 } from "@/components/admin/activity-row";
 import { RecordPanel, RecordTabs } from "@/components/admin/record-tabs";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import {
   Alert,
   Card,
@@ -89,7 +90,7 @@ export default function AdminManufacturerRecordPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
 
-  const { data: manufacturer, loading } = useQuery(
+  const { data: manufacturer, loading, error, refetch } = useQuery(
     () => manufacturerRepo.getById(id),
     [id],
   );
@@ -129,6 +130,8 @@ export default function AdminManufacturerRecordPage() {
                 </Button>
               }
             />
+
+        <QueryError error={error} onRetry={refetch} />
           </CardBody>
         </Card>
       </>

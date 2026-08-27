@@ -6,6 +6,7 @@ import { BadgeCheck, Ban, MapPin, RotateCcw, Search, Store } from "lucide-react"
 import { PageHeader } from "@/components/shared/page-header";
 import { Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Input, Select } from "@/components/ui/field";
 import {
   Card,
@@ -36,7 +37,7 @@ import { cn } from "@/lib/utils";
 */
 
 export default function AdminManufacturersPage() {
-  const { data: rows, loading } = useQuery(() => adminRepo.manufacturerRows(), []);
+  const { data: rows, loading, error, refetch } = useQuery(() => adminRepo.manufacturerRows(), []);
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState("");
   const [region, setRegion] = React.useState("");
@@ -84,6 +85,8 @@ export default function AdminManufacturersPage() {
           { label: "Manufacturers" },
         ]}
       />
+
+      <QueryError error={error} onRetry={refetch} />
 
       <Card>
         <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center">

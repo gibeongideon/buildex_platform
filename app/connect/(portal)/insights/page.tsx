@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Currency, Num, Pct } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import {
   Alert,
   Card,
@@ -83,7 +84,7 @@ export default function InsightsPage() {
   const { data: current, loading: loadingManufacturer } = useCurrentManufacturer();
   const manufacturerId = current?.manufacturer.id ?? null;
 
-  const { data: summary } = useQuery(
+  const { data: summary, error, refetch } = useQuery(
     async () => (manufacturerId ? insightsRepo.summary(manufacturerId) : null),
     [manufacturerId],
   );
@@ -133,6 +134,8 @@ export default function InsightsPage() {
           { label: "Insights" },
         ]}
       />
+
+        <QueryError error={error} onRetry={refetch} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

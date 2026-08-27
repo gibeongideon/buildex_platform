@@ -18,6 +18,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Currency, Num, Pct } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Field, FieldHint, Input, Label } from "@/components/ui/field";
 import {
   Alert,
@@ -333,7 +334,7 @@ export default function CampaignsPage() {
   const manufacturerId = current?.manufacturer.id ?? null;
   const [building, setBuilding] = React.useState(false);
 
-  const { data: campaigns, loading } = useQuery(
+  const { data: campaigns, loading, error, refetch } = useQuery(
     async () =>
       manufacturerId ? campaignRepo.listByManufacturer(manufacturerId) : [],
     [manufacturerId],
@@ -375,6 +376,8 @@ export default function CampaignsPage() {
             { label: "Campaigns" },
           ]}
         />
+
+        <QueryError error={error} onRetry={refetch} />
         <Card>
           <CardBody className="p-0">
             <EmptyState

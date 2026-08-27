@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { DetailRow } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import {
   Alert,
   Card,
@@ -42,7 +43,7 @@ export default function AdminSupplierRecordPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
 
-  const { data: vendor, loading } = useQuery(() => supplierRepo.getVendor(id), [id]);
+  const { data: vendor, loading, error, refetch } = useQuery(() => supplierRepo.getVendor(id), [id]);
   const { data: bills } = useQuery(() => supplierRepo.listBills({ vendorId: id }), [id]);
 
   if (loading && !vendor) {
@@ -70,6 +71,8 @@ export default function AdminSupplierRecordPage() {
                 </Button>
               }
             />
+
+        <QueryError error={error} onRetry={refetch} />
           </CardBody>
         </Card>
       </>

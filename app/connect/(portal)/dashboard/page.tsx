@@ -23,9 +23,10 @@ import { STATUS_LABELS, STATUS_TONE, canTransact } from "@/lib/schemas/verificat
 import { packageMeta } from "@/lib/schemas/subscription";
 import { priceRange } from "@/lib/schemas/product";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
+import { QueryError } from "@/components/ui/query-state";
 
 export default function ConnectDashboardPage() {
-  const { data, loading } = useCurrentManufacturer();
+  const { data, loading, error, refetch } = useCurrentManufacturer();
 
   if (loading && !data) {
     return (
@@ -57,6 +58,8 @@ export default function ConnectDashboardPage() {
                 </Button>
               }
             />
+
+        <QueryError error={error} onRetry={refetch} />
           </CardBody>
         </Card>
       </>

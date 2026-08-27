@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Currency, Num, Pct } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Input, Select } from "@/components/ui/field";
 import {
   Alert,
@@ -44,7 +45,7 @@ const STATUS_LABELS: Record<Campaign["status"], string> = {
 };
 
 export default function AdminCampaignsPage() {
-  const { data: rows, loading } = useQuery(() => adminRepo.campaignRows(), []);
+  const { data: rows, loading, error, refetch } = useQuery(() => adminRepo.campaignRows(), []);
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState("");
   const [busyId, setBusyId] = React.useState<string | null>(null);
@@ -86,6 +87,8 @@ export default function AdminCampaignsPage() {
           { label: "Campaigns" },
         ]}
       />
+
+      <QueryError error={error} onRetry={refetch} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

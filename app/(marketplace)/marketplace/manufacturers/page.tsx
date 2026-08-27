@@ -8,6 +8,7 @@ import { marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import { PRODUCT_CATEGORIES, REGIONS } from "@/lib/schemas/common";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Input, Select } from "@/components/ui/field";
 import { Card, CardBody, EmptyState, Skeleton } from "@/components/ui/primitives";
 import { priceRange, type Product } from "@/lib/schemas/product";
@@ -37,7 +38,7 @@ function ManufacturersDirectoryInner() {
   const [category, setCategory] = React.useState("");
   const [sort, setSort] = React.useState<Sort>("range");
 
-  const { data, loading } = useQuery(() => marketplaceRepo.listStorefronts(), []);
+  const { data, loading, error, refetch } = useQuery(() => marketplaceRepo.listStorefronts(), []);
   const { data: search } = useQuery(() => marketplaceRepo.search({ sort: "relevance" }), []);
 
   const priceByManufacturer = new Map<string, number>();
@@ -100,6 +101,8 @@ function ManufacturersDirectoryInner() {
           <li className="text-foreground">Verified manufacturers</li>
         </ol>
       </nav>
+
+      <QueryError error={error} onRetry={refetch} />
 
       <h1 className="font-display text-xl font-bold tracking-tight text-foreground">
         Verified manufacturers

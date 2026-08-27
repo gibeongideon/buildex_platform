@@ -27,6 +27,7 @@ import type { DocumentTypeKey } from "@/lib/schemas/document";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
 import { StepShell, StepSkeleton } from "../step-frame";
 import { OpsReviewNote } from "@/components/shared/ops-review-note";
+import { QueryError } from "@/components/ui/query-state";
 
 const STATUS_MESSAGE: Record<string, string> = {
   submitted:
@@ -48,7 +49,7 @@ export default function VerificationStepPage() {
   const { completeStep, saving } = useOnboarding();
   const manufacturerId = draft?.manufacturerId ?? null;
 
-  const { data: manufacturer, loading } = useQuery(
+  const { data: manufacturer, loading, error, refetch } = useQuery(
     async () => (manufacturerId ? manufacturerRepo.getById(manufacturerId) : null),
     [manufacturerId],
   );
@@ -106,6 +107,11 @@ export default function VerificationStepPage() {
       wide
     >
       <div className="max-w-2xl space-y-5">
+        <QueryError
+          error={error}
+          onRetry={refetch}
+          title="Could not refresh your application status"
+        />
         <Alert
           tone={STATUS_TONE[manufacturer.status]}
           title={

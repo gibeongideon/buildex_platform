@@ -4,6 +4,7 @@ import * as React from "react";
 import { Activity, Filter, Search, X } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Input, Select } from "@/components/ui/field";
 import {
   Card,
@@ -75,7 +76,7 @@ export default function AdminActivityPage() {
 
   // Counts describe what the *current* period and filters hold, so they match
   // what clicking a chip returns.
-  const { data: kindCounts } = useQuery(
+  const { data: kindCounts, error, refetch } = useQuery(
     () =>
       activityRepo.kinds({
         actorTypes: actorType ? [actorType as ActivityActorType] : undefined,
@@ -133,6 +134,8 @@ export default function AdminActivityPage() {
           { label: "Activity" },
         ]}
       />
+
+      <QueryError error={error} onRetry={refetch} />
 
       <div className="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] [&>*]:min-w-0">
         <Card className="lg:sticky lg:top-6 lg:self-start">

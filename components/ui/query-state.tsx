@@ -4,76 +4,54 @@ import * as React from "react";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, Skeleton } from "@/components/ui/primitives";
-import type { QueryState as Query } from "@/lib/data/hooks";
 import { cn } from "@/lib/utils";
 
 /*
-  The three states every data-backed surface has, in one place.
+  Surfacing a failed repository call.
 
-  Written because they were not being handled. Thirty-two of the thirty-five
-  screens that call `useQuery` never read its `error`, so a failed call rendered
-  its loading skeleton forever: no message, no explanation, no way out. That
-  costs nothing today, because the data is in the browser and the call cannot
-  fail — and it becomes a visible outage the moment those calls become network
-  requests at the backend cutover.
+  Thirty-two of the thirty-five screens that call `useQuery` never read its
+  `error`, so a failed call rendered its loading skeleton forever: no message, no
+  explanation, no way out. That costs nothing today, because the data is in the
+  browser and the call cannot fail — and it becomes a visible outage the moment
+  those calls are network requests.
 
-  Handling it per screen would mean writing the same three branches thirty-two
-  times, which is how it came to be skipped. So it is one component, and using it
-  is less work than not using it.
+  Deliberately a banner rather than a wrapper that owns the whole render. On
+  these screens the query result feeds the filters, the KPI cards and the table,
+  so a render-prop wrapper would mean moving every derived value inside a
+  callback on thirty-two pages — a large diff, and a lot of risk, to fix
+  something a single line can fix. This composes with the loading and empty
+  branches each page already has.
 */
 
-export function QueryState<T>({
-  query,
-  skeleton,
-  empty,
-  isEmpty,
-  errorTitle = "Could not load this",
-  children,
+export function QueryError({
+  error,
+  onRetry,
+  title = "Could not load this",
+  className,
 }: {
-  query: Query<T>;
-  /** Shown on the first load only — a refetch keeps the previous data on screen. */
-  skeleton: React.ReactNode;
-  /** Optional: what to show when the call succeeded but returned nothing. */
-  empty?: React.ReactNode;
-  /** Defaults to "an empty array". Override for other shapes. */
-  isEmpty?: (data: T) => boolean;
-  errorTitle?: string;
-  children: (data: T) => React.ReactNode;
+  error: Error | undefined;
+  onRetry: () => void;
+  title?: string;
+  className?: string;
 }) {
-  const { data, loading, error, refetch } = query;
+  if (!error) return null;
 
-  /*
-    Error first, and only when there is nothing to show. If a refetch fails but
-    stale data is still on screen, keeping the data and letting the reader retry
-    beats replacing a working table with an error box.
-  */
-  if (error && data === undefined) {
-    return (
-      <Alert
-        tone="danger"
-        title={errorTitle}
-        action={
-          <Button variant="secondary" size="sm" onClick={refetch}>
-            <RotateCcw aria-hidden="true" />
-            Retry
-          </Button>
-        }
-      >
-        {error.message || "Something went wrong fetching this data."} Nothing was lost —
-        this screen only reads.
-      </Alert>
-    );
-  }
-
-  // Stale-while-revalidate: the skeleton is for the first load, not every load.
-  if (data === undefined) {
-    return loading ? <>{skeleton}</> : null;
-  }
-
-  const blank = isEmpty ? isEmpty(data) : Array.isArray(data) && data.length === 0;
-  if (blank && empty) return <>{empty}</>;
-
-  return <>{children(data)}</>;
+  return (
+    <Alert
+      tone="danger"
+      className={cn("mb-6", className)}
+      title={title}
+      action={
+        <Button variant="secondary" size="sm" onClick={onRetry}>
+          <RotateCcw aria-hidden="true" />
+          Retry
+        </Button>
+      }
+    >
+      {error.message || "Something went wrong fetching this data."} Nothing was lost —
+      this screen only reads.
+    </Alert>
+  );
 }
 
 /**

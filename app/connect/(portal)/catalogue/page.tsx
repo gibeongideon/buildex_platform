@@ -34,6 +34,7 @@ import { productLimit, packageMeta } from "@/lib/schemas/subscription";
 import { canListProducts } from "@/lib/schemas/verification";
 import { cn, formatDate } from "@/lib/utils";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
+import { QueryError } from "@/components/ui/query-state";
 
 /*
   Catalogue management.
@@ -53,7 +54,7 @@ const STATUS_META: Record<Product["status"], { label: string; tone: Tone }> = {
 };
 
 export default function CataloguePage() {
-  const { data, loading } = useCurrentManufacturer();
+  const { data, loading, error, refetch } = useCurrentManufacturer();
   const [query, setQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("");
   const [busyId, setBusyId] = React.useState<string | null>(null);
@@ -123,6 +124,8 @@ export default function CataloguePage() {
           </>
         }
       />
+
+        <QueryError error={error} onRetry={refetch} />
 
       {atLimit ? (
         <Alert

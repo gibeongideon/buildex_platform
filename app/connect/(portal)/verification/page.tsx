@@ -23,9 +23,10 @@ import { DOCUMENT_TYPES, type DocumentTypeKey } from "@/lib/schemas/document";
 import { STATUS_LABELS, STATUS_TONE } from "@/lib/schemas/verification";
 import { formatDate } from "@/lib/utils";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
+import { QueryError } from "@/components/ui/query-state";
 
 export default function VerificationPage() {
-  const { data, loading } = useCurrentManufacturer();
+  const { data, loading, error, refetch } = useCurrentManufacturer();
 
   if (loading && !data) {
     return (
@@ -59,6 +60,8 @@ export default function VerificationPage() {
           </StatusPill>
         }
       />
+
+        <QueryError error={error} onRetry={refetch} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0 space-y-6">

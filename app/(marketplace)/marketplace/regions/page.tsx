@@ -10,6 +10,7 @@ import { COUNTIES, REGIONS, type Region } from "@/lib/schemas/common";
 import { REGION_REACH } from "@/lib/schemas/campaign";
 import { Currency, Num } from "@/components/shared/format";
 import { Card, CardBody, Skeleton } from "@/components/ui/primitives";
+import { QueryError } from "@/components/ui/query-state";
 import { priceRange } from "@/lib/schemas/product";
 
 /*
@@ -28,7 +29,7 @@ function RegionsInner() {
   const params = useSearchParams();
   const query = (params.get("q") ?? "").trim();
 
-  const { data, loading } = useQuery(
+  const { data, loading, error, refetch } = useQuery(
     () => marketplaceRepo.search({ query: query || undefined, sort: "relevance" }),
     [query],
   );
@@ -81,6 +82,8 @@ function RegionsInner() {
           <li className="text-foreground">Delivery regions</li>
         </ol>
       </nav>
+
+      <QueryError error={error} onRetry={refetch} />
 
       <h1 className="flex items-center gap-2 font-display text-xl font-bold tracking-tight text-foreground">
         <Truck className="size-5 text-brand" aria-hidden="true" />

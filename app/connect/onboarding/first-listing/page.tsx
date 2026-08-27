@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Alert } from "@/components/ui/primitives";
+import { QueryError } from "@/components/ui/query-state";
 import { ListingForm } from "@/components/shared/listing-form";
 import { manufacturerRepo, productRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
@@ -17,7 +18,7 @@ export default function FirstListingStepPage() {
   const [submitting, setSubmitting] = React.useState(false);
 
   const manufacturerId = draft?.manufacturerId ?? null;
-  const { data: manufacturer } = useQuery(
+  const { data: manufacturer, error, refetch } = useQuery(
     async () => (manufacturerId ? manufacturerRepo.getById(manufacturerId) : null),
     [manufacturerId],
   );
@@ -32,6 +33,7 @@ export default function FirstListingStepPage() {
       description="Wholesale construction supply trades in quantity bands, so price it the way you actually sell it. The preview shows exactly what a hardware shop will see."
       wide
     >
+      <QueryError error={error} onRetry={refetch} />
       <ListingForm
         manufacturerName={
           manufacturer?.tradingName ?? draft?.company?.tradingName ?? "Your company"

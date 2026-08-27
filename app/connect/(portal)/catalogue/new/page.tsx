@@ -10,9 +10,10 @@ import { Alert, Skeleton } from "@/components/ui/primitives";
 import { productRepo } from "@/lib/data";
 import { canListProducts } from "@/lib/schemas/verification";
 import { useCurrentManufacturer } from "../../use-current-manufacturer";
+import { QueryError } from "@/components/ui/query-state";
 
 export default function NewListingPage() {
-  const { data, loading } = useCurrentManufacturer();
+  const { data, loading, error, refetch } = useCurrentManufacturer();
   const router = useRouter();
   const [submitting, setSubmitting] = React.useState(false);
 
@@ -40,6 +41,8 @@ export default function NewListingPage() {
           { label: "Add product" },
         ]}
       />
+
+        <QueryError error={error} onRetry={refetch} />
 
       <ListingForm
         manufacturerName={manufacturer.tradingName}

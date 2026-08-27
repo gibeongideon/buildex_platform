@@ -29,6 +29,7 @@ import { ProductThumb } from "@/components/shared/product-thumb";
 import { ProductCard } from "@/components/shared/product-card";
 import { Currency, DetailRow, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Field, FieldHint, Input, Label, Select, Textarea } from "@/components/ui/field";
 import {
   Alert,
@@ -67,7 +68,7 @@ export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
   const productId = params.id;
 
-  const { data: listing, loading } = useQuery(
+  const { data: listing, loading, error, refetch } = useQuery(
     () => marketplaceRepo.getListing(productId),
     [productId],
   );
@@ -184,6 +185,8 @@ export default function ProductDetailPage() {
           All listings
         </Link>
       </nav>
+
+      <QueryError error={error} onRetry={refetch} />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0">

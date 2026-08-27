@@ -17,6 +17,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Currency, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Field, Input, Label, MoneyInput, Select, Textarea } from "@/components/ui/field";
 import {
   Card,
@@ -156,7 +157,7 @@ export default function EnquiriesPage() {
   const [quotingId, setQuotingId] = React.useState<string | null>(null);
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
-  const { data: enquiries, loading } = useQuery(
+  const { data: enquiries, loading, error, refetch } = useQuery(
     async () =>
       manufacturerId
         ? enquiryRepo.list({
@@ -220,6 +221,8 @@ export default function EnquiriesPage() {
           { label: "Orders & enquiries" },
         ]}
       />
+
+        <QueryError error={error} onRetry={refetch} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

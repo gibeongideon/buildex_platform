@@ -15,6 +15,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Input, Select } from "@/components/ui/field";
 import {
   Alert,
@@ -49,7 +50,7 @@ import { cn, formatDate, formatMoney } from "@/lib/utils";
 */
 
 export default function AdminSuppliersPage() {
-  const { data: rows, loading } = useQuery(() => supplierRepo.vendorRows(), []);
+  const { data: rows, loading, error, refetch } = useQuery(() => supplierRepo.vendorRows(), []);
   const { data: bills } = useQuery(() => supplierRepo.listBills(), []);
   const [query, setQuery] = React.useState("");
   const [country, setCountry] = React.useState("");
@@ -88,6 +89,8 @@ export default function AdminSuppliersPage() {
           </Button>
         }
       />
+
+      <QueryError error={error} onRetry={refetch} />
 
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

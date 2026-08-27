@@ -18,6 +18,7 @@ import { priceAtQuantity, priceRange } from "@/lib/schemas/product";
 import { ProductCard, ProductCardSkeleton } from "@/components/shared/product-card";
 import { Currency, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import { Card, CardBody, EmptyState, Skeleton } from "@/components/ui/primitives";
 
 /*
@@ -45,7 +46,7 @@ function AskInner() {
     [initial],
   );
 
-  const { data, loading } = useQuery(
+  const { data, loading, error, refetch } = useQuery(
     async () => {
       if (!parsed) return null;
       return marketplaceRepo.search({
@@ -86,6 +87,8 @@ function AskInner() {
           <li className="text-foreground">Ask AI</li>
         </ol>
       </nav>
+
+      <QueryError error={error} onRetry={refetch} />
 
       <div className="flex items-center gap-2">
         <Sparkles className="size-5 text-primary" aria-hidden="true" />

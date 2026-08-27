@@ -17,6 +17,7 @@ import { DetailRow } from "@/components/shared/format";
 import { VerificationTracker } from "@/components/shared/verification-tracker";
 import { DecisionPanel } from "@/components/admin/decision-panel";
 import { Button } from "@/components/ui/button";
+import { QueryError } from "@/components/ui/query-state";
 import {
   Alert,
   Card,
@@ -51,7 +52,7 @@ export default function VerificationReviewPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
 
-  const { data: manufacturer, loading } = useQuery(
+  const { data: manufacturer, loading, error, refetch } = useQuery(
     () => manufacturerRepo.getById(id),
     [id],
   );
@@ -85,6 +86,8 @@ export default function VerificationReviewPage() {
                 </Button>
               }
             />
+
+        <QueryError error={error} onRetry={refetch} />
           </CardBody>
         </Card>
       </>

@@ -3,15 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import {
-  AlertTriangle,
-  ArrowLeft,
-  Building2,
-  ExternalLink,
-  FileText,
-  Store,
-  Users,
-} from "lucide-react";
+import { AlertTriangle, Building2, ExternalLink, FileText, Store, Users } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { DetailRow } from "@/components/shared/format";
 import { VerificationTracker } from "@/components/shared/verification-tracker";
@@ -34,6 +26,7 @@ import { capacityBandLabel, regionForCounty } from "@/lib/schemas/common";
 import { documentTypeMeta, isDocumentExpired } from "@/lib/schemas/document";
 import { STATUS_LABELS, STATUS_TONE } from "@/lib/schemas/verification";
 import { formatDate, formatRelative } from "@/lib/utils";
+import { BackLink } from "@/components/shared/back-link";
 
 /*
   One application, reviewed.
@@ -125,15 +118,9 @@ export default function VerificationReviewPage() {
         }
       />
 
-      <nav aria-label="Back" className="mb-4">
-        <Link
-          href="/admin/verification"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground hover:underline"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden="true" />
-          Verification queue
-        </Link>
-      </nav>
+      <BackLink href="/admin/verification" className="mb-4">
+        Verification queue
+      </BackLink>
 
       {drafts > 0 ? (
         <Alert tone="info" className="mb-6" title={`${drafts} listing${drafts === 1 ? "" : "s"} waiting on you`}>

@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Search, Store } from "lucide-react";
 import { marketplaceRepo } from "@/lib/data";
@@ -12,6 +11,7 @@ import { QueryError } from "@/components/ui/query-state";
 import { Input, Select } from "@/components/ui/field";
 import { Card, CardBody, EmptyState, Skeleton } from "@/components/ui/primitives";
 import { priceRange, type Product } from "@/lib/schemas/product";
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import {
   ManufacturerRow,
   ManufacturerRowSkeleton,
@@ -90,17 +90,13 @@ function ManufacturersDirectoryInner() {
 
   return (
     <div className="mx-auto max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8">
-      <nav aria-label="Breadcrumb" className="mb-4">
-        <ol className="flex items-center gap-1 text-xs text-muted-foreground">
-          <li>
-            <Link href="/marketplace" className="hover:text-foreground hover:underline">
-              Marketplace
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li className="text-foreground">Verified manufacturers</li>
-        </ol>
-      </nav>
+      <Breadcrumbs
+        className="mb-4"
+        items={[
+          { label: "Marketplace", href: "/marketplace" },
+          { label: "Verified manufacturers" },
+        ]}
+      />
 
       <QueryError error={error} onRetry={refetch} />
 

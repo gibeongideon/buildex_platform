@@ -5,15 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  ArrowLeft,
-  BadgeCheck,
-  CheckCircle2,
-  MessageSquare,
-  Package,
-  ShieldCheck,
-  Store,
-} from "lucide-react";
+import { BadgeCheck, CheckCircle2, MessageSquare, Package, ShieldCheck, Store } from "lucide-react";
 import { browsingRepo, enquiryRepo, marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import {
@@ -42,6 +34,7 @@ import {
   StatusPill,
 } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
+import { BackLink } from "@/components/shared/back-link";
 
 /**
  * The enquiry form collects contact details only — the quantity comes from the
@@ -176,15 +169,9 @@ export default function ProductDetailPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-      <nav aria-label="Breadcrumb" className="mb-5">
-        <Link
-          href="/marketplace"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground hover:underline"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden="true" />
-          All listings
-        </Link>
-      </nav>
+      <BackLink href="/marketplace" className="mb-5">
+        All listings
+      </BackLink>
 
       <QueryError error={error} onRetry={refetch} />
 

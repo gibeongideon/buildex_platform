@@ -3,21 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import {
-  ArrowLeft,
-  BadgeCheck,
-  Building2,
-  CalendarDays,
-  CheckCircle2,
-  Clock,
-  Factory,
-  MapPin,
-  Package,
-  Search,
-  ShieldCheck,
-  Store,
-  Truck,
-} from "lucide-react";
+import { BadgeCheck, Building2, CalendarDays, CheckCircle2, Clock, Factory, MapPin, Package, Search, ShieldCheck, Store, Truck } from "lucide-react";
 import { marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import { priceRange, type Product } from "@/lib/schemas/product";
@@ -29,6 +15,7 @@ import { Currency, DetailRow, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
 import { Input, Select } from "@/components/ui/field";
+import { BackLink } from "@/components/shared/back-link";
 import {
   Alert,
   Card,
@@ -164,13 +151,9 @@ export default function ManufacturerStorefrontPage() {
       {/* Store banner — Buildex Connect chrome, supplier content. */}
       <section className="on-brand">
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-          <Link
-            href="/marketplace"
-            className="inline-flex items-center gap-1.5 text-sm text-white/70 transition-colors hover:text-white"
-          >
-            <ArrowLeft className="size-3.5" aria-hidden="true" />
+          <BackLink href="/marketplace" tone="onDark">
             Buildex Connect marketplace
-          </Link>
+          </BackLink>
 
           <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex items-start gap-4">

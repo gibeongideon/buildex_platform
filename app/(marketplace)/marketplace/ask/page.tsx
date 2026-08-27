@@ -20,6 +20,7 @@ import { Currency, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
 import { Card, CardBody, EmptyState, Skeleton } from "@/components/ui/primitives";
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 
 /*
   Ask AI — the sourcing assistant.
@@ -76,17 +77,13 @@ function AskInner() {
 
   return (
     <div className="mx-auto max-w-[80rem] px-4 py-6 sm:px-6 lg:px-8">
-      <nav aria-label="Breadcrumb" className="mb-4">
-        <ol className="flex items-center gap-1 text-xs text-muted-foreground">
-          <li>
-            <Link href="/marketplace" className="hover:text-foreground hover:underline">
-              Marketplace
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li className="text-foreground">Ask AI</li>
-        </ol>
-      </nav>
+      <Breadcrumbs
+        className="mb-4"
+        items={[
+          { label: "Marketplace", href: "/marketplace" },
+          { label: "Ask AI" },
+        ]}
+      />
 
       <QueryError error={error} onRetry={refetch} />
 

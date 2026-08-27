@@ -26,6 +26,7 @@ import {
   priceAtQuantity,
 } from "@/lib/schemas/product";
 import { cn } from "@/lib/utils";
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 
 /*
   Side-by-side comparison, driven by quantity.
@@ -109,17 +110,13 @@ function CompareInner() {
 
   return (
     <div className="mx-auto max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8">
-      <nav aria-label="Breadcrumb" className="mb-4">
-        <ol className="flex items-center gap-1 text-xs text-muted-foreground">
-          <li>
-            <Link href="/marketplace" className="hover:text-foreground hover:underline">
-              Marketplace
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li className="text-foreground">Compare</li>
-        </ol>
-      </nav>
+      <Breadcrumbs
+        className="mb-4"
+        items={[
+          { label: "Marketplace", href: "/marketplace" },
+          { label: "Compare" },
+        ]}
+      />
 
       <QueryError error={error} onRetry={refetch} />
 

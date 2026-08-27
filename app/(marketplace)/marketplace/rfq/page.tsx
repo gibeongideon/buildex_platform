@@ -5,15 +5,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  ArrowLeft,
-  BadgeCheck,
-  CheckCircle2,
-  FileText,
-  Send,
-  Store,
-  Truck,
-} from "lucide-react";
+import { BadgeCheck, CheckCircle2, FileText, Send, Store, Truck } from "lucide-react";
 import { enquiryRepo, marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import {
@@ -28,6 +20,7 @@ import { Currency, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
 import { Field, FieldHint, Input, Label, Select, Textarea } from "@/components/ui/field";
+import { BackLink } from "@/components/shared/back-link";
 import {
   Alert,
   Card,
@@ -217,15 +210,9 @@ export default function RfqPage() {
 
   return (
     <div className="mx-auto max-w-[70rem] px-4 py-6 sm:px-6 lg:px-8">
-      <nav aria-label="Breadcrumb" className="mb-4">
-        <Link
-          href="/marketplace"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground hover:underline"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden="true" />
-          Marketplace
-        </Link>
-      </nav>
+      <BackLink href="/marketplace" className="mb-4">
+        Marketplace
+      </BackLink>
 
       <QueryError error={error} onRetry={refetch} />
 

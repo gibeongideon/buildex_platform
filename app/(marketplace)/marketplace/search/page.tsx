@@ -14,6 +14,7 @@ import { QueryError } from "@/components/ui/query-state";
 import { Select } from "@/components/ui/field";
 import { Card, CardBody, EmptyState, Skeleton } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 
 /*
   Marketplace results.
@@ -142,17 +143,13 @@ function MarketplaceSearchInner() {
 
   return (
     <div className="mx-auto max-w-[112rem] px-4 py-5 sm:px-6 lg:px-8">
-      <nav aria-label="Breadcrumb" className="mb-3">
-        <ol className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-          <li>
-            <Link href="/marketplace" className="hover:text-foreground hover:underline">
-              Marketplace
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li className="text-foreground">{heading}</li>
-        </ol>
-      </nav>
+      <Breadcrumbs
+        className="mb-4"
+        items={[
+          { label: "Marketplace", href: "/marketplace" },
+          { label: "{heading}" },
+        ]}
+      />
 
       <QueryError error={error} onRetry={refetch} />
 

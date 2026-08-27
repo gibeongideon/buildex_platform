@@ -3,22 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import {
-  Activity,
-  ArrowLeft,
-  Ban,
-  Building2,
-  CreditCard,
-  ExternalLink,
-  FileText,
-  Megaphone,
-  MessageSquare,
-  Package,
-  RotateCcw,
-  ShieldCheck,
-  Store,
-  Users,
-} from "lucide-react";
+import { Activity, Ban, Building2, CreditCard, ExternalLink, FileText, Megaphone, MessageSquare, Package, RotateCcw, ShieldCheck, Store, Users } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Currency, DetailRow, Num, Pct } from "@/components/shared/format";
@@ -73,6 +58,7 @@ import {
   type ManufacturerStatus,
 } from "@/lib/schemas/verification";
 import { cn, formatDate, formatRelative } from "@/lib/utils";
+import { BackLink } from "@/components/shared/back-link";
 
 /*
   One manufacturer, everything about them.
@@ -82,7 +68,6 @@ import { cn, formatDate, formatRelative } from "@/lib/utils";
   application stands. The verification queue answers "should they be on the
   platform"; this answers "how are they doing on it".
 */
-
 
 export default function AdminManufacturerRecordPage() {
   const params = useParams<{ id: string }>();
@@ -230,15 +215,9 @@ export default function AdminManufacturerRecordPage() {
         }
       />
 
-      <nav aria-label="Back" className="mb-4">
-        <Link
-          href="/admin/manufacturers"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground hover:underline"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden="true" />
-          Manufacturer directory
-        </Link>
-      </nav>
+      <BackLink href="/admin/manufacturers" className="mb-4">
+        Manufacturer directory
+      </BackLink>
 
       {suspended ? (
         <Alert tone="danger" className="mb-6" title="This supplier is suspended">

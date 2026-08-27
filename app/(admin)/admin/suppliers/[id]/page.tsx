@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { AlertTriangle, ArrowLeft, Building2, FileText } from "lucide-react";
+import { AlertTriangle, Building2, FileText } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { DetailRow } from "@/components/shared/format";
@@ -32,6 +32,7 @@ import {
   outstanding,
 } from "@/lib/schemas/supplier";
 import { cn, formatDate, formatMoney } from "@/lib/utils";
+import { BackLink } from "@/components/shared/back-link";
 
 /*
   One supplier: what they supply, what is owed, and what is wrong with the
@@ -101,15 +102,9 @@ export default function AdminSupplierRecordPage() {
         }
       />
 
-      <nav aria-label="Back" className="mb-4">
-        <Link
-          href="/admin/suppliers"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground hover:underline"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden="true" />
-          Suppliers
-        </Link>
-      </nav>
+      <BackLink href="/admin/suppliers" className="mb-4">
+        Suppliers
+      </BackLink>
 
       {issues.length > 0 ? (
         <Alert

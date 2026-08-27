@@ -18,6 +18,7 @@ import {
   type RankingMetric,
 } from "@/components/marketplace/ranking-block";
 import { cn } from "@/lib/utils";
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 
 /*
   Top ranking.
@@ -250,17 +251,13 @@ export default function TopRankingPage() {
       </div>
 
       <div className="mx-auto max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8">
-        <nav aria-label="Breadcrumb" className="mb-4">
-          <ol className="flex items-center gap-1 text-xs text-muted-foreground">
-            <li>
-              <Link href="/marketplace" className="hover:text-foreground hover:underline">
-                Marketplace
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li className="text-foreground">Top ranking</li>
-          </ol>
-        </nav>
+      <Breadcrumbs
+        className="mb-4"
+        items={[
+          { label: "Marketplace", href: "/marketplace" },
+          { label: "Top ranking" },
+        ]}
+      />
 
         <QueryError error={error} onRetry={refetch} />
 

@@ -12,6 +12,7 @@ import { Currency, Num } from "@/components/shared/format";
 import { Card, CardBody, Skeleton } from "@/components/ui/primitives";
 import { QueryError } from "@/components/ui/query-state";
 import { priceRange } from "@/lib/schemas/product";
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 
 /*
   Delivery regions.
@@ -71,17 +72,13 @@ function RegionsInner() {
 
   return (
     <div className="mx-auto max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8">
-      <nav aria-label="Breadcrumb" className="mb-4">
-        <ol className="flex items-center gap-1 text-xs text-muted-foreground">
-          <li>
-            <Link href="/marketplace" className="hover:text-foreground hover:underline">
-              Marketplace
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li className="text-foreground">Delivery regions</li>
-        </ol>
-      </nav>
+      <Breadcrumbs
+        className="mb-4"
+        items={[
+          { label: "Marketplace", href: "/marketplace" },
+          { label: "Delivery regions" },
+        ]}
+      />
 
       <QueryError error={error} onRetry={refetch} />
 

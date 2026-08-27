@@ -402,6 +402,32 @@ painting them onto a canvas rather than parsing the string — Tailwind v4 emits
 for anything carrying an alpha modifier, and it composites translucent grounds the way a
 reader actually sees them. Headings must clear 10:1, `muted` 7:1 and `subtle` 5.5:1.
 
+### Colour that means something
+
+The soft tints used to sit at 8% of their base over white, which measures 1.16:1 against
+the page — technically a tint, visibly grey. The interface read as flat not because it
+lacked colour but because the colour it had was too dilute to see. Each is now the deepest
+tint that keeps its own foreground clear of 4.5:1 when set on it:
+
+| Token | Light | On white | Its own text on it |
+| --- | --- | --- | --- |
+| `--brand-soft` | `#CFD1E0` | 1.52:1 | 8.11:1 |
+| `--success-soft` | `#E5F0EA` | 1.17:1 | 4.65:1 |
+| `--warning-soft` | `#F3E0D8` | 1.28:1 | 4.65:1 |
+| `--danger-soft` | `#F0D4D2` | 1.40:1 | 4.69:1 |
+
+The darker semantics reach that limit sooner than brand blue does, which is why they stay
+paler — the constraint is the colour, not a design preference.
+
+**`StatCard` carries a tone, and the tone carries meaning.** An overdue count is amber, a
+breach red, a completion green, everything else brand blue. That is the difference between
+an interface with colour and one that is merely coloured: a reader scans the KPI row and
+knows where to look before reading a single number. The tone tints a small chip behind the
+icon and nothing else, so the figure stays the loudest thing on the card.
+
+Colour is never the only signal. Every toned figure also carries a label and a hint, so
+nothing here depends on distinguishing amber from green.
+
 ### Foundation
 
 - **Surfaces are separated by 1px borders, not shadows.** Shadows are reserved for true

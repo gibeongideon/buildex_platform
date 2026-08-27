@@ -90,23 +90,27 @@ export default function AdminCampaignsPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Active campaigns"
+          tone="info"
           value={active.length}
           hint={`of ${all.length} total`}
           icon={<Megaphone className="size-4" />}
         />
         <StatCard
           label="Spend to date"
+          tone="info"
           value={<Currency value={spend} />}
           hint="Indicative pricing"
           icon={<Target className="size-4" />}
         />
         <StatCard
           label="Enquiries generated"
+          tone="success"
           value={<Num value={enquiries} />}
           icon={<Megaphone className="size-4" />}
         />
         <StatCard
           label="View → enquiry"
+          tone="success"
           value={<Pct value={views ? (enquiries / views) * 100 : 0} />}
           hint="Across all campaigns"
           icon={<Target className="size-4" />}

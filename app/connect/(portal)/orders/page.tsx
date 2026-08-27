@@ -224,6 +224,7 @@ export default function EnquiriesPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Needs a reply"
+          tone="warning"
           value={needsReply.length}
           hint={
             needsReply.length
@@ -234,18 +235,21 @@ export default function EnquiriesPage() {
         />
         <StatCard
           label="Open pipeline"
+          tone="info"
           value={<Currency value={pipelineValue} compact />}
           hint="New and quoted, at enquiry quantity"
           icon={<Clock className="size-4" />}
         />
         <StatCard
           label="Accepted"
+          tone="success"
           value={accepted.length}
           hint="Converted to orders"
           icon={<CheckCircle2 className="size-4" />}
         />
         <StatCard
           label="Accepted value"
+          tone="success"
           value={<Currency value={wonValue} compact />}
           hint="Lifetime through Buildex Connect"
           icon={<Package className="size-4" />}

@@ -480,12 +480,14 @@ export default function CampaignsPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Impressions"
+          tone="info"
           value={<Num value={totals.impressions} />}
           hint="All campaigns, lifetime"
           icon={<Eye className="size-4" />}
         />
         <StatCard
           label="Product views"
+          tone="info"
           value={<Num value={totals.views} />}
           hint={
             totals.impressions
@@ -496,6 +498,7 @@ export default function CampaignsPage() {
         />
         <StatCard
           label="Enquiries"
+          tone="success"
           value={<Num value={totals.enquiries} />}
           hint={
             totals.views
@@ -506,6 +509,7 @@ export default function CampaignsPage() {
         />
         <StatCard
           label="Spent"
+          tone="info"
           value={<Currency value={totals.spent} compact />}
           hint={
             totals.enquiries

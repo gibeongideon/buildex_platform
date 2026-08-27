@@ -91,9 +91,11 @@ export default function AdminListingsPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Live on the marketplace" value={live} icon={<Package className="size-4" />} />
+        <StatCard label="Live on the marketplace"
+          tone="success" value={live} icon={<Package className="size-4" />} />
         <StatCard
           label="Drafts"
+          tone="warning"
           value={drafts.length}
           hint={
             heldByVerification
@@ -104,6 +106,7 @@ export default function AdminListingsPage() {
         />
         <StatCard
           label="Categories in use"
+          tone="info"
           value={new Set(all.map((r) => r.product.category)).size}
           hint={`of ${PRODUCT_CATEGORIES.length}`}
           icon={<Package className="size-4" />}

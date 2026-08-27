@@ -130,24 +130,28 @@ export default function ConnectDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Active listings"
+          tone="success"
           value={active.length}
           hint={drafts.length ? `${drafts.length} in draft` : "All listings live"}
           icon={<Package className="size-4" />}
         />
         <StatCard
           label="Lowest catalogue price"
+          tone="info"
           value={catalogueFloor ? <Currency value={catalogueFloor} /> : "—"}
           hint="Best band across your range"
           icon={<TrendingUp className="size-4" />}
         />
         <StatCard
           label="Regions covered"
+          tone="info"
           value={manufacturer.distributionRegions.length}
           hint={manufacturer.distributionRegions.slice(0, 2).join(", ")}
           icon={<MapPin className="size-4" />}
         />
         <StatCard
           label="Package"
+          tone="info"
           value={
             manufacturer.subscription
               ? packageMeta(manufacturer.subscription.package).name

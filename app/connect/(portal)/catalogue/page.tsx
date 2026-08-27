@@ -150,24 +150,28 @@ export default function CataloguePage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Live listings"
+          tone="success"
           value={live.length}
           hint={limit === null ? "Unlimited on your package" : `of ${limit} allowed`}
           icon={<Eye className="size-4" />}
         />
         <StatCard
           label="Drafts"
+          tone="warning"
           value={drafts.length}
           hint={drafts.length ? "Not yet visible to buyers" : "Nothing pending"}
           icon={<Pencil className="size-4" />}
         />
         <StatCard
           label="Categories"
+          tone="info"
           value={new Set(products.map((p) => p.category)).size}
           hint="Across your whole range"
           icon={<Package className="size-4" />}
         />
         <StatCard
           label="Entry price"
+          tone="info"
           value={cheapest ? <Currency value={cheapest} /> : "—"}
           hint="Cheapest band you publish"
           icon={<Store className="size-4" />}

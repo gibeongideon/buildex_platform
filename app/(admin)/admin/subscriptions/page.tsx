@@ -115,23 +115,27 @@ export default function AdminSubscriptionsPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Paying suppliers"
+          tone="success"
           value={paying.length}
           hint={`of ${all.length} on the platform`}
           icon={<CreditCard className="size-4" />}
         />
         <StatCard
           label="Monthly run rate"
+          tone="info"
           value={<Currency value={runRate} />}
           hint="Indicative pricing"
           icon={<TrendingUp className="size-4" />}
         />
         <StatCard
           label="Renewing within 30 days"
+          tone="warning"
           value={renewingSoon.length}
           icon={<CalendarClock className="size-4" />}
         />
         <StatCard
           label="On no package"
+          tone="neutral"
           value={byPackage.get("none") ?? 0}
           hint="Not yet subscribed"
           icon={<Layers className="size-4" />}

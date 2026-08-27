@@ -136,11 +136,13 @@ export default function AdminEnquiriesPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total enquiries"
+          tone="info"
           value={<Num value={all.length} />}
           icon={<MessageSquare className="size-4" />}
         />
         <StatCard
           label="Unanswered"
+          tone="warning"
           value={unanswered.length}
           hint={
             unanswered.length
@@ -151,6 +153,7 @@ export default function AdminEnquiriesPage() {
         />
         <StatCard
           label="Answer rate"
+          tone="success"
           value={<Pct value={all.length ? (answered.length / all.length) * 100 : 0} />}
           hint={
             lateReplies
@@ -161,6 +164,7 @@ export default function AdminEnquiriesPage() {
         />
         <StatCard
           label="Suppliers receiving"
+          tone="info"
           value={bySupplier.length}
           hint="With at least one enquiry"
           icon={<MessageSquare className="size-4" />}

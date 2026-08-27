@@ -137,12 +137,14 @@ export default function InsightsPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Product views"
+          tone="info"
           value={<Num value={summary?.views ?? 0} />}
           hint="From your regional campaigns"
           icon={<Eye className="size-4" />}
         />
         <StatCard
           label="Enquiries"
+          tone="success"
           value={<Num value={summary?.enquiries ?? 0} />}
           hint={
             summary && summary.views
@@ -153,12 +155,14 @@ export default function InsightsPage() {
         />
         <StatCard
           label="Accepted value"
+          tone="success"
           value={<Currency value={summary?.acceptedValueKsh ?? 0} compact />}
           hint={`${summary?.orders ?? 0} orders won`}
           icon={<TrendingUp className="size-4" />}
         />
         <StatCard
           label="Response rate"
+          tone="success"
           value={<Pct value={summary?.responseRatePercent ?? 0} />}
           hint={
             summary

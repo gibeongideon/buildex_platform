@@ -167,7 +167,18 @@
   --brand: #262e70;
   --brand-hover: #444b84;
   --brand-fg: #ffffff;
-  --brand-soft: #eeeef4;
+  /*
+    The soft tints carry the brand's colour into fills — category tiles,
+    supplier avatars, status pills, KPI chips. They used to sit at 8% of the
+    base over white, which measures 1.16:1 against the page: technically a tint,
+    visibly grey. The interface read as flat not because it lacked colour but
+    because the colour it had was too dilute to see.
+
+    Each is now the deepest tint that still keeps its own foreground clear of
+    4.5:1 when set on it — 18% for brand, and less for the darker semantics,
+    which reach the limit sooner.
+  */
+  --brand-soft: #cfd1e0; /* 1.52:1 on white · brand text on it 8.11:1 */
 
   /* Yellow: important actions. Blue text, gold boundary. */
   --primary: #ffda03;
@@ -176,15 +187,15 @@
   --primary-border: #a38c02;
 
   --success: #0f7a3d;
-  --success-soft: #eff5f2;
+  --success-soft: #e5f0ea; /* success text on it 4.65:1 */
   --warning: #b23c0b; /* orange, not yellow — see header note */
-  --warning-soft: #f9efeb;
+  --warning-soft: #f3e0d8; /* warning text on it 4.65:1 */
   --danger: #b3261e;
-  --danger-soft: #f9eeed;
+  --danger-soft: #f0d4d2; /* danger text on it 4.69:1 */
   --info: #262e70;
-  --info-soft: #eeeef4;
+  --info-soft: #cfd1e0;
   --neutral: #474d7a;
-  --neutral-soft: #f2f2f6;
+  --neutral-soft: #eaebf1;
 }
 
 [data-theme="dark"] {
@@ -215,7 +226,7 @@
   --brand: #9da1bf;
   --brand-hover: #babcd1;
   --brand-fg: #262e70;
-  --brand-soft: #15193e;
+  --brand-soft: #1e2450;
 
   /* Yellow is unchanged — it reads beautifully on dark and needs no border. */
   --primary: #ffda03;
@@ -224,15 +235,15 @@
   --primary-border: transparent;
 
   --success: #8cbfa2;
-  --success-soft: #0c1c23;
+  --success-soft: #10261c;
   --warning: #e2a48a;
-  --warning-soft: #25141c;
+  --warning-soft: #2e1a10;
   --danger: #db9793;
-  --danger-soft: #23101f;
+  --danger-soft: #2d1416;
   --info: #979bba;
-  --info-soft: #0f122a;
+  --info-soft: #1a1f45;
   --neutral: #c4c7da;
-  --neutral-soft: #0e112b;
+  --neutral-soft: #171b3d;
 }
 
 @layer base {

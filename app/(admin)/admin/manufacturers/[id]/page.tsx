@@ -255,24 +255,28 @@ export default function AdminManufacturerRecordPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Live listings"
+          tone="success"
           value={live.length}
           hint={drafts.length ? `${drafts.length} in draft` : "Nothing in draft"}
           icon={<Package className="size-4" />}
         />
         <StatCard
           label="Enquiries received"
+          tone="info"
           value={inbox.length}
           hint={unanswered.length ? `${unanswered.length} unanswered` : "All answered"}
           icon={<MessageSquare className="size-4" />}
         />
         <StatCard
           label="Value enquired"
+          tone="info"
           value={<Currency value={inFlight} />}
           hint="Quoted price, or lowest band"
           icon={<CreditCard className="size-4" />}
         />
         <StatCard
           label="Campaign spend"
+          tone="info"
           value={<Currency value={spend} />}
           hint={`${ads.filter((c) => c.status === "active").length} active`}
           icon={<Megaphone className="size-4" />}
@@ -500,13 +504,16 @@ export default function AdminManufacturerRecordPage() {
 
         <RecordPanel tabKey="enquiries" active={tab} idPrefix="mfr">
           <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard label="Unanswered" value={unanswered.length} />
+            <StatCard label="Unanswered"
+          tone="warning" value={unanswered.length} />
             <StatCard
               label="Answer rate"
+          tone="success"
               value={<Pct value={inbox.length ? (answered.length / inbox.length) * 100 : 0} />}
             />
             <StatCard
               label="They advertise"
+          tone="neutral"
               value={
                 manufacturer.storefront.avgResponseHours
                   ? `${manufacturer.storefront.avgResponseHours}h`

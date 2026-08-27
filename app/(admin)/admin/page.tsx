@@ -78,6 +78,7 @@ export default function AdminOverviewPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Awaiting decision"
+          tone="warning"
           loading={!summary}
           value={summary?.applicationsAwaitingDecision}
           hint={
@@ -89,6 +90,7 @@ export default function AdminOverviewPage() {
         />
         <StatCard
           label="Verified suppliers"
+          tone="success"
           loading={!summary}
           value={summary?.verifiedSuppliers}
           hint={
@@ -100,6 +102,7 @@ export default function AdminOverviewPage() {
         />
         <StatCard
           label="Live listings"
+          tone="success"
           loading={!summary}
           value={<Num value={summary?.liveListings ?? 0} />}
           hint={
@@ -111,6 +114,7 @@ export default function AdminOverviewPage() {
         />
         <StatCard
           label="Unanswered enquiries"
+          tone="warning"
           loading={!summary}
           value={summary?.enquiriesUnanswered}
           hint="Across every supplier"
@@ -127,6 +131,7 @@ export default function AdminOverviewPage() {
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Enquiry value in flight"
+          tone="info"
           loading={!summary}
           value={<Currency value={summary?.enquiryValueInFlightKsh ?? 0} compact />}
           hint="New and quoted, at enquiry quantity"
@@ -134,6 +139,7 @@ export default function AdminOverviewPage() {
         />
         <StatCard
           label="Accepted value"
+          tone="success"
           loading={!summary}
           value={<Currency value={summary?.acceptedValueKsh ?? 0} compact />}
           hint="Converted to orders, lifetime"
@@ -141,6 +147,7 @@ export default function AdminOverviewPage() {
         />
         <StatCard
           label="Active campaigns"
+          tone="info"
           loading={!summary}
           value={summary?.activeCampaigns}
           hint="Regional visibility running now"
@@ -148,6 +155,7 @@ export default function AdminOverviewPage() {
         />
         <StatCard
           label="Campaign spend"
+          tone="info"
           loading={!summary}
           value={<Currency value={summary?.campaignSpendKsh ?? 0} compact />}
           hint="Lifetime, all suppliers"

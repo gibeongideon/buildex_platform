@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { getDataVersion, subscribeToData } from "@/lib/data";
 
 /*
@@ -15,6 +15,14 @@ export type QueryState<T> = {
   data: T | undefined;
   loading: boolean;
   error: Error | undefined;
+  /**
+   * Run the call again.
+   *
+   * Without this an error is terminal: the only way out is a page reload, which
+   * loses whatever the reader had filtered or scrolled to. Every failure surface
+   * offers it — see `QueryState` in `components/ui/query-state.tsx`.
+   */
+  refetch: () => void;
 };
 
 type Settled<T> = { key: string; data?: T; error?: Error };
@@ -39,7 +47,16 @@ export function useQuery<T>(fetcher: () => Promise<T>, deps: unknown[]): QuerySt
     () => 0, // server render: version is always zero
   );
 
-  const key = `${version}::${deps.map((dep) => String(dep)).join("|")}`;
+  /*
+    A local counter that only `refetch` moves. Folding it into the key reuses
+    the existing "the key changed, so re-run and mark this stale" machinery,
+    rather than bolting a second path onto the effect — and because `loading` is
+    derived from the key, a retry shows as loading without any extra state.
+  */
+  const [attempt, setAttempt] = useState(0);
+  const refetch = useCallback(() => setAttempt((n) => n + 1), []);
+
+  const key = `${version}:${attempt}::${deps.map((dep) => String(dep)).join("|")}`;
   const [settled, setSettled] = useState<Settled<T> | null>(null);
 
   useEffect(() => {
@@ -71,5 +88,6 @@ export function useQuery<T>(fetcher: () => Promise<T>, deps: unknown[]): QuerySt
     data: settled?.data,
     error: settled?.key === key ? settled.error : undefined,
     loading: settled?.key !== key,
+    refetch,
   };
 }

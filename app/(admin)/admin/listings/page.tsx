@@ -17,12 +17,16 @@ import {
   EmptyState,
   Skeleton,
   StatusPill,
-  type Tone,
 } from "@/components/ui/primitives";
 import { adminRepo, productRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import { PRODUCT_CATEGORIES } from "@/lib/schemas/common";
-import { priceRange, type Product } from "@/lib/schemas/product";
+import {
+  PRODUCT_STATUS_LABELS,
+  PRODUCT_STATUS_TONE,
+  priceRange,
+  type Product,
+} from "@/lib/schemas/product";
 import { canListProducts } from "@/lib/schemas/verification";
 import { cn } from "@/lib/utils";
 
@@ -35,12 +39,6 @@ import { cn } from "@/lib/utils";
   lighter tool than suspending the whole supplier.
 */
 
-const STATUS_META: Record<Product["status"], { label: string; tone: Tone }> = {
-  active: { label: "Live", tone: "success" },
-  draft: { label: "Draft", tone: "neutral" },
-  out_of_stock: { label: "Out of stock", tone: "warning" },
-  archived: { label: "Archived", tone: "neutral" },
-};
 
 export default function AdminListingsPage() {
   const { data: rows, loading, error, refetch } = useQuery(() => adminRepo.listingRows(), []);
@@ -230,7 +228,7 @@ export default function AdminListingsPage() {
                 <tbody className="divide-y divide-border">
                   {filtered.map(({ product, manufacturer }) => {
                     const range = priceRange(product.priceBands);
-                    const meta = STATUS_META[product.status];
+                    
                     const busy = busyId === product.id;
                     const held =
                       product.status === "draft" &&
@@ -281,7 +279,9 @@ export default function AdminListingsPage() {
                           ) : null}
                         </td>
                         <td className="px-3 py-3">
-                          <StatusPill tone={meta.tone}>{meta.label}</StatusPill>
+                          <StatusPill tone={PRODUCT_STATUS_TONE[product.status]}>
+                            {PRODUCT_STATUS_LABELS[product.status]}
+                          </StatusPill>
                           {held ? (
                             <p className="mt-1 text-xs text-warning">
                               Waiting on verification

@@ -40,7 +40,6 @@ import {
   EmptyState,
   Skeleton,
   StatusPill,
-  type Tone,
 } from "@/components/ui/primitives";
 import {
   activityRepo,
@@ -57,7 +56,12 @@ import {
   ENQUIRY_STATUS_TONE,
   enquiryValue,
 } from "@/lib/schemas/enquiry";
-import { formatLeadTime, priceRange, type Product } from "@/lib/schemas/product";
+import {
+  PRODUCT_STATUS_LABELS,
+  PRODUCT_STATUS_TONE,
+  formatLeadTime,
+  priceRange,
+} from "@/lib/schemas/product";
 import { CAMPAIGN_STATUS_TONE, conversionRate } from "@/lib/schemas/campaign";
 import { packageMeta, packagePrice } from "@/lib/schemas/subscription";
 import {
@@ -79,12 +83,6 @@ import { cn, formatDate, formatRelative } from "@/lib/utils";
   platform"; this answers "how are they doing on it".
 */
 
-const PRODUCT_STATUS_META: Record<Product["status"], { label: string; tone: Tone }> = {
-  active: { label: "Live", tone: "success" },
-  draft: { label: "Draft", tone: "neutral" },
-  out_of_stock: { label: "Out of stock", tone: "warning" },
-  archived: { label: "Archived", tone: "neutral" },
-};
 
 export default function AdminManufacturerRecordPage() {
   const params = useParams<{ id: string }>();
@@ -462,7 +460,7 @@ export default function AdminManufacturerRecordPage() {
                 <ul className="divide-y divide-border">
                   {catalogue.map((product) => {
                     const range = priceRange(product.priceBands);
-                    const meta = PRODUCT_STATUS_META[product.status];
+                    
                     return (
                       <li key={product.id} className="flex items-center gap-3 px-4 py-3">
                         <ProductThumb
@@ -495,7 +493,9 @@ export default function AdminManufacturerRecordPage() {
                             {formatLeadTime(product.leadTimeDays)}
                           </p>
                         </div>
-                        <StatusPill tone={meta.tone}>{meta.label}</StatusPill>
+                        <StatusPill tone={PRODUCT_STATUS_TONE[product.status]}>
+                            {PRODUCT_STATUS_LABELS[product.status]}
+                          </StatusPill>
                       </li>
                     );
                   })}

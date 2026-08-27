@@ -26,10 +26,15 @@ import {
   EmptyState,
   Skeleton,
   StatusPill,
-  type Tone,
 } from "@/components/ui/primitives";
 import { productRepo } from "@/lib/data";
-import { formatLeadTime, priceRange, type Product } from "@/lib/schemas/product";
+import {
+  PRODUCT_STATUS_LABELS,
+  PRODUCT_STATUS_TONE,
+  formatLeadTime,
+  priceRange,
+  type Product,
+} from "@/lib/schemas/product";
 import { productLimit, packageMeta } from "@/lib/schemas/subscription";
 import { canListProducts } from "@/lib/schemas/verification";
 import { cn, formatDate } from "@/lib/utils";
@@ -46,12 +51,6 @@ import { QueryError } from "@/components/ui/query-state";
   enquiries.
 */
 
-const STATUS_META: Record<Product["status"], { label: string; tone: Tone }> = {
-  active: { label: "Live", tone: "success" },
-  draft: { label: "Draft", tone: "neutral" },
-  out_of_stock: { label: "Out of stock", tone: "warning" },
-  archived: { label: "Archived", tone: "neutral" },
-};
 
 export default function CataloguePage() {
   const { data, loading, error, refetch } = useCurrentManufacturer();
@@ -273,7 +272,7 @@ export default function CataloguePage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {filtered.map((product) => {
-                    const meta = STATUS_META[product.status];
+                    
                     const busy = busyId === product.id;
 
                     return (
@@ -319,7 +318,9 @@ export default function CataloguePage() {
                           {formatLeadTime(product.leadTimeDays)}
                         </td>
                         <td className="px-3 py-3">
-                          <StatusPill tone={meta.tone}>{meta.label}</StatusPill>
+                          <StatusPill tone={PRODUCT_STATUS_TONE[product.status]}>
+                            {PRODUCT_STATUS_LABELS[product.status]}
+                          </StatusPill>
                           {product.status === "active" ? (
                             <p className="mt-1 text-xs text-subtle-foreground">
                               since {formatDate(product.updatedAt)}

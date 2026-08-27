@@ -39,6 +39,34 @@ export const PRODUCT_STATUSES = ["draft", "active", "out_of_stock", "archived"] 
 export const productStatusSchema = z.enum(PRODUCT_STATUSES);
 export type ProductStatus = z.infer<typeof productStatusSchema>;
 
+/*
+  How a listing's status is written and coloured.
+
+  Beside the statuses themselves, matching `verification.ts`, `enquiry.ts` and
+  `campaign.ts` — product status was the one that did not follow the pattern,
+  and had drifted into three byte-identical copies across the admin listings
+  table, the manufacturer record and the supplier's own catalogue. Three copies
+  agree until someone edits one.
+
+  "Live" rather than "Active": what the supplier and the buyer both call it.
+*/
+export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
+  draft: "Draft",
+  active: "Live",
+  out_of_stock: "Out of stock",
+  archived: "Archived",
+};
+
+export const PRODUCT_STATUS_TONE: Record<
+  ProductStatus,
+  "neutral" | "info" | "warning" | "success" | "danger"
+> = {
+  draft: "neutral",
+  active: "success",
+  out_of_stock: "warning",
+  archived: "neutral",
+};
+
 /**
  * The fields a manufacturer actually fills in.
  *

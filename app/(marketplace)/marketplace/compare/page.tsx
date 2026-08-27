@@ -24,7 +24,6 @@ import {
   formatBandRange,
   formatLeadTime,
   priceAtQuantity,
-  priceRange,
 } from "@/lib/schemas/product";
 import { cn } from "@/lib/utils";
 

@@ -64,12 +64,23 @@ components/
   ui/                     Primitives — button, form fields, cards, pills, chips
   shared/                 Composed, product-aware components
 
+  Reach for these before writing a list screen — each replaced between five and
+  sixty-six hand-written copies, and a new copy is how they drift apart again:
+
+  ui/query-state.tsx      QueryError banner + skeleton helpers for a failed load
+  ui/filter-bar.tsx       FilterBar (search + filters + "N of M") and SearchField
+  ui/data-table.tsx       DataTable — the scroller, table and header row
+  shared/breadcrumbs.tsx  Breadcrumbs — the trail; PageHeader renders it too
+  shared/back-link.tsx    BackLink — one step up to the parent list
+  shared/error-panel.tsx  The body of every error.tsx boundary
+
 lib/
   schemas/                Zod schemas — the contract for the future database
   data/
     types.ts              Repository interfaces (THE SEAM)
     index.ts              Active implementation (THE SWAP POINT)
     mock/                 In-memory store + repository implementations
+      latency.ts          FAST / NORMAL / SLOW — the one place they are set
     fixtures/             Kenyan seed data
     hooks.ts              React bindings — useQuery
   rules/                  Business rules, kept out of both schemas and components
@@ -118,9 +129,10 @@ Component  ──►  lib/data (repository interface)  ──►  mock implement
    fixture, never touch `localStorage`, never reach into `lib/data/mock/`.
 2. Every repository method is `async` and returns a Zod-inferred type. The signatures are
    already API-shaped, so nothing changes when they become network calls.
-3. Repository calls carry 140–420 ms of artificial latency. This is deliberate: it forces
-   every screen to have a real loading state, so the swap to a networked backend does not
-   surface a whole class of missing UI.
+3. Repository calls carry 140–420 ms of artificial latency, set in one place —
+   `lib/data/mock/latency.ts`. This is deliberate: it forces every screen to have a real
+   loading state, so the swap to a networked backend does not surface a whole class of
+   missing UI.
 4. Business rules live in `lib/rules/`, not in components and not in schemas — so ops
    actions, demo controls and the wizard can never disagree about what the rules are.
 
@@ -559,6 +571,11 @@ decorative — see [04 — Delivered](./04-delivered.md#defects-found-and-fixed)
 | Impure calls | Never `Date.now()` or `new Date()` in a component body. Move it to a module-scope helper (`lib/rules/`) |
 | State from async data | Derive it during render from a nullable override, rather than syncing it in an effect |
 | Loading states | Every async surface needs explicit loading, empty and error states. The artificial latency exists to make their absence obvious |
+| Failed loads | Take `error` and `refetch` from `useQuery` and render `<QueryError>`. On a record page the error branch goes **before** the not-found branch: a failed request and a missing record are different answers, and "it may have been removed" about a record that exists is a false claim |
+| Summary tiles | Derive KPI tiles from an unfiltered query, never from the filtered one that feeds the table. Only the "N of M" count beside the filter should move when a filter moves |
+| Status labels and tones | One `*_LABELS` / `*_TONE` map per schema file, beside the status list — `PRODUCT_STATUS_LABELS` in `lib/schemas/product.ts` is the pattern. Never a local copy in a page |
+| Union-typed filters | Hold filter state as the union (`Region \| ""`), not `string`, and convert DOM values with `asOption`, which checks membership. No `as never` |
+| Section titles | Sections name themselves in a server `layout.tsx`; the client shell lives in its own file beside it, because a client component cannot export `metadata` |
 | Accessibility | Keyboard-operable controls (the dropzone is a real `<button>`, not a drag-only div), `role="alert"` on validation errors, `aria-invalid` on failing inputs, skip links on every layout |
 
 ---

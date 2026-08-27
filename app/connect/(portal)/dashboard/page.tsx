@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowRight, Check, MapPin, Package, Sparkles, TrendingUp } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
-import { SectionGuide } from "@/components/shared/section-guide";
 import { StatCard } from "@/components/shared/stat-card";
 import {
   Alert,
@@ -88,7 +87,6 @@ export default function ConnectDashboardPage() {
         }
       />
 
-      <SectionGuide sectionKey="portal" />
 
       {isDemoFallback ? (
         <Alert

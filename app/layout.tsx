@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Montserrat } from "next/font/google";
 import { themeScript } from "@/components/shared/theme";
 import { DemoPanel } from "@/components/shared/demo-panel";
+import { DemoGuide } from "@/components/shared/section-guide";
 import "./globals.css";
 
 /*
@@ -77,6 +78,13 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased">
         {children}
+        {/*
+          Both of these float above the product and belong to no page: the guide
+          explains which audience a screen is for, the panel drives demo state.
+          Mounted here so removing the scaffolding is one line, not a sweep
+          through every route.
+        */}
+        <DemoGuide />
         <DemoPanel />
       </body>
     </html>

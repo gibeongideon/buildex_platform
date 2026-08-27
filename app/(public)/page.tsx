@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BuildexMark } from "@/components/shared/brand";
-import { SectionQuickLinks } from "@/components/shared/section-guide";
 
 const PRODUCTS = [
   {
@@ -128,11 +127,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/*
-        A guided way in, for demonstrations. The prototype spans four audiences
-        and it is not obvious from a URL which screen belongs to whom.
-      */}
-      <SectionQuickLinks />
 
       <section className="border-b border-border bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">

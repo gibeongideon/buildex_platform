@@ -1,5 +1,9 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import {
   ArrowRight,
   Compass,
@@ -8,21 +12,25 @@ import {
   ShieldCheck,
   Store,
   Truck,
+  X,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 /*
   A guided tour of the build, for demonstrations.
 
   The prototype spans three businesses and four audiences — an applying
   manufacturer, a verified supplier, a hardware shop, and Buildex's own staff —
-  and which screen belongs to whom is not obvious from a URL. So each section
-  states plainly what it is and who it is for: once on the home page as a
-  jumping-off point, and again as a banner on the section itself, so someone who
-  arrives by a deep link is not left guessing.
+  and which screen belongs to whom is not obvious from a URL.
 
-  One definition, two surfaces. The home page and the banners read the same
-  array, so a section can never describe itself differently in two places.
+  It floats above the product rather than sitting inside it. Guidance baked into
+  a page becomes something a reviewer has to mentally subtract before judging
+  the design, and something a developer has to remember to delete before launch.
+  Overlaying it keeps the product exactly what it claims to be, and makes the
+  scaffolding removable in one line.
+
+  Brand blue, not green: green is the interface's success colour, and a standing
+  green panel on every page reads as "everything is fine" rather than "here is
+  what this is".
 */
 
 export type DemoSection = {
@@ -79,108 +87,111 @@ export const DEMO_SECTIONS: DemoSection[] = [
   },
 ];
 
-export function sectionByKey(key: string) {
-  const section = DEMO_SECTIONS.find((s) => s.key === key);
-  if (!section) throw new Error(`Unknown demo section: ${key}`);
-  return section;
+/** Which section the current URL belongs to, longest match first. */
+function currentSection(pathname: string) {
+  return [...DEMO_SECTIONS]
+    .sort((a, b) => b.href.length - a.href.length)
+    .find((s) => pathname.startsWith(s.href));
 }
+
+const ENABLED = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
 
 /**
- * The green explainer shown at the top of a section.
- *
- * Green because it is guidance rather than product chrome — it should read as a
- * note *about* the screen, not part of it. Deliberately compact: it sits above
- * real work and must not push it down the page.
+ * The floating guide. Mounted once in the root layout, so it is available on
+ * every screen and belongs to none of them.
  */
-export function SectionGuide({
-  sectionKey,
-  className,
-}: {
-  sectionKey: string;
-  className?: string;
-}) {
-  const section = sectionByKey(sectionKey);
+export function DemoGuide() {
+  const pathname = usePathname();
+  const [open, setOpen] = React.useState(false);
+
+  if (!ENABLED) return null;
+  const active = currentSection(pathname ?? "");
 
   return (
-    <aside
-      aria-label={`About ${section.title}`}
-      className={cn(
-        "mb-6 rounded-lg border border-success/30 bg-success-soft px-4 py-3",
-        className,
-      )}
-    >
-      <div className="flex items-start gap-2.5">
-        <Compass className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-success">{section.title}</p>
-          <p className="mt-0.5 text-sm text-foreground">{section.what}</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            For {section.who}.{" "}
-            <Link href="/#sections" className="text-success hover:underline">
-              See the other sections
-            </Link>
-          </p>
-        </div>
-      </div>
-    </aside>
-  );
-}
+    <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
+      <DialogPrimitive.Trigger asChild>
+        <button
+          type="button"
+          // Stacked above the Demo controls pill; both are scaffolding, and
+          // keeping them in one corner leaves the product's own chrome alone.
+          className="fixed bottom-28 right-4 z-40 flex items-center gap-2 rounded-full border border-brand bg-brand px-3.5 py-2 text-xs font-medium text-brand-foreground shadow-overlay transition-colors hover:bg-brand-hover print:hidden"
+        >
+          <Compass className="size-3.5" aria-hidden="true" />
+          Walk the build
+        </button>
+      </DialogPrimitive.Trigger>
 
-/** The home page's jumping-off grid. */
-export function SectionQuickLinks() {
-  return (
-    <section id="sections" className="border-b border-border bg-surface scroll-mt-20">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-success">
-              <Compass className="size-3.5" aria-hidden="true" />
-              Walk the build
-            </p>
-            <h2 className="mt-2 font-display text-2xl font-bold tracking-tight text-foreground">
-              Every section, and who it is for
-            </h2>
-            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              The prototype covers four audiences and three businesses. Each link opens
-              the real screens with seeded data — nothing here is a mock-up image.
-            </p>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/40" />
+        <DialogPrimitive.Content className="fixed bottom-28 right-4 z-50 max-h-[min(38rem,calc(100vh-9rem))] w-[min(26rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-border bg-surface shadow-overlay">
+          <div className="sticky top-0 flex items-start justify-between gap-3 border-b border-border bg-surface px-4 py-3">
+            <div className="min-w-0">
+              <DialogPrimitive.Title className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Compass className="size-4 text-brand" aria-hidden="true" />
+                Walk the build
+              </DialogPrimitive.Title>
+              <DialogPrimitive.Description className="mt-0.5 text-xs text-muted-foreground">
+                For guidance only — this panel is not part of the product.
+              </DialogPrimitive.Description>
+            </div>
+            <DialogPrimitive.Close className="rounded-md p-1 text-muted-foreground hover:bg-surface-muted">
+              <X className="size-4" aria-hidden="true" />
+              <span className="sr-only">Close</span>
+            </DialogPrimitive.Close>
           </div>
-        </div>
 
-        <ul className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {DEMO_SECTIONS.map((section) => {
-            const Icon = section.icon;
-            return (
-              <li key={section.key}>
-                <Link
-                  href={section.href}
-                  className="group flex h-full flex-col rounded-lg border border-border bg-surface p-5 transition-colors hover:border-success"
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-success-soft text-success">
-                      <Icon className="size-5" aria-hidden="true" />
+          {active ? (
+            <div className="border-b border-border bg-brand-soft px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-brand">
+                You are here
+              </p>
+              <p className="mt-1 text-sm font-semibold text-foreground">{active.title}</p>
+              <p className="mt-0.5 text-sm text-foreground">{active.what}</p>
+              <p className="mt-1 text-xs text-muted-foreground">For {active.who}.</p>
+            </div>
+          ) : null}
+
+          <ul className="divide-y divide-border">
+            {DEMO_SECTIONS.filter((s) => s.key !== active?.key).map((section) => {
+              const Icon = section.icon;
+              return (
+                <li key={section.key}>
+                  <Link
+                    href={section.href}
+                    onClick={() => setOpen(false)}
+                    className="group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-surface-muted"
+                  >
+                    <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand">
+                      <Icon className="size-4" aria-hidden="true" />
                     </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-foreground group-hover:text-success">
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-medium text-foreground group-hover:text-brand">
                         {section.title}
-                      </p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">{section.who}</p>
-                    </div>
+                      </span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        {section.who}
+                      </span>
+                      <span className="mt-1 block text-xs text-foreground">
+                        {section.what}
+                      </span>
+                    </span>
                     <ArrowRight
-                      className="mt-1 size-4 shrink-0 text-subtle-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-success"
+                      className="mt-1 size-4 shrink-0 text-subtle-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-brand"
                       aria-hidden="true"
                     />
-                  </div>
-                  {/* The green explanation the demo actually leans on. */}
-                  <p className="mt-3 border-t border-border pt-3 text-sm text-success">
-                    {section.what}
-                  </p>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </section>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          <p className="border-t border-border px-4 py-3 text-xs text-muted-foreground">
+            Every link opens the real screens with seeded data — nothing here is a
+            mock-up image. Set <code className="text-numeric">NEXT_PUBLIC_DEMO_MODE=false</code>{" "}
+            to remove this panel entirely.
+          </p>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }

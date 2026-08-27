@@ -87,18 +87,21 @@ shortcut it is.
 
 ### Walking the demo
 
-**Start at `/`.** The home page now carries a *Walk the build* section: one card
-per audience — manufacturer onboarding, the manufacturer dashboard, Buildex
-Admin, the marketplace, and the supplier ledger — each with a green line saying
-what that section does and whose screen it is. Every one of those sections
-repeats the same explanation as a small green banner at its top, so anyone
-arriving by a deep link is not left guessing which of the four audiences they
-are looking at.
+A **Walk the build** button floats bottom-right on every screen. It opens a panel
+that names the section you are currently on, says what it does and whose screen
+it is, and links to the other four — manufacturer onboarding, the manufacturer
+dashboard, Buildex Admin, the marketplace, and the supplier ledger.
 
-Both read one definition in `components/shared/section-guide.tsx`, so a section
-cannot describe itself differently in two places. Adding a section to the tour is
-one entry in `DEMO_SECTIONS` plus a `<SectionGuide sectionKey="…" />` on the page.
+It floats rather than sitting in the pages on purpose. Guidance baked into a
+screen becomes something a reviewer has to mentally subtract before judging the
+design, and something a developer has to remember to delete before launch. The
+panel is brand blue rather than green, because green is the interface's success
+colour and a standing green panel reads as "everything is fine" rather than
+"here is what this is".
 
+One definition drives it — `DEMO_SECTIONS` in
+`components/shared/section-guide.tsx`. Adding a section is one array entry, and
+`NEXT_PUBLIC_DEMO_MODE=false` removes the whole thing.
 
 **As a buyer (hardware shop):**
 

@@ -15,7 +15,6 @@ import {
   Truck,
 } from "lucide-react";
 import { browsingRepo, marketplaceRepo } from "@/lib/data";
-import { SectionGuide } from "@/components/shared/section-guide";
 import { useHomeScope } from "@/components/marketplace/home-scope";
 import {
   AskSurface,
@@ -386,7 +385,6 @@ export default function MarketplaceHomePage() {
       </section>
 
       <div className="mx-auto max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8">
-      <SectionGuide sectionKey="marketplace" />
       {scope === "manufacturers" ? (
         <ManufacturersSurface />
       ) : scope === "regions" ? (

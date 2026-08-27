@@ -289,6 +289,17 @@ export const marketplaceRepo: MarketplaceRepo = {
       .map((l) => l.product);
   },
 
+  async listingsByIds(ids) {
+    await sleep(FAST);
+    const byId = new Map(publicListings().map((l) => [l.product.id, l]));
+    // Ordered by the caller's ids so the columns keep the order they were
+    // picked in, and silently dropping anything no longer public.
+    return ids.flatMap((id) => {
+      const listing = byId.get(id);
+      return listing ? [listing] : [];
+    });
+  },
+
   async similarFromOthers(productId, limit = 4) {
     await sleep(FAST);
     const listings = publicListings();

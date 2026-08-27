@@ -420,3 +420,65 @@ test("the home page leads with the product grid, no dead columns", async ({ page
   const panels = row.locator("> div > div");
   await expect(panels.first()).toBeVisible();
 });
+
+test("a buyer can compare the same material across suppliers, priced at their quantity", async ({
+  page,
+}) => {
+  await page.goto("/marketplace/search?category=Cement%20%26%20Concrete");
+  await expect(page.locator("article h3 a").first()).toBeVisible({ timeout: 15_000 });
+
+  // Shortlist two listings from the grid.
+  const toggles = page.getByRole("checkbox", { name: /Compare/ });
+  await toggles.nth(0).click();
+  await toggles.nth(1).click();
+
+  // The tray reports the shortlist and is the way through to the comparison.
+  const tray = page.getByRole("region", { name: /selected for comparison/i });
+  await expect(tray).toBeVisible({ timeout: 15_000 });
+  await expect(tray).toContainText("2 of 4 selected");
+
+  await tray.getByRole("button", { name: /^Compare/ }).click();
+  await expect(page).toHaveURL(/\/marketplace\/compare\?ids=/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Compare", {
+    timeout: 15_000,
+  });
+
+  /*
+    The rows a buyer decides on. Anchored: each row header carries a hint, and
+    the Line total row's hint is literally "Unit price × quantity", so an
+    unanchored match would hit two headers and trip strict mode.
+  */
+  for (const label of ["Unit price", "Line total", "Minimum order", "Price bands"]) {
+    await expect(
+      page.getByRole("rowheader", { name: new RegExp(`^${label}`) }),
+    ).toBeVisible();
+  }
+
+  /*
+    The point of the page: price is a set of quantity bands, so who is cheapest
+    depends on how much you buy. Exactly one column carries the badge, and the
+    figures change when the quantity does.
+  */
+  await expect(page.getByText("Cheapest at this quantity")).toHaveCount(1);
+  const atDefault = await page
+    .getByRole("row")
+    .filter({ hasText: "Line total" })
+    .innerText();
+
+  await page.getByLabel("Your quantity").fill("5000");
+  await expect
+    .poll(
+      async () =>
+        page.getByRole("row").filter({ hasText: "Line total" }).innerText(),
+      { timeout: 15_000 },
+    )
+    .not.toBe(atDefault);
+  await expect(page.getByText("Cheapest at this quantity")).toHaveCount(1);
+
+  // A quantity below every supplier's minimum is stated, not priced.
+  await page.getByLabel("Your quantity").fill("1");
+  await expect(page.getByText(/Below their minimum/).first()).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(page.getByText("Cheapest at this quantity")).toHaveCount(0);
+});

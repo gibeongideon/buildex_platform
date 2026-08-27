@@ -8,6 +8,7 @@ import { PromoStrip, UtilityBar, UtilityLinks } from "@/components/marketplace/t
 import { CategoryMegaMenu } from "@/components/marketplace/mega-menu";
 import { SearchHero, SearchScopeTabs } from "@/components/marketplace/search-hero";
 import { HomeScopeProvider } from "@/components/marketplace/home-scope";
+import { CompareProvider, CompareTray } from "@/components/marketplace/compare";
 import { Wordmark } from "@/components/shared/brand";
 import { TooltipProvider } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
@@ -81,6 +82,12 @@ export default function MarketplaceLayout({
         the page below it share one selection. Off the home page the provider
         stands down and the tabs go back to being navigation.
       */}
+      {/*
+        Comparison selection is held for the whole marketplace, not one page: a
+        buyer builds a shortlist while moving between search, a listing and a
+        storefront, and losing it on navigation would make the feature useless.
+      */}
+      <CompareProvider>
       <HomeScopeProvider enabled={isHome}>
       <div className="flex min-h-dvh flex-col bg-background">
         <a
@@ -268,6 +275,8 @@ export default function MarketplaceLayout({
         </footer>
       </div>
       </HomeScopeProvider>
+      <CompareTray />
+      </CompareProvider>
     </TooltipProvider>
   );
 }

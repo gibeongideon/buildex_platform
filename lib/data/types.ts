@@ -224,6 +224,15 @@ export interface MarketplaceRepo {
   relatedFromManufacturer(productId: string, limit?: number): Promise<Product[]>;
   /** Comparable listings from other manufacturers in the same category. */
   similarFromOthers(productId: string, limit?: number): Promise<MarketplaceListing[]>;
+  /**
+   * Several listings at once, for the side-by-side comparison.
+   *
+   * One call rather than one per id: the comparison is the page's whole point,
+   * so it should not stutter in as four separate loads. Ids that are no longer
+   * public are simply absent from the result — a listing pulled from sale must
+   * not reappear because someone had it selected.
+   */
+  listingsByIds(ids: string[]): Promise<MarketplaceListing[]>;
 }
 
 // ---------------------------------------------------------------------------

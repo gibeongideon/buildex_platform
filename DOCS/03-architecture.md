@@ -402,6 +402,24 @@ painting them onto a canvas rather than parsing the string — Tailwind v4 emits
 for anything carrying an alpha modifier, and it composites translucent grounds the way a
 reader actually sees them. Headings must clear 10:1, `muted` 7:1 and `subtle` 5.5:1.
 
+### Comparison is driven by quantity, not price
+
+On this marketplace a price is a set of quantity bands, not a number, so "who is
+cheapest" has no answer until the buyer says how much they are buying — two suppliers can
+each win at different volumes. `/marketplace/compare` therefore hangs off a quantity field,
+re-prices every column through `priceAtQuantity()`, and marks the cheapest only once there
+is a quantity to be cheapest *at*.
+
+The other half is minimum order. A supplier whose MOQ is 100 cannot serve an order of 20 at
+any price, so their column says "below their minimum" instead of showing a unit price the
+buyer could never get. A comparison that quietly ignored MOQ would recommend suppliers who
+would refuse the order.
+
+Selection lives in `CompareProvider` context rather than the URL, because a buyer builds a
+shortlist while moving between search, a listing and a storefront; losing it on navigation
+would make the feature useless. The comparison page itself reads ids from the URL, so a
+shortlist is still shareable.
+
 ### Colour that means something
 
 The soft tints used to sit at 8% of their base over white, which measures 1.16:1 against

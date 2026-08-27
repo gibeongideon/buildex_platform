@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { BadgeCheck, Store } from "lucide-react";
+import { CompareToggle } from "@/components/marketplace/compare";
 import { cn } from "@/lib/utils";
 import { Currency } from "./format";
 import { ProductThumb } from "./product-thumb";
@@ -134,6 +135,21 @@ export function ProductCard({
             </Link>
           </div>
         )}
+
+        {/*
+          Comparison lives at the bottom of the card, after the buyer has seen
+          price and supplier — it is a second thought, not the first one. Renders
+          only inside the marketplace, where `CompareProvider` is mounted.
+
+          `relative z-10` is load-bearing: the title is a stretched link
+          (`after:absolute after:inset-0`) covering the whole card, so anything
+          interactive inside the card has to be lifted above that overlay or it
+          cannot be clicked at all. Keyboard users could still reach this button
+          via focus, which is exactly what makes the bug easy to miss.
+        */}
+        <div className="relative z-10 mt-3 border-t border-border pt-2.5">
+          <CompareToggle productId={product.id} />
+        </div>
       </div>
     </article>
   );

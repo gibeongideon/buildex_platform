@@ -149,12 +149,38 @@ Search, storefronts, related products and comparables all build on it, so a veri
 state can never leak a listing by accident. An unverified manufacturer has no public
 storefront at all.
 
-**The scope tabs are navigation.** Ask AI / Products / Manufacturers / Regions each map to
-a route, and the active tab is derived from `usePathname()` rather than local state — so it
-stays correct on a page reached by any other means (deep link, mega menu, a card). Switching
-tab carries the current `?q=` across, read from `window.location.search` at click time so
-the layout never needs `useSearchParams` and stays statically renderable. The tab row shows
-large inside the home hero and as a slim bar on every other marketplace page.
+**The scope tabs behave two ways, on purpose.** Ask AI / Products / Manufacturers / Regions
+are an *in-place switch* on the home page and *navigation* everywhere else — which is what
+the reference marketplace does, and why its tabs read as tabs.
+
+On `/marketplace`, choosing a tab changes the search field, the headline and the panels
+below it without leaving: a buyer deciding what *kind* of thing they want has not committed
+to a search yet, so sending them to another page for the answer is premature. The selection
+lives in `HomeScopeProvider` (`components/marketplace/home-scope.tsx`), which the layout
+mounts only on the home page — the hero sits in the layout and the panels sit in the page,
+so the choice has to be shared. Deliberately not in the URL: `useSearchParams()` in a
+layout opts the whole marketplace subtree out of static rendering.
+
+Off the home page the same tabs navigate, and the active one is derived from
+`usePathname()` rather than local state, so it stays correct on a page reached by any other
+means (deep link, mega menu, a card). Switching carries the current `?q=` across, read from
+`window.location.search` at click time for the same static-rendering reason. `useHomeScope()`
+returning null is how the tab row tells the two situations apart.
+
+**One supplier row, two surfaces.** `ManufacturerRow` renders the credentials-left,
+product-strip-right layout used by both the home page's Manufacturers tab and the full
+directory at `/marketplace/manufacturers`, so the shortlist and the directory can never
+describe the same supplier differently. Its capability filters (`lib/rules/suppliers.ts`)
+are predicates over real fields — certifications, the supplier's own response record,
+delivery reach, payment terms, real MOQs — so a chip a buyer filtered on is the same claim
+printed on the card. There are deliberately no star ratings: the platform has no reviews,
+and a fabricated 4.8/5 would undermine every real number beside it.
+
+**A strip spreads across categories.** `spreadBy()` in `lib/utils.ts` picks one item per
+distinct category before repeating any. Four listings from one category show four
+near-identical photos and tell a buyer nothing about a supplier's range; the same four tiles
+spread across categories are informative. Shared by the supplier row and the home page's
+thumbnail panels.
 
 **One search field per page.** Two inputs sharing a label are ambiguous to a screen reader
 and to keyboard users, so the layout's compact field renders in exactly one place and stands

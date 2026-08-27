@@ -15,6 +15,12 @@ import {
   Truck,
 } from "lucide-react";
 import { browsingRepo, marketplaceRepo } from "@/lib/data";
+import { useHomeScope } from "@/components/marketplace/home-scope";
+import {
+  AskSurface,
+  ManufacturersSurface,
+  RegionsSurface,
+} from "@/components/marketplace/home-surfaces";
 import { useQuery } from "@/lib/data/hooks";
 import { PRODUCT_CATEGORIES, REGIONS } from "@/lib/schemas/common";
 import { REGION_REACH } from "@/lib/schemas/campaign";
@@ -24,7 +30,7 @@ import { ProductCard, ProductCardSkeleton } from "@/components/shared/product-ca
 import { Currency, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
 import { StatusPill } from "@/components/ui/primitives";
-import { cn } from "@/lib/utils";
+import { cn, spreadBy } from "@/lib/utils";
 
 /*
   The marketplace home.
@@ -225,6 +231,14 @@ function PromoPanel({
 }
 
 export default function MarketplaceHomePage() {
+  /*
+    Which scope tab is selected. The tabs live in the marketplace layout and the
+    content lives here, so the choice arrives through context — see
+    `components/marketplace/home-scope.tsx` for why it is not in the URL.
+  */
+  const home = useHomeScope();
+  const scope = home?.scope ?? "products";
+
   const { data: search, loading } = useQuery(
     () => marketplaceRepo.search({ sort: "relevance" }),
     [],
@@ -252,39 +266,17 @@ export default function MarketplaceHomePage() {
     (facets?.categories ?? []).map((c) => [c.value, c.count]),
   );
 
-  /*
-    One per category. A four-up thumbnail panel filled from a single category
-    shows four near-identical photos, which tells a buyer nothing — spreading it
-    across categories makes the panel actually informative.
-  */
-  function spread<T extends { product: { category: string } }>(items: T[], take: number) {
-    const seen = new Set<string>();
-    const picked: T[] = [];
-    for (const item of items) {
-      if (seen.has(item.product.category)) continue;
-      seen.add(item.product.category);
-      picked.push(item);
-      if (picked.length === take) return picked;
-    }
-    // Top up from the remainder if there were not enough distinct categories.
-    for (const item of items) {
-      if (picked.includes(item)) continue;
-      picked.push(item);
-      if (picked.length === take) break;
-    }
-    return picked;
-  }
-
-  const newest = spread(
+  const newest = spreadBy(
     [...listings].sort(
       (a, b) =>
         new Date(b.product.createdAt).getTime() -
         new Date(a.product.createdAt).getTime(),
     ),
     4,
+    (l) => l.product.category,
   );
 
-  const mostWanted = spread(listings, 4);
+  const mostWanted = spreadBy(listings, 4, (l) => l.product.category);
 
   const panels: React.ReactNode[] = [];
 
@@ -393,6 +385,14 @@ export default function MarketplaceHomePage() {
       </section>
 
       <div className="mx-auto max-w-[112rem] px-4 py-6 sm:px-6 lg:px-8">
+      {scope === "manufacturers" ? (
+        <ManufacturersSurface />
+      ) : scope === "regions" ? (
+        <RegionsSurface />
+      ) : scope === "ask" ? (
+        <AskSurface />
+      ) : (
+        <>
 
       <section className="grid items-stretch gap-4 lg:grid-cols-[17rem_minmax(0,1fr)]">
         <div className="flex max-h-[26rem] flex-col rounded-lg border border-border bg-surface">
@@ -627,6 +627,8 @@ export default function MarketplaceHomePage() {
             </div>
           </section>
         </div>
+        </>
+      )}
       </div>
     </>
   );

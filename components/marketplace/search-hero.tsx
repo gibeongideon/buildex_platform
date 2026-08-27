@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LayoutGrid, Search, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PRODUCT_CATEGORIES } from "@/lib/schemas/common";
+import { useHomeScope, type SearchScope } from "./home-scope";
 
 /*
   The marketplace search hero and its scope tabs.
@@ -19,14 +20,20 @@ import { PRODUCT_CATEGORIES } from "@/lib/schemas/common";
   "Regions" because Buildex trades inside one country, where the useful question
   is which region a supplier delivers to.
 
-  The tabs are navigation, not just a mode switch on a form: clicking one goes
-  to that surface and carries any query with it, and the active tab is derived
-  from the current route rather than local state. That means the tabs stay
-  correct on a page you arrived at by any other route — a deep link, the mega
-  menu, a card — which local state could not guarantee.
+  The tabs behave in the two ways the reference site's do, depending on where
+  they are:
+
+    · On the home page they are an in-place switch. Choosing "Manufacturers"
+      changes the field and the content below it without leaving, because a buyer
+      deciding what *kind* of thing they want has not committed to a search yet.
+    · Everywhere else they are navigation, and the active tab is derived from the
+      route rather than local state — which is what keeps them correct on a page
+      reached by a deep link, the mega menu or a card.
+
+  `useHomeScope()` returning null is how this component tells the two apart.
 */
 
-export type SearchScope = "ask" | "products" | "manufacturers" | "regions";
+export type { SearchScope };
 
 const TABS: { value: SearchScope; label: string; href: string; hint: string }[] = [
   {
@@ -90,12 +97,19 @@ export function SearchScopeTabs({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const active = scopeForPath(pathname);
+  const home = useHomeScope();
+  const active = home ? home.scope : scopeForPath(pathname);
 
   // Read the live query at click time rather than during render: it keeps the
   // buyer's term when they switch surface, without pulling `useSearchParams`
   // into a layout and forcing the whole tree out of static rendering.
   function go(scope: SearchScope) {
+    // On the home page the tab is a mode switch, so stay put and let the hero
+    // and the panels below react.
+    if (home) {
+      home.setScope(scope);
+      return;
+    }
     const current =
       typeof window === "undefined"
         ? ""
@@ -192,9 +206,13 @@ export function SearchHero({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  // Scope follows the route, so submitting from the collapsed header or the nav
-  // bar keeps you on the surface you are already looking at.
-  const scope = scopeForPath(pathname);
+  const home = useHomeScope();
+  /*
+    On the home page the scope is whichever tab is selected; everywhere else it
+    follows the route, so submitting from the collapsed header or the nav bar
+    keeps you on the surface you are already looking at.
+  */
+  const scope = home && !compact ? home.scope : scopeForPath(pathname);
   const [query, setQuery] = React.useState(defaultQuery);
   const [category, setCategory] = React.useState("");
 

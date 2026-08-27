@@ -98,3 +98,31 @@ export function makeId(prefix: string) {
 export function sleep(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
+
+/**
+ * Picks `take` items, preferring one per distinct key before repeating any.
+ *
+ * A four-up thumbnail strip filled from a single category shows four
+ * near-identical photos, which tells a buyer nothing about what a supplier
+ * actually makes. Spreading across categories makes the same four tiles
+ * informative. Tops up from the remainder when there are not enough distinct
+ * keys to fill the strip, so it never returns short.
+ */
+export function spreadBy<T>(items: T[], take: number, keyOf: (item: T) => string): T[] {
+  const seen = new Set<string>();
+  const picked: T[] = [];
+
+  for (const item of items) {
+    const key = keyOf(item);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    picked.push(item);
+    if (picked.length === take) return picked;
+  }
+  for (const item of items) {
+    if (picked.includes(item)) continue;
+    picked.push(item);
+    if (picked.length === take) break;
+  }
+  return picked;
+}

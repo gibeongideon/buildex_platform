@@ -337,6 +337,29 @@ response record to advertise, and the enquiries console reads exactly that numbe
 
 ---
 
+### The scope tabs, revisited
+
+They shipped as pure navigation: clicking one left the home page for that surface. Measured
+against the reference marketplace, that was wrong — its tabs are an in-place switch, and
+staying put is the point. Clicking "Manufacturers" there changes the field, the headline and
+the content below it, and you only leave once you actually search.
+
+The home page now does the same. Each surface is real:
+
+| Tab | What it shows in place |
+| --- | --- |
+| Products | The catalogue: category rail, panel row, demand grid |
+| Manufacturers | Every verified supplier, credentials beside a strip of their own listings with prices and minimum orders, filtered by real capability chips |
+| Regions | All eight regions with listing and supplier counts counted from the catalogue |
+| Ask AI | The sourcing examples, and a plain statement that it is a matcher rather than a chatbot |
+
+The supplier row is shared with the full directory, so the shortlist and
+`/marketplace/manufacturers` cannot drift. Off the home page the tabs still navigate — a
+spec now covers both behaviours, and that the strip spreads across categories rather than
+repeating one photo.
+
+---
+
 ## Verification
 
 ### End-to-end (`npm run test:e2e`)

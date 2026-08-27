@@ -277,38 +277,91 @@ test("the manufacturers tab lists suppliers with their product strips", async ({
   await expect(rows.first()).toBeVisible({ timeout: 15_000 });
   expect(await rows.count()).toBeGreaterThan(4);
 
-  // Each row carries trust signals and a route into the store.
+  /*
+    The directory and the home page's Manufacturers tab render the same
+    `ManufacturerRow`, so this also covers the shortlist on the home page: the
+    credentials, the product strip with prices and minimum orders, and the route
+    into the store.
+  */
   const first = rows.first();
-  await expect(first.getByText("Response")).toBeVisible();
-  await expect(first.getByRole("link", { name: "Visit store" })).toBeVisible();
+  await expect(first.getByText("Factory capabilities")).toBeVisible();
+  await expect(first).toContainText(/Min\. order:/);
+  await expect(first).toContainText(/KSh/);
+  await expect(first).toContainText(/orders fulfilled/);
+  await expect(first.getByRole("link", { name: /Visit store/ })).toBeVisible();
 
-  await first.getByRole("link", { name: "Visit store" }).click();
+  // The strip spreads across categories rather than repeating one photo, so a
+  // buyer can see the breadth of what a supplier makes.
+  const tiles = first.locator('a[href^="/marketplace/product/"]');
+  expect(await tiles.count()).toBeGreaterThan(1);
+
+  await first.getByRole("link", { name: /Visit store/ }).click();
   await expect(page).toHaveURL(/\/marketplace\/manufacturer\//);
 });
 
-test("the four scope tabs navigate and carry the query", async ({ page }) => {
+test("the scope tabs switch the home page in place, and navigate elsewhere", async ({
+  page,
+}) => {
   await page.goto("/marketplace");
 
-  // Each tab is navigation, not just a mode switch on the form.
-  for (const [label, path] of [
-    ["Ask AI", "/marketplace/ask"],
-    ["Manufacturers", "/marketplace/manufacturers"],
-    ["Regions", "/marketplace/regions"],
-    ["Products", "/marketplace/search"],
+  /*
+    On the home page a tab is a mode switch, not a link: the reference
+    marketplace keeps you put until you actually search, because choosing what
+    *kind* of thing you want is not yet a search. Each tab has to change the
+    content without changing the URL.
+  */
+  for (const [label, heading] of [
+    ["Manufacturers", /verified manufacturers/i],
+    ["Regions", /regions/i],
+    ["Ask AI", /Describe the job/i],
   ] as const) {
-    await page.goto("/marketplace");
     await page.getByRole("tab", { name: new RegExp(label) }).click();
-    await expect(page).toHaveURL(new RegExp(path.replace(/\//g, "\\/")));
+    await expect(page.getByRole("heading", { name: heading }).first()).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page).toHaveURL(/\/marketplace$/);
+    await expect(page.getByRole("tab", { selected: true })).toContainText(label);
   }
 
-  // The active tab is derived from the route, so a deep link shows it correctly.
+  // Manufacturers shows real suppliers with their own products, prices and MOQ.
+  await page.getByRole("tab", { name: /Manufacturers/ }).click();
+  const supplier = page.getByRole("listitem").filter({ hasText: /Visit store/ }).first();
+  await expect(supplier).toBeVisible({ timeout: 15_000 });
+  await expect(supplier).toContainText("Main products");
+  await expect(supplier).toContainText(/Min\. order:/);
+  await expect(supplier).toContainText(/KSh/);
+  await expect(supplier).toContainText("Factory capabilities");
+
+  // A capability chip narrows the list, and every chip is a real credential.
+  const before = await page.getByRole("listitem").filter({ hasText: /Visit store/ }).count();
+  await page.getByRole("checkbox", { name: "ISO 9001" }).click();
+  await expect
+    .poll(
+      async () =>
+        page.getByRole("listitem").filter({ hasText: /Visit store/ }).count(),
+      { timeout: 15_000 },
+    )
+    .toBeLessThanOrEqual(before);
+  await expect(page.getByRole("checkbox", { name: "ISO 9001" })).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
+
+  // Back on Products, the listing grid returns.
+  await page.getByRole("tab", { name: "Products" }).click();
+  await expect(page.getByRole("heading", { name: "Most in demand" })).toBeVisible({
+    timeout: 15_000,
+  });
+
+  // Off the home page the same tabs are navigation, and the active one is
+  // derived from the route so a deep link shows it correctly.
   await page.goto("/marketplace/manufacturers");
   await expect(page.getByRole("tab", { selected: true })).toContainText(
     "Manufacturers",
     { timeout: 15_000 },
   );
 
-  // Switching surface keeps the buyer's term.
+  // And switching surface there keeps the buyer's term.
   await page.goto("/marketplace/search?q=cement");
   await page.getByRole("tab", { name: /Ask AI/ }).click();
   await expect(page).toHaveURL(/\/marketplace\/ask\?q=cement/);

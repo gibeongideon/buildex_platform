@@ -7,6 +7,7 @@ import { BadgeCheck, FileText, Flame, Sparkles, Truck } from "lucide-react";
 import { PromoStrip, UtilityBar, UtilityLinks } from "@/components/marketplace/top-bar";
 import { CategoryMegaMenu } from "@/components/marketplace/mega-menu";
 import { SearchHero, SearchScopeTabs } from "@/components/marketplace/search-hero";
+import { HomeScopeProvider } from "@/components/marketplace/home-scope";
 import { BuildexMark, Wordmark } from "@/components/shared/brand";
 import { TooltipProvider } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
@@ -75,6 +76,12 @@ export default function MarketplaceLayout({
 
   return (
     <TooltipProvider delayDuration={200}>
+      {/*
+        On the home page the scope tabs switch content in place, so the hero and
+        the page below it share one selection. Off the home page the provider
+        stands down and the tabs go back to being navigation.
+      */}
+      <HomeScopeProvider enabled={isHome}>
       <div className="flex min-h-dvh flex-col bg-background">
         <a
           href="#main"
@@ -269,6 +276,7 @@ export default function MarketplaceLayout({
           </div>
         </footer>
       </div>
+      </HomeScopeProvider>
     </TooltipProvider>
   );
 }

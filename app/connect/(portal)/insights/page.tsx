@@ -136,7 +136,7 @@ export default function InsightsPage() {
         ]}
       />
 
-        <QueryError error={error} onRetry={refetch} />
+      <QueryError error={error} onRetry={refetch} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

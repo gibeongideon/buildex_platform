@@ -34,6 +34,20 @@ export default function EditListingPage() {
     );
   }
 
+  /*
+    Before the not-found branch, not after it. A failed load leaves the
+    record undefined too, and saying "not found — it may have been removed"
+    about a record that exists is worse than saying nothing.
+  */
+  if (error && !product) {
+    return (
+      <>
+        <PageHeader title="Edit listing" />
+        <QueryError error={error} onRetry={refetch} title="Could not load this listing" />
+      </>
+    );
+  }
+
   if (!product || !current) {
     return (
       <>
@@ -49,8 +63,6 @@ export default function EditListingPage() {
                 </Button>
               }
             />
-
-        <QueryError error={error} onRetry={refetch} />
           </CardBody>
         </Card>
       </>
@@ -81,6 +93,8 @@ export default function EditListingPage() {
           ) : null
         }
       />
+
+      <QueryError error={error} onRetry={refetch} />
 
       <ListingForm
         manufacturerName={manufacturer.tradingName}

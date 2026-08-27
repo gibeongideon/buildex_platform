@@ -42,7 +42,7 @@ export default function NewListingPage() {
         ]}
       />
 
-        <QueryError error={error} onRetry={refetch} />
+      <QueryError error={error} onRetry={refetch} />
 
       <ListingForm
         manufacturerName={manufacturer.tradingName}

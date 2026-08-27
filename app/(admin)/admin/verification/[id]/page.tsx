@@ -64,6 +64,20 @@ export default function VerificationReviewPage() {
     );
   }
 
+  /*
+    Before the not-found branch, not after it. A failed load leaves the
+    record undefined too, and saying "not found — it may have been removed"
+    about a record that exists is worse than saying nothing.
+  */
+  if (error && !manufacturer) {
+    return (
+      <>
+        <PageHeader title="Review application" />
+        <QueryError error={error} onRetry={refetch} title="Could not load this application" />
+      </>
+    );
+  }
+
   if (!manufacturer) {
     return (
       <>
@@ -80,8 +94,6 @@ export default function VerificationReviewPage() {
                 </Button>
               }
             />
-
-        <QueryError error={error} onRetry={refetch} />
           </CardBody>
         </Card>
       </>
@@ -122,6 +134,8 @@ export default function VerificationReviewPage() {
       <BackLink href="/admin/verification" className="mb-4">
         Verification queue
       </BackLink>
+
+      <QueryError error={error} onRetry={refetch} />
 
       {drafts > 0 ? (
         <Alert tone="info" className="mb-6" title={`${drafts} listing${drafts === 1 ? "" : "s"} waiting on you`}>

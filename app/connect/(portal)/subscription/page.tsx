@@ -76,7 +76,7 @@ export default function SubscriptionPage() {
         ]}
       />
 
-        <QueryError error={error} onRetry={refetch} />
+      <QueryError error={error} onRetry={refetch} />
 
       <div className="space-y-6">
         {confirmed && !changed ? (

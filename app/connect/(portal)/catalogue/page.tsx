@@ -116,7 +116,7 @@ export default function CataloguePage() {
         }
       />
 
-        <QueryError error={error} onRetry={refetch} />
+      <QueryError error={error} onRetry={refetch} />
 
       {atLimit ? (
         <Alert

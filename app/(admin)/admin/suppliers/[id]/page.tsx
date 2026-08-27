@@ -56,6 +56,20 @@ export default function AdminSupplierRecordPage() {
     );
   }
 
+  /*
+    Before the not-found branch, not after it. A failed load leaves the
+    record undefined too, and saying "not found — it may have been removed"
+    about a record that exists is worse than saying nothing.
+  */
+  if (error && !vendor) {
+    return (
+      <>
+        <PageHeader title="Supplier" />
+        <QueryError error={error} onRetry={refetch} title="Could not load this supplier" />
+      </>
+    );
+  }
+
   if (!vendor) {
     return (
       <>
@@ -72,8 +86,6 @@ export default function AdminSupplierRecordPage() {
                 </Button>
               }
             />
-
-        <QueryError error={error} onRetry={refetch} />
           </CardBody>
         </Card>
       </>
@@ -105,6 +117,8 @@ export default function AdminSupplierRecordPage() {
       <BackLink href="/admin/suppliers" className="mb-4">
         Suppliers
       </BackLink>
+
+      <QueryError error={error} onRetry={refetch} />
 
       {issues.length > 0 ? (
         <Alert

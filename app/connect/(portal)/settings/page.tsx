@@ -126,7 +126,7 @@ export default function SettingsPage() {
         }
       />
 
-        <QueryError error={error} onRetry={refetch} />
+      <QueryError error={error} onRetry={refetch} />
 
       {saved && !dirty ? (
         <Alert tone="success" className="mb-6" title="Settings saved">

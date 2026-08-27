@@ -8,6 +8,7 @@ import { vendorIssues } from "@/lib/rules/procurement";
 import { sleep } from "@/lib/utils";
 import type { BillFilter, SupplierRepo, VendorFilter } from "@/lib/data/types";
 import { getSnapshot, mutate } from "./db";
+import { FAST, NORMAL } from "./latency";
 
 /*
   The purchase ledger, mocked.
@@ -16,9 +17,6 @@ import { getSnapshot, mutate } from "./db";
   `lib/data/mock/admin.ts` — the payables table needs a figure per vendor, and
   a repository call per vendor is the obvious way to make that page slow.
 */
-
-const FAST = 140;
-const NORMAL = 260;
 
 function matchesVendor(vendor: Vendor, filter: VendorFilter) {
   if (filter.status && vendor.status !== filter.status) return false;

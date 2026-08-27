@@ -9,6 +9,7 @@ import type {
   ActivityRepo,
 } from "@/lib/data/types";
 import { getSnapshot } from "./db";
+import { NORMAL } from "./latency";
 
 /*
   The platform activity timeline.
@@ -28,8 +29,6 @@ import { getSnapshot } from "./db";
   At the backend cutover this becomes a real append-only log. The interface does
   not move, and the derivation here becomes the backfill for historic rows.
 */
-
-const NORMAL = 260;
 
 function event(e: ActivityEvent): ActivityEvent {
   return e;

@@ -13,6 +13,7 @@ import {
 import { sleep } from "@/lib/utils";
 import type { AdminRepo, PlatformSummary } from "@/lib/data/types";
 import { getSnapshot } from "./db";
+import { NORMAL } from "./latency";
 
 /*
   Buildex Admin's cross-entity reads.
@@ -23,8 +24,6 @@ import { getSnapshot } from "./db";
   the obvious way to make this page slow. Same reasoning as `publicListings()`
   in the marketplace.
 */
-
-const NORMAL = 260;
 
 /** Indexes built once per call and shared by everything that needs them. */
 function index() {

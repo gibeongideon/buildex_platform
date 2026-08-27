@@ -21,6 +21,7 @@ import type {
 } from "@/lib/data/types";
 import type { Enquiry } from "@/lib/schemas/enquiry";
 import { getSnapshot, mutate } from "./db";
+import { FAST, NORMAL } from "./latency";
 
 /*
   Mock implementations of the marketplace, enquiry, campaign and insights
@@ -31,9 +32,6 @@ import { getSnapshot, mutate } from "./db";
   cleared to list. Everything else (search, storefronts, related products)
   builds on that, so verification status can never leak a listing by accident.
 */
-
-const FAST = 140;
-const NORMAL = 260;
 
 function now() {
   return new Date().toISOString();

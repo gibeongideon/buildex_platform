@@ -21,18 +21,14 @@ import type {
   SessionRepo,
 } from "@/lib/data/types";
 import { emptyDraft, getSnapshot, mutate } from "./db";
+import { FAST, NORMAL, SLOW } from "./latency";
 
 /*
   Mock implementations of the repository interfaces.
 
-  Every method awaits a short delay before returning. That is deliberate: it
-  forces every screen to have a real loading state, so the eventual swap to a
-  networked backend does not surface a class of missing UI.
+  Every method awaits one of the delays in `./latency` before returning, for
+  the reason recorded there.
 */
-
-const FAST = 140;
-const NORMAL = 260;
-const SLOW = 420;
 
 function now() {
   return new Date().toISOString();

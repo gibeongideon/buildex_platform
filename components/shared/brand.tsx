@@ -131,10 +131,18 @@ const SIZES = {
 export function Wordmark({
   product = "connect",
   size = "md",
+  reversed = false,
   className,
 }: {
   product?: ProductKey;
   size?: keyof typeof SIZES;
+  /**
+   * For a permanently dark ground — the brand-blue footers — rather than dark
+   * *mode*. Without it those surfaces had to hand-copy this lockup to get the
+   * reversed treatment, and a hand-copy is what let the public footer drift to
+   * the wrong product name.
+   */
+  reversed?: boolean;
   className?: string;
 }) {
   const meta = PRODUCT_META[product];
@@ -143,11 +151,12 @@ export function Wordmark({
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       {/* Reversed to white on dark grounds, per the guideline's own variants. */}
-      <BuildexMark className={cn(scale.mark, "w-auto dark:text-white")} />
+      <BuildexMark className={cn(scale.mark, "w-auto dark:text-white", reversed && "text-white")} />
       <span className="flex flex-col items-start leading-none">
         <span
           className={cn(
             "font-display font-extrabold tracking-tight text-brand dark:text-white",
+            reversed && "text-white",
             scale.name,
           )}
         >
@@ -163,6 +172,9 @@ export function Wordmark({
             "mt-1 font-display font-bold uppercase tracking-[0.18em] text-primary",
             "rounded-[3px] bg-brand px-1.5 py-px",
             "dark:bg-transparent dark:px-0 dark:py-0",
+            // On a dark ground the chip is unnecessary: yellow already reads at
+            // 14:1 there, which is the guideline's own reversed artwork.
+            reversed && "bg-transparent px-0 py-0",
             scale.descriptor,
           )}
         >

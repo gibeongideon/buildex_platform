@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BuildexMark, Wordmark } from "@/components/shared/brand";
+import { Wordmark } from "@/components/shared/brand";
 import { ThemeToggle } from "@/components/shared/theme";
 import { Button } from "@/components/ui/button";
 
@@ -88,18 +88,13 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              {/* Reversed lockup — the variant the guideline supplies for dark grounds. */}
-              <span className="inline-flex items-center gap-2.5">
-                <BuildexMark className="h-7 text-white" />
-                <span className="flex flex-col items-start leading-none">
-                  <span className="font-display text-base font-extrabold tracking-tight text-white">
-                    BUILDEX
-                  </span>
-                  <span className="mt-1 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                    INTERIORS
-                  </span>
-                </span>
-              </span>
+              {/*
+                The platform is Buildex Connect; Interiors is one of the three
+                businesses inside it, and the legal entity in the copyright line
+                below. This used to hand-copy the lockup and had drifted to the
+                wrong one — it now renders the shared component, which cannot.
+              */}
+              <Wordmark product="connect" reversed />
               <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/70">
                 Product supply, financing and the manufacturer marketplace for Kenya&apos;s
                 construction material market.

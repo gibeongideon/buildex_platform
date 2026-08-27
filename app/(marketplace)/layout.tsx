@@ -8,7 +8,7 @@ import { PromoStrip, UtilityBar, UtilityLinks } from "@/components/marketplace/t
 import { CategoryMegaMenu } from "@/components/marketplace/mega-menu";
 import { SearchHero, SearchScopeTabs } from "@/components/marketplace/search-hero";
 import { HomeScopeProvider } from "@/components/marketplace/home-scope";
-import { BuildexMark, Wordmark } from "@/components/shared/brand";
+import { Wordmark } from "@/components/shared/brand";
 import { TooltipProvider } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 
@@ -199,17 +199,8 @@ export default function MarketplaceLayout({
           <div className="mx-auto max-w-[112rem] px-4 py-10 sm:px-6 lg:px-8">
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <span className="inline-flex items-center gap-2.5">
-                  <BuildexMark className="h-7 text-white" />
-                  <span className="flex flex-col items-start leading-none">
-                    <span className="font-display text-base font-extrabold tracking-tight text-white">
-                      BUILDEX
-                    </span>
-                    <span className="mt-1 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                      CONNECT
-                    </span>
-                  </span>
-                </span>
+                {/* The shared lockup, not a copy of it — see the public footer. */}
+                <Wordmark product="connect" reversed />
                 <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/70">
                   Wholesale building materials from verified Kenyan manufacturers, priced
                   in quantity bands and delivered by region.

@@ -20,14 +20,19 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     /*
-      CI runs the suite against the *production* build — the same standalone
-      bundle the pipeline then ships — so a defect that only appears in a
-      production render cannot slip through a green dev-mode run. Locally it
-      stays `next dev`, so the suite reuses whatever server is already up.
+      CI runs the suite against the standalone bundle the pipeline actually
+      ships — not `next start`, which Next refuses to pair with
+      `output: "standalone"`, and not `next dev`. So a defect that only appears
+      in the shipped artifact cannot slip through a green run.
+
+      Requires `npm run build && npm run package:standalone` first; the workflow
+      does both before invoking Playwright. Locally it stays `next dev`, so the
+      suite reuses whatever server is already up.
     */
     command: process.env.CI
-      ? `npx next start --port ${PORT}`
+      ? `node .next/standalone/server.js`
       : `npx next dev --port ${PORT}`,
+    env: process.env.CI ? { PORT: String(PORT), HOSTNAME: "127.0.0.1" } : {},
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

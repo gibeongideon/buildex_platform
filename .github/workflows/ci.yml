@@ -45,11 +45,19 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Assemble the standalone bundle
+        # `output: "standalone"` omits public/ and .next/static on purpose, so
+        # both are copied in beside server.js. Done before the tests, not after,
+        # so the suite exercises the exact artifact that ships.
+        run: npm run package:standalone
+
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
       - name: End-to-end tests
-        # Runs against `next start`, i.e. the production build above.
+        # Against `node .next/standalone/server.js` — the shipped bundle. Next
+        # refuses to pair `next start` with standalone output, so testing that
+        # way would exercise a path production never takes.
         run: npm run test:e2e
 
       - name: Upload Playwright report on failure
@@ -60,19 +68,16 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
-      - name: Package the standalone release
+      - name: Package the tested bundle
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: |
           set -euo pipefail
-          # `output: "standalone"` emits server.js plus only the node_modules the
-          # server needs — but deliberately not public/ or .next/static, so both
-          # are copied in beside it here.
-          mkdir -p release
-          cp -r .next/standalone/. release/
-          mkdir -p release/.next/static
-          cp -r .next/static/. release/.next/static/
-          cp -r public release/public
-          tar -czf buildex-release.tar.gz -C release .
+          # Already assembled and already tested — this only tars it, so the
+          # bytes that deploy are the bytes the suite ran against.
+          test -f .next/standalone/server.js
+          test -d .next/standalone/public
+          test -d .next/standalone/.next/static
+          tar -czf buildex-release.tar.gz -C .next/standalone .
           echo "Release artifact: $(du -h buildex-release.tar.gz | cut -f1)"
 
       - name: Upload the release artifact

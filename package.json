@@ -2,14 +2,16 @@
   "name": "buildex-platform",
   "version": "0.1.0",
   "private": true,
-  "description": "Buildex Ecosystem — clickable enterprise mockup (Buildex · Buildex Capital · Buildex Connect)",
+  "description": "Buildex Ecosystem \u2014 clickable enterprise mockup (Buildex \u00b7 Buildex Capital \u00b7 Buildex Connect)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "package:standalone": "rm -rf .next/standalone/public .next/standalone/.next/static && cp -r public .next/standalone/public && mkdir -p .next/standalone/.next/static && cp -r .next/static/. .next/standalone/.next/static/",
+    "start:standalone": "node .next/standalone/server.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",

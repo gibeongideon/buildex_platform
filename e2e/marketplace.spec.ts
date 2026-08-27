@@ -219,20 +219,51 @@ test("a request for quotation reaches every matching supplier", async ({ page })
   await expect(page.getByText(/Your request went to/)).toBeVisible({ timeout: 20_000 });
 });
 
-test("top ranking is ordered by real enquiry demand", async ({ page }) => {
+test("top ranking is many leaderboards, and loads more as you scroll", async ({
+  page,
+}) => {
   await page.goto("/marketplace/top-ranking");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Top ranking", {
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Top Ranking", {
     timeout: 15_000,
   });
 
-  // The breadcrumb is an <ol> too, so anchor on the rank badges instead.
-  // These are decorative spans, so match the attribute directly rather than
-  // by accessible name.
-  const rankOne = page.locator('[aria-label="Rank 1"]');
-  await expect(rankOne).toBeVisible({ timeout: 15_000 });
-  await expect(page.locator("li").filter({ has: rankOne })).toContainText(/Cement/i);
-  await expect(page.locator('[aria-label="Rank 6"]')).toBeVisible();
+  // Blocks, each a small leaderboard with a podium rather than one long list.
+  const blocks = page.locator("section[aria-label]").filter({ has: page.locator("ol") });
+  await expect(blocks.first()).toBeVisible({ timeout: 15_000 });
+  await expect(blocks.first()).toContainText("#1");
+  await expect(blocks.first()).toContainText("#3");
+
+  /*
+    The waterfall. Six blocks arrive at a time, so reaching the bottom has to
+    produce more of them — if the sentinel ever stops firing the page silently
+    truncates the ranking instead of erroring.
+  */
+  const before = await blocks.count();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect
+    .poll(async () => blocks.count(), { timeout: 15_000 })
+    .toBeGreaterThan(before);
+
+  /*
+    What "top" means is chosen, not assumed. Switching the metric has to
+    actually reorder — a ranking page whose controls do nothing is worse than
+    one with no controls.
+  */
+  const firstBlockTop = () => blocks.first().locator("ol > li").first().innerText();
+  const byEnquiries = await firstBlockTop();
+  await page.getByRole("button", { name: "Best value" }).click();
+  await expect
+    .poll(async () => firstBlockTop(), { timeout: 15_000 })
+    .not.toBe(byEnquiries);
+
+  // Choosing a category switches the blocks from categories to delivery regions.
+  await page.getByRole("tab", { name: "Roofing", exact: true }).click();
+  await expect(blocks.first()).toContainText("Roofing", { timeout: 15_000 });
+  await expect(
+    page.getByRole("section" as never).first().or(blocks.first()),
+  ).toBeVisible();
 });
+
 
 test("browsing a listing populates the history rail on the home page", async ({ page }) => {
   await page.goto("/marketplace/product/prd_eq_vinyl20");

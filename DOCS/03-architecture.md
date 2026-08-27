@@ -402,6 +402,31 @@ painting them onto a canvas rather than parsing the string — Tailwind v4 emits
 for anything carrying an alpha modifier, and it composites translucent grounds the way a
 reader actually sees them. Headings must clear 10:1, `muted` 7:1 and `subtle` 5.5:1.
 
+### Top ranking is many leaderboards, not one list
+
+Built the way the large B2B marketplaces build theirs: a page of small
+leaderboards rather than one long ranking. "The top three roofing sheets
+delivered to Nyanza" is a question a buyer can act on; "the 400th ranked product
+overall" is not.
+
+Two levels, mirroring that shape. With no category selected each block is a
+category; select one and the blocks become the regions that category is actually
+delivered to — the Kenyan equivalent of the reference site's global/region
+switch, and the question a hardware shop actually has.
+
+Every ranking is a number the platform already holds: enquiries received, entry
+price, or quoted lead time. There is deliberately **no "best reviewed"** tab —
+the marketplace has no reviews, and a star rating invented to fill a tab would
+undermine the enquiry counts sitting next to it.
+
+Blocks arrive six at a time behind an `IntersectionObserver` sentinel. That
+sentinel is attached through a **callback ref, not an effect**: it does not exist
+on the first render, because the page shows skeletons until the listings arrive.
+An effect keyed on mount looked for a node that was not there, found null, and
+silently never observed anything — the page stopped at six leaderboards and
+looked complete. Progressive loading fails quietly, so it is asserted in the
+suite rather than eyeballed.
+
 ### The marketplace groups by category, not one long grid
 
 A single continuous grid of every listing makes a buyer scan forty unrelated products to

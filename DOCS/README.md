@@ -21,6 +21,7 @@ copy says "the Buildex Connect marketplace".
 | [03 — Architecture](./03-architecture.md) | Stack, the data seam, design system, conventions, backend cutover guide |
 | [04 — Delivered](./04-delivered.md) | What Phases 0–3 actually shipped, verification evidence, defects found and fixed |
 | [05 — Next Steps](./05-next-steps.md) | Immediate actions, Phase 2 scope, open decisions and blockers |
+| [06 — Deployment](./06-deployment.md) | The server, the CI/CD pipeline, rollback, TLS and the access model |
 
 Source requirements live in [`requirements_reference/`](../requirements_reference/):
 

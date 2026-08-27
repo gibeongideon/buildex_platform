@@ -1,0 +1,195 @@
+name: CI & Deploy
+
+# Every push and PR is verified. Only main deploys, and only after the same
+# commit has passed every gate — the artifact that ships is the one that was
+# tested, downloaded from the verify job rather than rebuilt.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  # A newer push to the same branch supersedes an in-flight run. Deploys are
+  # never cancelled mid-flight, though: see cancel-in-progress on the job.
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  verify:
+    name: Typecheck, lint, build, e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        # The repo's standing bar: zero errors. Warnings are the React Compiler
+        # declining to optimise React Hook Form, which is upstream.
+        run: npx eslint . --max-warnings 100
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        # Runs against `next start`, i.e. the production build above.
+        run: npm run test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Package the standalone release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          # `output: "standalone"` emits server.js plus only the node_modules the
+          # server needs — but deliberately not public/ or .next/static, so both
+          # are copied in beside it here.
+          mkdir -p release
+          cp -r .next/standalone/. release/
+          mkdir -p release/.next/static
+          cp -r .next/static/. release/.next/static/
+          cp -r public release/public
+          tar -czf buildex-release.tar.gz -C release .
+          echo "Release artifact: $(du -h buildex-release.tar.gz | cut -f1)"
+
+      - name: Upload the release artifact
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: buildex-release
+          path: buildex-release.tar.gz
+          retention-days: 14
+
+  deploy:
+    name: Deploy to buildexconnect.dibon.co.ke
+    needs: verify
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      # One deploy at a time, and never cancel one halfway through a release
+      # swap — that is how you end up with a half-activated symlink.
+      group: deploy-production
+      cancel-in-progress: false
+    environment:
+      name: production
+      url: https://buildexconnect.dibon.co.ke
+    steps:
+      - name: Preflight — are the deploy secrets configured?
+        id: preflight
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          missing=""
+          [[ -n "${DEPLOY_HOST:-}" ]]     || missing="$missing DEPLOY_HOST"
+          [[ -n "${DEPLOY_USER:-}" ]]     || missing="$missing DEPLOY_USER"
+          [[ -n "${DEPLOY_SSH_KEY:-}" ]]  || missing="$missing DEPLOY_SSH_KEY"
+          [[ -n "${SSH_KNOWN_HOSTS:-}" ]] || missing="$missing SSH_KNOWN_HOSTS"
+          if [[ -n "$missing" ]]; then
+            # Skip rather than fail: an unconfigured repository should not report
+            # a broken build. The summary says exactly what is missing.
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Deploy skipped"
+              echo
+              echo "These repository secrets are not set:**$missing**"
+              echo
+              echo "See \`DOCS/06-deployment.md\` for what each one holds."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::Deploy skipped — missing secrets:$missing"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download the tested artifact
+        if: steps.preflight.outputs.ready == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: buildex-release
+
+      - name: Configure SSH
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # The host key is pinned from a secret rather than accepted on first
+          # use, so a redirected DNS record cannot silently receive the release.
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Ship the release
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          scp -o IdentitiesOnly=yes buildex-release.tar.gz \
+            "$DEPLOY_USER@$DEPLOY_HOST:/srv/buildex/incoming/${{ github.sha }}.tar.gz"
+
+      - name: Activate, health-check, roll back on failure
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          # All of the release logic lives on the server in a versioned script,
+          # so the rollback path is the same whether a deploy runs from here or
+          # by hand during an incident.
+          ssh -o IdentitiesOnly=yes "$DEPLOY_USER@$DEPLOY_HOST" \
+            "sudo /usr/local/bin/buildex-activate ${{ github.sha }}"
+
+      - name: Confirm the new release is the one serving
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          # Falls back to the bare IP so this still verifies before DNS and TLS
+          # are in place.
+          PUBLIC_URL: ${{ vars.PUBLIC_URL || format('http://{0}', secrets.DEPLOY_HOST) }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 10); do
+            body=$(curl -fsS --max-time 10 "${PUBLIC_URL}/api/health" || true)
+            echo "attempt $attempt: $body"
+            case "$body" in
+              *"${{ github.sha }}"*)
+                echo "Live release matches ${{ github.sha }}"
+                exit 0
+                ;;
+            esac
+            sleep 5
+          done
+          echo "::error::The public health endpoint never reported this commit."
+          exit 1

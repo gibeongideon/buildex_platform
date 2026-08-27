@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+#
+# Activates a shipped release, and undoes itself if the result is not healthy.
+#
+#   sudo buildex-activate <git-sha>
+#
+# The pipeline scp's /srv/buildex/incoming/<sha>.tar.gz and then calls this. All
+# of the release logic lives here rather than in the workflow so that recovering
+# by hand during an incident is the same operation, not a different one.
+
+set -euo pipefail
+
+RELEASE="${1:?usage: buildex-activate <git-sha>}"
+ROOT=/srv/buildex
+INCOMING="$ROOT/incoming/$RELEASE.tar.gz"
+TARGET="$ROOT/releases/$RELEASE"
+KEEP=5
+
+log() { printf '[activate] %s\n' "$*"; }
+die() { printf '[activate] ERROR: %s\n' "$*" >&2; exit 1; }
+
+[[ -f "$INCOMING" ]] || die "no such upload: $INCOMING"
+
+# Remember where to go back to *before* touching anything.
+PREVIOUS=""
+if [[ -L "$ROOT/current" ]]; then
+  PREVIOUS="$(readlink -f "$ROOT/current")"
+  log "current release is ${PREVIOUS##*/}"
+fi
+
+# Unpack beside the live one. A re-deploy of the same sha replaces it, which is
+# what you want when a build is retried.
+log "unpacking $RELEASE"
+rm -rf "$TARGET"
+mkdir -p "$TARGET"
+tar -xzf "$INCOMING" -C "$TARGET"
+[[ -f "$TARGET/server.js" ]] || die "release has no server.js — refusing to activate"
+chown -R deploy:deploy "$TARGET"
+
+# The running release is readable from outside the box via /api/health, which is
+# what lets the pipeline prove the new version is the one actually serving.
+printf 'BUILDEX_RELEASE=%s\n' "$RELEASE" > "$ROOT/release.env"
+chown deploy:deploy "$ROOT/release.env"
+
+activate() {
+  local path="$1"
+  ln -sfn "$path" "$ROOT/current.tmp"
+  # Atomic: a rename over the existing symlink, so there is no instant where
+  # `current` is missing.
+  mv -Tf "$ROOT/current.tmp" "$ROOT/current"
+  systemctl restart buildex
+}
+
+healthy() {
+  local attempt
+  for attempt in $(seq 1 20); do
+    if curl -fsS --max-time 3 http://127.0.0.1:3000/api/health >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
+log "activating $RELEASE"
+activate "$TARGET"
+
+if healthy; then
+  log "healthy on $RELEASE"
+else
+  log "unhealthy after 20s"
+  if [[ -n "$PREVIOUS" && -d "$PREVIOUS" && "$PREVIOUS" != "$TARGET" ]]; then
+    log "rolling back to ${PREVIOUS##*/}"
+    printf 'BUILDEX_RELEASE=%s\n' "${PREVIOUS##*/}" > "$ROOT/release.env"
+    activate "$PREVIOUS"
+    if healthy; then
+      log "rollback succeeded — the bad release was NOT left serving"
+    else
+      log "rollback also unhealthy — service is down, investigate now"
+    fi
+  else
+    log "no previous release to roll back to"
+  fi
+  journalctl -u buildex -n 40 --no-pager || true
+  die "deploy failed; $RELEASE is not serving"
+fi
+
+# Keep the last few releases so a manual rollback needs no rebuild.
+log "pruning old releases, keeping $KEEP"
+cd "$ROOT/releases"
+ls -1dt */ 2>/dev/null | tail -n +$((KEEP + 1)) | while read -r old; do
+  old="${old%/}"
+  if [[ "$(readlink -f "$ROOT/current")" != "$ROOT/releases/$old" ]]; then
+    log "  removing $old"
+    rm -rf "$ROOT/releases/$old"
+  fi
+done
+
+rm -f "$INCOMING"
+log "done: $RELEASE is live"

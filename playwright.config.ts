@@ -19,7 +19,15 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: `npx next dev --port ${PORT}`,
+    /*
+      CI runs the suite against the *production* build — the same standalone
+      bundle the pipeline then ships — so a defect that only appears in a
+      production render cannot slip through a green dev-mode run. Locally it
+      stays `next dev`, so the suite reuses whatever server is already up.
+    */
+    command: process.env.CI
+      ? `npx next start --port ${PORT}`
+      : `npx next dev --port ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

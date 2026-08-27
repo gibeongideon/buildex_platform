@@ -21,6 +21,7 @@ import { formatDate } from "@/lib/utils";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
 import { stepHref } from "../steps";
 import { StepShell, StepSkeleton } from "../step-frame";
+import { DataTable } from "@/components/ui/data-table";
 
 function SectionCard({
   title,
@@ -140,34 +141,28 @@ export default function ReviewStepPage() {
         </SectionCard>
 
         <SectionCard title={`Directors (${directors.length})`} editStep="directors">
-          <div className="scroll-x">
-            <table className="w-full min-w-[34rem] text-sm">
-              <thead>
-                <tr className="border-b border-border text-left">
-                  <th className="pb-2 font-medium text-muted-foreground">Name</th>
-                  <th className="pb-2 font-medium text-muted-foreground">National ID</th>
-                  <th className="pb-2 font-medium text-muted-foreground">Role</th>
-                  <th className="pb-2 text-right font-medium text-muted-foreground">
-                    Ownership
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {directors.map((director) => (
-                  <tr key={director.id}>
-                    <td className="py-2.5 font-medium text-foreground">
-                      {director.fullName}
-                    </td>
-                    <td className="py-2.5 text-muted-foreground">{director.nationalId}</td>
-                    <td className="py-2.5 text-muted-foreground">{director.role}</td>
-                    <td className="py-2.5 text-right text-foreground">
-                      {director.ownershipPercent}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            minWidth="min-w-[34rem]"
+            columns={[
+              { label: "Name", className: "pb-2" },
+              { label: "National ID", className: "pb-2" },
+              { label: "Role", className: "pb-2" },
+              { label: "Ownership", align: "right", className: "pb-2" },
+            ]}
+          >
+            {directors.map((director) => (
+              <tr key={director.id}>
+                <td className="py-2.5 font-medium text-foreground">
+                  {director.fullName}
+                </td>
+                <td className="py-2.5 text-muted-foreground">{director.nationalId}</td>
+                <td className="py-2.5 text-muted-foreground">{director.role}</td>
+                <td className="py-2.5 text-right text-foreground">
+                  {director.ownershipPercent}%
+                </td>
+              </tr>
+            ))}
+          </DataTable>
         </SectionCard>
 
         <SectionCard title={`Documents (${documents.length})`} editStep="documents">

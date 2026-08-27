@@ -32,6 +32,7 @@ import { cn, formatDate } from "@/lib/utils";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
 import { QueryError } from "@/components/ui/query-state";
 import { FilterBar } from "@/components/ui/filter-bar";
+import { DataTable } from "@/components/ui/data-table";
 
 /*
   Catalogue management.
@@ -226,142 +227,124 @@ export default function CataloguePage() {
               }
             />
           ) : (
-            <div className="scroll-x">
-              <table className="w-full min-w-[54rem] text-sm">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th scope="col" className="px-4 py-2.5 text-left font-medium text-muted-foreground">
-                      Product
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Category
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      From
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      MOQ
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Lead time
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Status
-                    </th>
-                    <th scope="col" className="px-4 py-2.5 text-right font-medium text-muted-foreground">
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filtered.map((product) => {
+            <DataTable
+              minWidth="min-w-[54rem]"
+              columns={[
+                { label: "Product", className: "px-4 py-2.5" },
+                { label: "Category" },
+                { label: "From", align: "right" },
+                { label: "MOQ", align: "right" },
+                { label: "Lead time" },
+                { label: "Status" },
+                { label: "Actions", align: "right", srOnly: true, className: "px-4 py-2.5" },
+              ]}
+            >
+              {filtered.map((product) => {
                     
-                    const busy = busyId === product.id;
+                const busy = busyId === product.id;
 
-                    return (
-                      <tr
-                        key={product.id}
-                        className={cn("align-middle", busy && "opacity-50")}
-                      >
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            <ProductThumb
-                              productId={product.id}
-                              category={product.category}
-                              className="size-10 shrink-0 rounded-md border border-border"
-                              iconClassName="size-4"
-                            />
-                            <div className="min-w-0">
-                              <Link
-                                href={`/connect/catalogue/${product.id}`}
-                                className="block truncate font-medium text-foreground hover:text-brand hover:underline"
-                              >
-                                {product.name}
-                              </Link>
-                              <p className="text-xs text-muted-foreground text-numeric">
-                                {product.sku}
-                                {product.packSize ? ` · ${product.packSize}` : ""}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-3 py-3 text-muted-foreground">
-                          {product.category}
-                        </td>
-                        <td className="px-3 py-3 text-right">
-                          <Currency value={priceRange(product.priceBands).min} />
-                          <span className="text-xs text-muted-foreground">
-                            /{product.unit}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-right text-numeric text-muted-foreground">
-                          {product.moq}
-                        </td>
-                        <td className="px-3 py-3 text-muted-foreground">
-                          {formatLeadTime(product.leadTimeDays)}
-                        </td>
-                        <td className="px-3 py-3">
-                          <StatusPill tone={PRODUCT_STATUS_TONE[product.status]}>
-                            {PRODUCT_STATUS_LABELS[product.status]}
-                          </StatusPill>
-                          {product.status === "active" ? (
-                            <p className="mt-1 text-xs text-subtle-foreground">
-                              since {formatDate(product.updatedAt)}
-                            </p>
-                          ) : null}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-end gap-1">
-                            {product.status === "active" ? (
-                              <Button variant="ghost" size="sm" asChild>
-                                <Link
-                                  href={`/marketplace/product/${product.id}`}
-                                  title="View on marketplace"
-                                >
-                                  <ExternalLink aria-hidden="true" />
-                                  <span className="sr-only">
-                                    View {product.name} on the marketplace
-                                  </span>
-                                </Link>
-                              </Button>
-                            ) : null}
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link href={`/connect/catalogue/${product.id}`}>
-                                <Pencil aria-hidden="true" />
-                                <span className="sr-only">Edit {product.name}</span>
-                              </Link>
-                            </Button>
-                            {product.status === "archived" ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                  setStatus(product, canPublish ? "active" : "draft")
-                                }
-                                title="Restore"
-                              >
-                                <RotateCcw aria-hidden="true" />
-                                <span className="sr-only">Restore {product.name}</span>
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setStatus(product, "archived")}
-                                title="Archive"
-                              >
-                                <Archive aria-hidden="true" />
-                                <span className="sr-only">Archive {product.name}</span>
-                              </Button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                return (
+                  <tr
+                    key={product.id}
+                    className={cn("align-middle", busy && "opacity-50")}
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <ProductThumb
+                          productId={product.id}
+                          category={product.category}
+                          className="size-10 shrink-0 rounded-md border border-border"
+                          iconClassName="size-4"
+                        />
+                        <div className="min-w-0">
+                          <Link
+                            href={`/connect/catalogue/${product.id}`}
+                            className="block truncate font-medium text-foreground hover:text-brand hover:underline"
+                          >
+                            {product.name}
+                          </Link>
+                          <p className="text-xs text-muted-foreground text-numeric">
+                            {product.sku}
+                            {product.packSize ? ` · ${product.packSize}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 text-muted-foreground">
+                      {product.category}
+                    </td>
+                    <td className="px-3 py-3 text-right">
+                      <Currency value={priceRange(product.priceBands).min} />
+                      <span className="text-xs text-muted-foreground">
+                        /{product.unit}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 text-right text-numeric text-muted-foreground">
+                      {product.moq}
+                    </td>
+                    <td className="px-3 py-3 text-muted-foreground">
+                      {formatLeadTime(product.leadTimeDays)}
+                    </td>
+                    <td className="px-3 py-3">
+                      <StatusPill tone={PRODUCT_STATUS_TONE[product.status]}>
+                        {PRODUCT_STATUS_LABELS[product.status]}
+                      </StatusPill>
+                      {product.status === "active" ? (
+                        <p className="mt-1 text-xs text-subtle-foreground">
+                          since {formatDate(product.updatedAt)}
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        {product.status === "active" ? (
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link
+                              href={`/marketplace/product/${product.id}`}
+                              title="View on marketplace"
+                            >
+                              <ExternalLink aria-hidden="true" />
+                              <span className="sr-only">
+                                View {product.name} on the marketplace
+                              </span>
+                            </Link>
+                          </Button>
+                        ) : null}
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={`/connect/catalogue/${product.id}`}>
+                            <Pencil aria-hidden="true" />
+                            <span className="sr-only">Edit {product.name}</span>
+                          </Link>
+                        </Button>
+                        {product.status === "archived" ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              setStatus(product, canPublish ? "active" : "draft")
+                            }
+                            title="Restore"
+                          >
+                            <RotateCcw aria-hidden="true" />
+                            <span className="sr-only">Restore {product.name}</span>
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setStatus(product, "archived")}
+                            title="Archive"
+                          >
+                            <Archive aria-hidden="true" />
+                            <span className="sr-only">Archive {product.name}</span>
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </DataTable>
           )}
         </CardBody>
       </Card>

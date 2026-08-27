@@ -28,6 +28,7 @@ import {
 } from "@/lib/schemas/campaign";
 import { cn, formatRelative } from "@/lib/utils";
 import { FilterBar } from "@/components/ui/filter-bar";
+import { DataTable } from "@/components/ui/data-table";
 
 /*
   Campaign oversight.
@@ -178,122 +179,100 @@ export default function AdminCampaignsPage() {
               }
             />
           ) : (
-            <div className="scroll-x">
-              <table className="w-full min-w-[68rem] text-sm">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th scope="col" className="px-4 py-2.5 text-left font-medium text-muted-foreground">
-                      Campaign
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Regions
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      Budget / day
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      Spent
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      Views
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      Enquiries
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      Conversion
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Status
-                    </th>
-                    <th scope="col" className="px-4 py-2.5 text-right font-medium text-muted-foreground">
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filtered.map(({ campaign, manufacturer }) => {
-                    const busy = busyId === campaign.id;
-                    const rate = conversionRate(campaign.metrics);
+            <DataTable
+              minWidth="min-w-[68rem]"
+              columns={[
+                { label: "Campaign", className: "px-4 py-2.5" },
+                { label: "Regions" },
+                { label: "Budget / day", align: "right" },
+                { label: "Spent", align: "right" },
+                { label: "Views", align: "right" },
+                { label: "Enquiries", align: "right" },
+                { label: "Conversion", align: "right" },
+                { label: "Status" },
+                { label: "Actions", align: "right", srOnly: true, className: "px-4 py-2.5" },
+              ]}
+            >
+              {filtered.map(({ campaign, manufacturer }) => {
+                const busy = busyId === campaign.id;
+                const rate = conversionRate(campaign.metrics);
 
-                    return (
-                      <tr key={campaign.id} className={cn("align-middle", busy && "opacity-50")}>
-                        <td className="px-4 py-3">
-                          <p className="font-medium text-foreground">{campaign.name}</p>
-                          <Link
-                            href={`/admin/manufacturers/${manufacturer.id}`}
-                            className="text-xs text-muted-foreground hover:text-brand hover:underline"
+                return (
+                  <tr key={campaign.id} className={cn("align-middle", busy && "opacity-50")}>
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-foreground">{campaign.name}</p>
+                      <Link
+                        href={`/admin/manufacturers/${manufacturer.id}`}
+                        className="text-xs text-muted-foreground hover:text-brand hover:underline"
+                      >
+                        {manufacturer.tradingName}
+                      </Link>
+                      <p className="text-xs text-muted-foreground">
+                        Started {formatRelative(campaign.startsAt)}
+                      </p>
+                    </td>
+                    <td className="px-3 py-3">
+                      <p className="text-muted-foreground">
+                        {campaign.regions.join(", ")}
+                      </p>
+                      <p className="text-xs text-muted-foreground text-numeric">
+                        <Num value={totalShops(campaign.regions)} /> shops covered
+                      </p>
+                    </td>
+                    <td className="px-3 py-3 text-right">
+                      <Currency value={campaign.dailyBudgetKsh} />
+                    </td>
+                    <td className="px-3 py-3 text-right">
+                      <Currency value={campaign.spentKsh} />
+                    </td>
+                    <td className="px-3 py-3 text-right text-muted-foreground">
+                      <Num value={campaign.metrics.views} />
+                    </td>
+                    <td className="px-3 py-3 text-right text-muted-foreground">
+                      <Num value={campaign.metrics.enquiries} />
+                    </td>
+                    <td
+                      className={cn(
+                        "px-3 py-3 text-right font-medium text-numeric",
+                        rate >= 4 ? "text-success" : rate >= 1.5 ? "text-foreground" : "text-muted-foreground",
+                      )}
+                    >
+                      <Pct value={rate} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <StatusPill tone={CAMPAIGN_STATUS_TONE[campaign.status]}>
+                        {STATUS_LABELS[campaign.status]}
+                      </StatusPill>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        {campaign.status === "active" ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setStatusFor(campaign.id, "paused")}
+                            title="Pause"
                           >
-                            {manufacturer.tradingName}
-                          </Link>
-                          <p className="text-xs text-muted-foreground">
-                            Started {formatRelative(campaign.startsAt)}
-                          </p>
-                        </td>
-                        <td className="px-3 py-3">
-                          <p className="text-muted-foreground">
-                            {campaign.regions.join(", ")}
-                          </p>
-                          <p className="text-xs text-muted-foreground text-numeric">
-                            <Num value={totalShops(campaign.regions)} /> shops covered
-                          </p>
-                        </td>
-                        <td className="px-3 py-3 text-right">
-                          <Currency value={campaign.dailyBudgetKsh} />
-                        </td>
-                        <td className="px-3 py-3 text-right">
-                          <Currency value={campaign.spentKsh} />
-                        </td>
-                        <td className="px-3 py-3 text-right text-muted-foreground">
-                          <Num value={campaign.metrics.views} />
-                        </td>
-                        <td className="px-3 py-3 text-right text-muted-foreground">
-                          <Num value={campaign.metrics.enquiries} />
-                        </td>
-                        <td
-                          className={cn(
-                            "px-3 py-3 text-right font-medium text-numeric",
-                            rate >= 4 ? "text-success" : rate >= 1.5 ? "text-foreground" : "text-muted-foreground",
-                          )}
-                        >
-                          <Pct value={rate} />
-                        </td>
-                        <td className="px-3 py-3">
-                          <StatusPill tone={CAMPAIGN_STATUS_TONE[campaign.status]}>
-                            {STATUS_LABELS[campaign.status]}
-                          </StatusPill>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-end gap-1">
-                            {campaign.status === "active" ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setStatusFor(campaign.id, "paused")}
-                                title="Pause"
-                              >
-                                <Pause aria-hidden="true" />
-                                <span className="sr-only">Pause {campaign.name}</span>
-                              </Button>
-                            ) : campaign.status === "paused" ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setStatusFor(campaign.id, "active")}
-                                title="Resume"
-                              >
-                                <Play aria-hidden="true" />
-                                <span className="sr-only">Resume {campaign.name}</span>
-                              </Button>
-                            ) : null}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                            <Pause aria-hidden="true" />
+                            <span className="sr-only">Pause {campaign.name}</span>
+                          </Button>
+                        ) : campaign.status === "paused" ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setStatusFor(campaign.id, "active")}
+                            title="Resume"
+                          >
+                            <Play aria-hidden="true" />
+                            <span className="sr-only">Resume {campaign.name}</span>
+                          </Button>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </DataTable>
           )}
         </CardBody>
       </Card>

@@ -23,6 +23,7 @@ import { priceRange } from "@/lib/schemas/product";
 import { hasRegionalTargeting, packageMeta } from "@/lib/schemas/subscription";
 import { cn } from "@/lib/utils";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
+import { DataTable } from "@/components/ui/data-table";
 
 /*
   Market insights.
@@ -321,49 +322,37 @@ export default function InsightsPage() {
                 description="Every listing with meaningful visibility is generating enquiries."
               />
             ) : (
-              <div className="scroll-x">
-                <table className="w-full min-w-[28rem] text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th scope="col" className="px-5 py-2.5 text-left font-medium text-muted-foreground">
-                        Listing
-                      </th>
-                      <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                        Views
-                      </th>
-                      <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                        Entry price
-                      </th>
-                      <th scope="col" className="px-5 py-2.5 text-right font-medium text-muted-foreground">
-                        Lead time
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {lookersNotBuyers.map((row) => (
-                      <tr key={row.product.id}>
-                        <td className="px-5 py-2.5">
-                          <Link
-                            href={`/connect/catalogue/${row.product.id}`}
-                            className="font-medium text-foreground hover:text-brand hover:underline"
-                          >
-                            {row.product.name}
-                          </Link>
-                        </td>
-                        <td className="px-3 py-2.5 text-right text-muted-foreground">
-                          <Num value={row.views} />
-                        </td>
-                        <td className="px-3 py-2.5 text-right text-foreground">
-                          <Currency value={priceRange(row.product.priceBands).min} />
-                        </td>
-                        <td className="px-5 py-2.5 text-right text-muted-foreground">
-                          {row.product.leadTimeDays}d
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                minWidth="min-w-[28rem]"
+                columns={[
+                  { label: "Listing", className: "px-5 py-2.5" },
+                  { label: "Views", align: "right" },
+                  { label: "Entry price", align: "right" },
+                  { label: "Lead time", align: "right", className: "px-5 py-2.5" },
+                ]}
+              >
+                {lookersNotBuyers.map((row) => (
+                  <tr key={row.product.id}>
+                    <td className="px-5 py-2.5">
+                      <Link
+                        href={`/connect/catalogue/${row.product.id}`}
+                        className="font-medium text-foreground hover:text-brand hover:underline"
+                      >
+                        {row.product.name}
+                      </Link>
+                    </td>
+                    <td className="px-3 py-2.5 text-right text-muted-foreground">
+                      <Num value={row.views} />
+                    </td>
+                    <td className="px-3 py-2.5 text-right text-foreground">
+                      <Currency value={priceRange(row.product.priceBands).min} />
+                    </td>
+                    <td className="px-5 py-2.5 text-right text-muted-foreground">
+                      {row.product.leadTimeDays}d
+                    </td>
+                  </tr>
+                ))}
+              </DataTable>
             )}
           </CardBody>
         </Card>

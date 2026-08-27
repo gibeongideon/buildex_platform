@@ -25,6 +25,7 @@ import {
 } from "@/lib/schemas/verification";
 import { cn, formatRelative } from "@/lib/utils";
 import { FilterBar } from "@/components/ui/filter-bar";
+import { DataTable } from "@/components/ui/data-table";
 
 /*
   The ops verification queue.
@@ -155,107 +156,91 @@ export default function VerificationQueuePage() {
               }
             />
           ) : (
-            <div className="scroll-x">
-              <table className="w-full min-w-[58rem] text-sm">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th scope="col" className="px-4 py-2.5 text-left font-medium text-muted-foreground">
-                      Manufacturer
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Status
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Open checks
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Tightest SLA
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Submitted
-                    </th>
-                    <th scope="col" className="px-4 py-2.5 text-right font-medium text-muted-foreground">
-                      <span className="sr-only">Open</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filtered.map(({ manufacturer, pastSlaChecks }) => {
-                    const open = manufacturer.checks.filter(
-                      (c) => c.status !== "passed" && c.status !== "not_required",
-                    );
-                    const sla = worstSla(open);
+            <DataTable
+              minWidth="min-w-[58rem]"
+              columns={[
+                { label: "Manufacturer", className: "px-4 py-2.5" },
+                { label: "Status" },
+                { label: "Open checks" },
+                { label: "Tightest SLA" },
+                { label: "Submitted" },
+                { label: "Open", align: "right", srOnly: true, className: "px-4 py-2.5" },
+              ]}
+            >
+              {filtered.map(({ manufacturer, pastSlaChecks }) => {
+                const open = manufacturer.checks.filter(
+                  (c) => c.status !== "passed" && c.status !== "not_required",
+                );
+                const sla = worstSla(open);
 
-                    return (
-                      <tr key={manufacturer.id} className="align-middle">
-                        <td className="px-4 py-3">
-                          <Link
-                            href={`/admin/verification/${manufacturer.id}`}
-                            className="font-medium text-foreground hover:text-brand hover:underline"
-                          >
-                            {manufacturer.tradingName}
-                          </Link>
-                          <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                            <MapPin className="size-3" aria-hidden="true" />
-                            {manufacturer.county} ·{" "}
-                            {regionForCounty(manufacturer.county)}
-                          </p>
-                        </td>
-                        <td className="px-3 py-3">
-                          <StatusPill tone={STATUS_TONE[manufacturer.status]}>
-                            {STATUS_LABELS[manufacturer.status]}
-                          </StatusPill>
-                          {pastSlaChecks > 0 ? (
-                            <p className="mt-1 text-xs font-medium text-danger text-numeric">
-                              {pastSlaChecks} past SLA
-                            </p>
+                return (
+                  <tr key={manufacturer.id} className="align-middle">
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/admin/verification/${manufacturer.id}`}
+                        className="font-medium text-foreground hover:text-brand hover:underline"
+                      >
+                        {manufacturer.tradingName}
+                      </Link>
+                      <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                        <MapPin className="size-3" aria-hidden="true" />
+                        {manufacturer.county} ·{" "}
+                        {regionForCounty(manufacturer.county)}
+                      </p>
+                    </td>
+                    <td className="px-3 py-3">
+                      <StatusPill tone={STATUS_TONE[manufacturer.status]}>
+                        {STATUS_LABELS[manufacturer.status]}
+                      </StatusPill>
+                      {pastSlaChecks > 0 ? (
+                        <p className="mt-1 text-xs font-medium text-danger text-numeric">
+                          {pastSlaChecks} past SLA
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="px-3 py-3">
+                      {open.length === 0 ? (
+                        <span className="text-xs text-subtle-foreground">
+                          All cleared
+                        </span>
+                      ) : (
+                        <ul className="space-y-0.5">
+                          {open.slice(0, 2).map((check) => (
+                            <li
+                              key={check.key}
+                              className="text-xs text-muted-foreground"
+                            >
+                              {checkMeta(check.key).label}
+                            </li>
+                          ))}
+                          {open.length > 2 ? (
+                            <li className="text-xs text-subtle-foreground text-numeric">
+                              +{open.length - 2} more
+                            </li>
                           ) : null}
-                        </td>
-                        <td className="px-3 py-3">
-                          {open.length === 0 ? (
-                            <span className="text-xs text-subtle-foreground">
-                              All cleared
-                            </span>
-                          ) : (
-                            <ul className="space-y-0.5">
-                              {open.slice(0, 2).map((check) => (
-                                <li
-                                  key={check.key}
-                                  className="text-xs text-muted-foreground"
-                                >
-                                  {checkMeta(check.key).label}
-                                </li>
-                              ))}
-                              {open.length > 2 ? (
-                                <li className="text-xs text-subtle-foreground text-numeric">
-                                  +{open.length - 2} more
-                                </li>
-                              ) : null}
-                            </ul>
-                          )}
-                        </td>
-                        <td className="px-3 py-3">
-                          <SlaCell hours={sla} />
-                        </td>
-                        <td className="px-3 py-3 text-xs text-muted-foreground">
-                          {manufacturer.submittedAt
-                            ? formatRelative(manufacturer.submittedAt)
-                            : "—"}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <Button variant="secondary" size="sm" asChild>
-                            <Link href={`/admin/verification/${manufacturer.id}`}>
-                              Review
-                              <ChevronRight aria-hidden="true" />
-                            </Link>
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </ul>
+                      )}
+                    </td>
+                    <td className="px-3 py-3">
+                      <SlaCell hours={sla} />
+                    </td>
+                    <td className="px-3 py-3 text-xs text-muted-foreground">
+                      {manufacturer.submittedAt
+                        ? formatRelative(manufacturer.submittedAt)
+                        : "—"}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Button variant="secondary" size="sm" asChild>
+                        <Link href={`/admin/verification/${manufacturer.id}`}>
+                          Review
+                          <ChevronRight aria-hidden="true" />
+                        </Link>
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </DataTable>
           )}
         </CardBody>
       </Card>

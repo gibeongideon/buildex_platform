@@ -27,6 +27,7 @@ import {
 } from "@/lib/schemas/verification";
 import { cn } from "@/lib/utils";
 import { FilterBar } from "@/components/ui/filter-bar";
+import { DataTable } from "@/components/ui/data-table";
 
 /*
   The manufacturer directory — every supplier, whatever their state.
@@ -154,118 +155,100 @@ export default function AdminManufacturersPage() {
               }
             />
           ) : (
-            <div className="scroll-x">
-              <table className="w-full min-w-[64rem] text-sm">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th scope="col" className="px-4 py-2.5 text-left font-medium text-muted-foreground">
-                      Supplier
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Status
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Package
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      Live
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      Drafts
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      Open enquiries
-                    </th>
-                    <th scope="col" className="px-4 py-2.5 text-right font-medium text-muted-foreground">
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filtered.map(({ manufacturer: m, liveListings, draftListings, openEnquiries, pastSlaChecks }) => {
-                    const busy = busyId === m.id;
-                    const suspended = m.status === "suspended";
+            <DataTable
+              minWidth="min-w-[64rem]"
+              columns={[
+                { label: "Supplier", className: "px-4 py-2.5" },
+                { label: "Status" },
+                { label: "Package" },
+                { label: "Live", align: "right" },
+                { label: "Drafts", align: "right" },
+                { label: "Open enquiries", align: "right" },
+                { label: "Actions", align: "right", srOnly: true, className: "px-4 py-2.5" },
+              ]}
+            >
+              {filtered.map(({ manufacturer: m, liveListings, draftListings, openEnquiries, pastSlaChecks }) => {
+                const busy = busyId === m.id;
+                const suspended = m.status === "suspended";
 
-                    return (
-                      <tr key={m.id} className={cn("align-middle", busy && "opacity-50")}>
-                        <td className="px-4 py-3">
-                          <Link
-                            href={`/admin/manufacturers/${m.id}`}
-                            className="flex items-center gap-1.5 font-medium text-foreground hover:text-brand hover:underline"
-                          >
-                            {m.tradingName}
-                            {m.status === "approved" ? (
-                              <BadgeCheck
-                                className="size-4 shrink-0 text-success"
-                                aria-label="Verified"
-                              />
-                            ) : null}
+                return (
+                  <tr key={m.id} className={cn("align-middle", busy && "opacity-50")}>
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/admin/manufacturers/${m.id}`}
+                        className="flex items-center gap-1.5 font-medium text-foreground hover:text-brand hover:underline"
+                      >
+                        {m.tradingName}
+                        {m.status === "approved" ? (
+                          <BadgeCheck
+                            className="size-4 shrink-0 text-success"
+                            aria-label="Verified"
+                          />
+                        ) : null}
+                      </Link>
+                      <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                        <MapPin className="size-3" aria-hidden="true" />
+                        {m.county} · since {m.yearEstablished}
+                      </p>
+                    </td>
+                    <td className="px-3 py-3">
+                      <StatusPill tone={STATUS_TONE[m.status]}>
+                        {STATUS_LABELS[m.status]}
+                      </StatusPill>
+                      {pastSlaChecks > 0 ? (
+                        <p className="mt-1 text-xs font-medium text-danger text-numeric">
+                          {pastSlaChecks} past SLA
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="px-3 py-3 text-muted-foreground">
+                      {m.subscription ? packageMeta(m.subscription.package).name : "—"}
+                    </td>
+                    <td className="px-3 py-3 text-right text-numeric text-foreground">
+                      <Num value={liveListings} />
+                    </td>
+                    <td className="px-3 py-3 text-right text-numeric text-muted-foreground">
+                      {draftListings || "—"}
+                    </td>
+                    <td className="px-3 py-3 text-right text-numeric text-muted-foreground">
+                      {openEnquiries || "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={`/marketplace/manufacturer/${m.id}`} title="Public storefront">
+                            <Store aria-hidden="true" />
+                            <span className="sr-only">
+                              {m.tradingName} storefront
+                            </span>
                           </Link>
-                          <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                            <MapPin className="size-3" aria-hidden="true" />
-                            {m.county} · since {m.yearEstablished}
-                          </p>
-                        </td>
-                        <td className="px-3 py-3">
-                          <StatusPill tone={STATUS_TONE[m.status]}>
-                            {STATUS_LABELS[m.status]}
-                          </StatusPill>
-                          {pastSlaChecks > 0 ? (
-                            <p className="mt-1 text-xs font-medium text-danger text-numeric">
-                              {pastSlaChecks} past SLA
-                            </p>
-                          ) : null}
-                        </td>
-                        <td className="px-3 py-3 text-muted-foreground">
-                          {m.subscription ? packageMeta(m.subscription.package).name : "—"}
-                        </td>
-                        <td className="px-3 py-3 text-right text-numeric text-foreground">
-                          <Num value={liveListings} />
-                        </td>
-                        <td className="px-3 py-3 text-right text-numeric text-muted-foreground">
-                          {draftListings || "—"}
-                        </td>
-                        <td className="px-3 py-3 text-right text-numeric text-muted-foreground">
-                          {openEnquiries || "—"}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link href={`/marketplace/manufacturer/${m.id}`} title="Public storefront">
-                                <Store aria-hidden="true" />
-                                <span className="sr-only">
-                                  {m.tradingName} storefront
-                                </span>
-                              </Link>
-                            </Button>
-                            {suspended ? (
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => reinstate(m.id, m.checks)}
-                              >
-                                <RotateCcw aria-hidden="true" />
-                                Reinstate
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => suspend(m.id)}
-                                title="Suspend — pulls their listings from the marketplace"
-                              >
-                                <Ban aria-hidden="true" />
-                                <span className="sr-only">Suspend {m.tradingName}</span>
-                              </Button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </Button>
+                        {suspended ? (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => reinstate(m.id, m.checks)}
+                          >
+                            <RotateCcw aria-hidden="true" />
+                            Reinstate
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => suspend(m.id)}
+                            title="Suspend — pulls their listings from the marketplace"
+                          >
+                            <Ban aria-hidden="true" />
+                            <span className="sr-only">Suspend {m.tradingName}</span>
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </DataTable>
           )}
         </CardBody>
       </Card>

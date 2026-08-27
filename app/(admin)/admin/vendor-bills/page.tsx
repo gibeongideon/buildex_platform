@@ -36,6 +36,7 @@ import {
 } from "@/lib/schemas/supplier";
 import { cn, formatDate, formatMoney } from "@/lib/utils";
 import { FilterBar } from "@/components/ui/filter-bar";
+import { DataTable } from "@/components/ui/data-table";
 
 /*
   Vendor bills — accounts payable for Buildex Interiors.
@@ -229,24 +230,18 @@ export default function AdminVendorBillsPage() {
                 }
               />
             ) : (
-              <div className="scroll-x">
-                <table className="w-full min-w-[54rem] text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      {["Reference", "Vendor", "Bill date", "Due"].map((h) => (
-                        <th key={h} scope="col" className="px-4 py-2.5 text-left font-medium text-muted-foreground">
-                          {h}
-                        </th>
-                      ))}
-                      <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                        Amount
-                      </th>
-                      <th scope="col" className="px-4 py-2.5 text-left font-medium text-muted-foreground">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
+              <>
+                <DataTable
+                  minWidth="min-w-[54rem]"
+                  columns={[
+                    { label: "Reference", className: "px-4 py-2.5" },
+                    { label: "Vendor", className: "px-4 py-2.5" },
+                    { label: "Bill date", className: "px-4 py-2.5" },
+                    { label: "Due", className: "px-4 py-2.5" },
+                    { label: "Amount", align: "right" },
+                    { label: "Status", className: "px-4 py-2.5" },
+                  ]}
+                >
                     {filtered.slice(0, 60).map((bill) => {
                       const vendor = vendorById.get(bill.vendorId);
                       const late = isOverdue(bill);
@@ -307,15 +302,14 @@ export default function AdminVendorBillsPage() {
                         </tr>
                       );
                     })}
-                  </tbody>
-                </table>
+                </DataTable>
                 {filtered.length > 60 ? (
                   <p className="border-t border-border px-4 py-3 text-xs text-muted-foreground">
                     Showing the 60 most recent of {filtered.length}. Nothing is hidden
                     silently — narrow the filter to see the rest.
                   </p>
                 ) : null}
-              </div>
+              </>
             )}
           </CardBody>
         </Card>

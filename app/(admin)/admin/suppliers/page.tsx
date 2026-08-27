@@ -28,6 +28,7 @@ import {
 } from "@/lib/schemas/supplier";
 import { cn, formatDate, formatMoney } from "@/lib/utils";
 import { FilterBar } from "@/components/ui/filter-bar";
+import { DataTable } from "@/components/ui/data-table";
 
 /*
   Buildex Interiors' suppliers — the companies Buildex buys from.
@@ -217,116 +218,104 @@ export default function AdminSuppliersPage() {
               }
             />
           ) : (
-            <div className="scroll-x">
-              <table className="w-full min-w-[70rem] text-sm">
-                <thead>
-                  <tr className="border-b border-border">
-                    {["Name", "Contact", "City", "Country", "Currency"].map((h) => (
-                      <th
-                        key={h}
-                        scope="col"
-                        className="px-4 py-2.5 text-left font-medium text-muted-foreground"
-                      >
-                        {h}
-                      </th>
-                    ))}
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      Outstanding
-                    </th>
-                    <th scope="col" className="px-4 py-2.5 text-left font-medium text-muted-foreground">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filtered.map(({ vendor, bills: billCount, outstanding, overdueBills, lastBillAt }) => {
-                    const issues = vendorIssues(vendor);
-                    const worst = issues.find((i) => i.severity === "high");
+            <DataTable
+              minWidth="min-w-[70rem]"
+              columns={[
+                { label: "Name", className: "px-4 py-2.5" },
+                { label: "Contact", className: "px-4 py-2.5" },
+                { label: "City", className: "px-4 py-2.5" },
+                { label: "Country", className: "px-4 py-2.5" },
+                { label: "Currency", className: "px-4 py-2.5" },
+                { label: "Outstanding", align: "right" },
+                { label: "Status", className: "px-4 py-2.5" },
+              ]}
+            >
+              {filtered.map(({ vendor, bills: billCount, outstanding, overdueBills, lastBillAt }) => {
+                const issues = vendorIssues(vendor);
+                const worst = issues.find((i) => i.severity === "high");
 
-                    return (
-                      <tr key={vendor.id} className="align-top">
-                        <td className="px-4 py-3">
-                          <Link
-                            href={`/admin/suppliers/${vendor.id}`}
-                            className="font-medium text-foreground hover:text-brand hover:underline"
-                          >
-                            {vendor.name}
-                          </Link>
-                          <p className="mt-0.5 text-xs text-muted-foreground">
-                            {vendor.type}
-                            {lastBillAt ? ` · last bill ${formatDate(lastBillAt)}` : ""}
-                          </p>
-                          {worst ? (
-                            <p className="mt-1 inline-flex items-center gap-1 text-xs text-danger">
-                              <AlertTriangle className="size-3" aria-hidden="true" />
-                              {worst.label}
-                            </p>
-                          ) : issues.length > 0 ? (
-                            <p className="mt-1 text-xs text-warning">{issues[0].label}</p>
-                          ) : null}
-                        </td>
-                        <td className="px-4 py-3">
-                          {vendor.phone ? (
-                            <p className="flex items-center gap-1.5 text-xs text-muted-foreground text-numeric">
-                              <Phone className="size-3 shrink-0" aria-hidden="true" />
-                              {vendor.phone}
-                            </p>
-                          ) : null}
-                          {vendor.email ? (
-                            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Mail className="size-3 shrink-0" aria-hidden="true" />
-                              <span className="truncate">{vendor.email}</span>
-                            </p>
-                          ) : null}
-                          {!vendor.phone && !vendor.email ? (
-                            <span className="text-xs text-subtle-foreground">—</span>
-                          ) : null}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {vendor.city ? (
-                            <span className="inline-flex items-center gap-1">
-                              <MapPin className="size-3 shrink-0" aria-hidden="true" />
-                              {vendor.city}
-                            </span>
-                          ) : (
-                            <span className="text-subtle-foreground">—</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {vendor.country ?? <span className="text-subtle-foreground">—</span>}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="rounded-md bg-surface-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground text-numeric">
-                            {vendor.currency}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-right">
-                          <span
-                            className={cn(
-                              "font-medium text-numeric",
-                              overdueBills > 0 ? "text-danger" : "text-foreground",
-                            )}
-                          >
-                            {outstanding > 0
-                              ? formatMoney(outstanding, vendor.currency)
-                              : "—"}
-                          </span>
-                          <p className="text-xs text-muted-foreground text-numeric">
-                            <Num value={billCount} /> bill{billCount === 1 ? "" : "s"}
-                            {overdueBills > 0 ? ` · ${overdueBills} overdue` : ""}
-                          </p>
-                        </td>
-                        <td className="px-4 py-3">
-                          <StatusPill tone={VENDOR_STATUS_TONE[vendor.status]}>
-                            {VENDOR_STATUS_LABELS[vendor.status]}
-                          </StatusPill>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                return (
+                  <tr key={vendor.id} className="align-top">
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/admin/suppliers/${vendor.id}`}
+                        className="font-medium text-foreground hover:text-brand hover:underline"
+                      >
+                        {vendor.name}
+                      </Link>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {vendor.type}
+                        {lastBillAt ? ` · last bill ${formatDate(lastBillAt)}` : ""}
+                      </p>
+                      {worst ? (
+                        <p className="mt-1 inline-flex items-center gap-1 text-xs text-danger">
+                          <AlertTriangle className="size-3" aria-hidden="true" />
+                          {worst.label}
+                        </p>
+                      ) : issues.length > 0 ? (
+                        <p className="mt-1 text-xs text-warning">{issues[0].label}</p>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3">
+                      {vendor.phone ? (
+                        <p className="flex items-center gap-1.5 text-xs text-muted-foreground text-numeric">
+                          <Phone className="size-3 shrink-0" aria-hidden="true" />
+                          {vendor.phone}
+                        </p>
+                      ) : null}
+                      {vendor.email ? (
+                        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Mail className="size-3 shrink-0" aria-hidden="true" />
+                          <span className="truncate">{vendor.email}</span>
+                        </p>
+                      ) : null}
+                      {!vendor.phone && !vendor.email ? (
+                        <span className="text-xs text-subtle-foreground">—</span>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {vendor.city ? (
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="size-3 shrink-0" aria-hidden="true" />
+                          {vendor.city}
+                        </span>
+                      ) : (
+                        <span className="text-subtle-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {vendor.country ?? <span className="text-subtle-foreground">—</span>}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-md bg-surface-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground text-numeric">
+                        {vendor.currency}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 text-right">
+                      <span
+                        className={cn(
+                          "font-medium text-numeric",
+                          overdueBills > 0 ? "text-danger" : "text-foreground",
+                        )}
+                      >
+                        {outstanding > 0
+                          ? formatMoney(outstanding, vendor.currency)
+                          : "—"}
+                      </span>
+                      <p className="text-xs text-muted-foreground text-numeric">
+                        <Num value={billCount} /> bill{billCount === 1 ? "" : "s"}
+                        {overdueBills > 0 ? ` · ${overdueBills} overdue` : ""}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <StatusPill tone={VENDOR_STATUS_TONE[vendor.status]}>
+                        {VENDOR_STATUS_LABELS[vendor.status]}
+                      </StatusPill>
+                    </td>
+                  </tr>
+                );
+              })}
+            </DataTable>
           )}
         </CardBody>
       </Card>

@@ -24,6 +24,7 @@ import { packageMeta } from "@/lib/schemas/subscription";
 import { priceRange } from "@/lib/schemas/product";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
 import { QueryError } from "@/components/ui/query-state";
+import { DataTable } from "@/components/ui/data-table";
 
 export default function ConnectDashboardPage() {
   const { data, loading, error, refetch } = useCurrentManufacturer();
@@ -194,61 +195,49 @@ export default function ConnectDashboardPage() {
                 }
               />
             ) : (
-              <div className="scroll-x">
-                <table className="w-full min-w-[36rem] text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th scope="col" className="px-5 py-2.5 text-left font-medium text-muted-foreground">
-                        Product
-                      </th>
-                      <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                        Category
-                      </th>
-                      <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                        From
-                      </th>
-                      <th scope="col" className="px-5 py-2.5 text-right font-medium text-muted-foreground">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {products.slice(0, 8).map((product) => (
-                      <tr key={product.id}>
-                        <td className="px-5 py-3">
-                          <p className="font-medium text-foreground">{product.name}</p>
-                          <p className="text-xs text-muted-foreground">{product.sku}</p>
-                        </td>
-                        <td className="px-3 py-3 text-muted-foreground">{product.category}</td>
-                        <td className="px-3 py-3 text-right">
-                          <Currency value={priceRange(product.priceBands).min} />
-                          <span className="text-xs text-muted-foreground">
-                            {" "}
-                            /{product.unit}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-right">
-                          <StatusPill
-                            tone={
-                              product.status === "active"
-                                ? "success"
-                                : product.status === "out_of_stock"
-                                  ? "warning"
-                                  : "neutral"
-                            }
-                          >
-                            {product.status === "out_of_stock"
-                              ? "Out of stock"
-                              : product.status === "active"
-                                ? "Live"
-                                : "Draft"}
-                          </StatusPill>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                minWidth="min-w-[36rem]"
+                columns={[
+                  { label: "Product", className: "px-5 py-2.5" },
+                  { label: "Category" },
+                  { label: "From", align: "right" },
+                  { label: "Status", align: "right", className: "px-5 py-2.5" },
+                ]}
+              >
+                {products.slice(0, 8).map((product) => (
+                  <tr key={product.id}>
+                    <td className="px-5 py-3">
+                      <p className="font-medium text-foreground">{product.name}</p>
+                      <p className="text-xs text-muted-foreground">{product.sku}</p>
+                    </td>
+                    <td className="px-3 py-3 text-muted-foreground">{product.category}</td>
+                    <td className="px-3 py-3 text-right">
+                      <Currency value={priceRange(product.priceBands).min} />
+                      <span className="text-xs text-muted-foreground">
+                        {" "}
+                        /{product.unit}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <StatusPill
+                        tone={
+                          product.status === "active"
+                            ? "success"
+                            : product.status === "out_of_stock"
+                              ? "warning"
+                              : "neutral"
+                        }
+                      >
+                        {product.status === "out_of_stock"
+                          ? "Out of stock"
+                          : product.status === "active"
+                            ? "Live"
+                            : "Draft"}
+                      </StatusPill>
+                    </td>
+                  </tr>
+                ))}
+              </DataTable>
             )}
           </CardBody>
         </Card>

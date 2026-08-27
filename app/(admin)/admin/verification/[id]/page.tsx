@@ -27,6 +27,7 @@ import { documentTypeMeta, isDocumentExpired } from "@/lib/schemas/document";
 import { STATUS_LABELS, STATUS_TONE } from "@/lib/schemas/verification";
 import { formatDate, formatRelative } from "@/lib/utils";
 import { BackLink } from "@/components/shared/back-link";
+import { DataTable } from "@/components/ui/data-table";
 
 /*
   One application, reviewed.
@@ -186,44 +187,32 @@ export default function VerificationReviewPage() {
               </StatusPill>
             </CardHeader>
             <CardBody className="p-0">
-              <div className="scroll-x">
-                <table className="w-full min-w-[32rem] text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th scope="col" className="px-5 py-2.5 text-left font-medium text-muted-foreground">
-                        Name
-                      </th>
-                      <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                        National ID
-                      </th>
-                      <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                        Role
-                      </th>
-                      <th scope="col" className="px-5 py-2.5 text-right font-medium text-muted-foreground">
-                        Ownership
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {manufacturer.directors.map((director) => (
-                      <tr key={director.id}>
-                        <td className="px-5 py-2.5 font-medium text-foreground">
-                          {director.fullName}
-                        </td>
-                        <td className="px-3 py-2.5 text-muted-foreground text-numeric">
-                          {director.nationalId}
-                        </td>
-                        <td className="px-3 py-2.5 text-muted-foreground">
-                          {director.role}
-                        </td>
-                        <td className="px-5 py-2.5 text-right text-foreground text-numeric">
-                          {director.ownershipPercent}%
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                minWidth="min-w-[32rem]"
+                columns={[
+                  { label: "Name", className: "px-5 py-2.5" },
+                  { label: "National ID" },
+                  { label: "Role" },
+                  { label: "Ownership", align: "right", className: "px-5 py-2.5" },
+                ]}
+              >
+                {manufacturer.directors.map((director) => (
+                  <tr key={director.id}>
+                    <td className="px-5 py-2.5 font-medium text-foreground">
+                      {director.fullName}
+                    </td>
+                    <td className="px-3 py-2.5 text-muted-foreground text-numeric">
+                      {director.nationalId}
+                    </td>
+                    <td className="px-3 py-2.5 text-muted-foreground">
+                      {director.role}
+                    </td>
+                    <td className="px-5 py-2.5 text-right text-foreground text-numeric">
+                      {director.ownershipPercent}%
+                    </td>
+                  </tr>
+                ))}
+              </DataTable>
             </CardBody>
           </Card>
 

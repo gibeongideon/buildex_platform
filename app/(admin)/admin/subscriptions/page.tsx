@@ -30,6 +30,7 @@ import {
 } from "@/lib/schemas/subscription";
 import { canListProducts } from "@/lib/schemas/verification";
 import { cn, formatDate } from "@/lib/utils";
+import { DataTable } from "@/components/ui/data-table";
 
 /*
   Package administration.
@@ -199,133 +200,117 @@ export default function AdminSubscriptionsPage() {
                 ))}
               </div>
             ) : (
-              <div className="scroll-x">
-                <table className="w-full min-w-[54rem] text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th scope="col" className="px-4 py-2.5 text-left font-medium text-muted-foreground">
-                        Supplier
-                      </th>
-                      <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                        Package
-                      </th>
-                      <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                        Cycle
-                      </th>
-                      <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                        Renews
-                      </th>
-                      <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                        Listings
-                      </th>
-                      <th scope="col" className="px-4 py-2.5 text-left font-medium text-muted-foreground">
-                        Override
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {all.map(({ manufacturer, liveListings, draftListings }) => {
-                      const sub = manufacturer.subscription;
-                      const busy = busyId === manufacturer.id;
-                      const limit = sub ? productLimit(sub.package) : null;
-                      const total = liveListings + draftListings;
-                      const overLimit = limit !== null && total > limit;
+              <DataTable
+                minWidth="min-w-[54rem]"
+                columns={[
+                  { label: "Supplier", className: "px-4 py-2.5" },
+                  { label: "Package" },
+                  { label: "Cycle" },
+                  { label: "Renews" },
+                  { label: "Listings", align: "right" },
+                  { label: "Override", className: "px-4 py-2.5" },
+                ]}
+              >
+                {all.map(({ manufacturer, liveListings, draftListings }) => {
+                  const sub = manufacturer.subscription;
+                  const busy = busyId === manufacturer.id;
+                  const limit = sub ? productLimit(sub.package) : null;
+                  const total = liveListings + draftListings;
+                  const overLimit = limit !== null && total > limit;
 
-                      return (
-                        <tr
-                          key={manufacturer.id}
-                          className={cn("align-middle", busy && "opacity-50")}
+                  return (
+                    <tr
+                      key={manufacturer.id}
+                      className={cn("align-middle", busy && "opacity-50")}
+                    >
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/admin/manufacturers/${manufacturer.id}`}
+                          className="font-medium text-foreground hover:text-brand hover:underline"
                         >
-                          <td className="px-4 py-3">
-                            <Link
-                              href={`/admin/manufacturers/${manufacturer.id}`}
-                              className="font-medium text-foreground hover:text-brand hover:underline"
-                            >
-                              {manufacturer.tradingName}
-                            </Link>
-                            <p className="text-xs text-muted-foreground">
-                              {manufacturer.county}
-                              {canListProducts(manufacturer.status)
-                                ? ""
-                                : " · not yet cleared to list"}
-                            </p>
-                          </td>
-                          <td className="px-3 py-3">
-                            {sub ? (
-                              <StatusPill tone={PACKAGE_TONE[sub.package]}>
-                                {packageMeta(sub.package).name}
-                              </StatusPill>
-                            ) : (
-                              <span className="text-muted-foreground">None</span>
-                            )}
-                          </td>
-                          <td className="px-3 py-3 text-muted-foreground">
-                            {sub ? (sub.billingCycle === "annual" ? "Annual" : "Monthly") : "—"}
-                          </td>
-                          <td className="px-3 py-3">
-                            {sub?.renewsAt ? (
-                              <>
-                                <span className="text-muted-foreground text-numeric">
-                                  {formatDate(sub.renewsAt)}
-                                </span>
-                                {daysUntil(sub.renewsAt) <= 30 ? (
-                                  <p
-                                    className={cn(
-                                      "text-xs text-numeric",
-                                      daysUntil(sub.renewsAt) <= 7
-                                        ? "text-warning"
-                                        : "text-muted-foreground",
-                                    )}
-                                  >
-                                    in {daysUntil(sub.renewsAt)} days
-                                  </p>
-                                ) : null}
-                              </>
-                            ) : (
-                              <span className="text-muted-foreground">Never</span>
-                            )}
-                          </td>
-                          <td className="px-3 py-3 text-right">
-                            <span
-                              className={cn(
-                                "text-numeric",
-                                overLimit ? "font-medium text-danger" : "text-muted-foreground",
-                              )}
-                            >
-                              <Num value={total} />
-                              {limit !== null ? ` / ${limit}` : ""}
+                          {manufacturer.tradingName}
+                        </Link>
+                        <p className="text-xs text-muted-foreground">
+                          {manufacturer.county}
+                          {canListProducts(manufacturer.status)
+                            ? ""
+                            : " · not yet cleared to list"}
+                        </p>
+                      </td>
+                      <td className="px-3 py-3">
+                        {sub ? (
+                          <StatusPill tone={PACKAGE_TONE[sub.package]}>
+                            {packageMeta(sub.package).name}
+                          </StatusPill>
+                        ) : (
+                          <span className="text-muted-foreground">None</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-3 text-muted-foreground">
+                        {sub ? (sub.billingCycle === "annual" ? "Annual" : "Monthly") : "—"}
+                      </td>
+                      <td className="px-3 py-3">
+                        {sub?.renewsAt ? (
+                          <>
+                            <span className="text-muted-foreground text-numeric">
+                              {formatDate(sub.renewsAt)}
                             </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <Select
-                              value={sub?.package ?? ""}
-                              onChange={(event) => {
-                                const next = event.target.value as PackageKey;
-                                if (!next) return;
-                                setPackage(
-                                  manufacturer.id,
-                                  next,
-                                  sub?.billingCycle ?? "monthly",
-                                );
-                              }}
-                              aria-label={`Package for ${manufacturer.tradingName}`}
-                              className="h-8 w-auto text-xs"
-                              disabled={busy}
-                            >
-                              {sub ? null : <option value="">Set a package</option>}
-                              {PACKAGE_KEYS.map((key) => (
-                                <option key={key} value={key}>
-                                  {packageMeta(key).name}
-                                </option>
-                              ))}
-                            </Select>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                            {daysUntil(sub.renewsAt) <= 30 ? (
+                              <p
+                                className={cn(
+                                  "text-xs text-numeric",
+                                  daysUntil(sub.renewsAt) <= 7
+                                    ? "text-warning"
+                                    : "text-muted-foreground",
+                                )}
+                              >
+                                in {daysUntil(sub.renewsAt)} days
+                              </p>
+                            ) : null}
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">Never</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-3 text-right">
+                        <span
+                          className={cn(
+                            "text-numeric",
+                            overLimit ? "font-medium text-danger" : "text-muted-foreground",
+                          )}
+                        >
+                          <Num value={total} />
+                          {limit !== null ? ` / ${limit}` : ""}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Select
+                          value={sub?.package ?? ""}
+                          onChange={(event) => {
+                            const next = event.target.value as PackageKey;
+                            if (!next) return;
+                            setPackage(
+                              manufacturer.id,
+                              next,
+                              sub?.billingCycle ?? "monthly",
+                            );
+                          }}
+                          aria-label={`Package for ${manufacturer.tradingName}`}
+                          className="h-8 w-auto text-xs"
+                          disabled={busy}
+                        >
+                          {sub ? null : <option value="">Set a package</option>}
+                          {PACKAGE_KEYS.map((key) => (
+                            <option key={key} value={key}>
+                              {packageMeta(key).name}
+                            </option>
+                          ))}
+                        </Select>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </DataTable>
             )}
           </CardBody>
         </Card>

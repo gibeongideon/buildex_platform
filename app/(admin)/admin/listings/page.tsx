@@ -31,6 +31,7 @@ import {
 import { canListProducts } from "@/lib/schemas/verification";
 import { cn } from "@/lib/utils";
 import { FilterBar } from "@/components/ui/filter-bar";
+import { DataTable } from "@/components/ui/data-table";
 
 /*
   Listing moderation.
@@ -196,139 +197,123 @@ export default function AdminListingsPage() {
               }
             />
           ) : (
-            <div className="scroll-x">
-              <table className="w-full min-w-[62rem] text-sm">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th scope="col" className="px-4 py-2.5 text-left font-medium text-muted-foreground">
-                      Listing
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Supplier
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Category
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      Band spread
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                      Status
-                    </th>
-                    <th scope="col" className="px-4 py-2.5 text-right font-medium text-muted-foreground">
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filtered.map(({ product, manufacturer }) => {
-                    const range = priceRange(product.priceBands);
+            <DataTable
+              minWidth="min-w-[62rem]"
+              columns={[
+                { label: "Listing", className: "px-4 py-2.5" },
+                { label: "Supplier" },
+                { label: "Category" },
+                { label: "Band spread", align: "right" },
+                { label: "Status" },
+                { label: "Actions", align: "right", srOnly: true, className: "px-4 py-2.5" },
+              ]}
+            >
+              {filtered.map(({ product, manufacturer }) => {
+                const range = priceRange(product.priceBands);
                     
-                    const busy = busyId === product.id;
-                    const held =
-                      product.status === "draft" &&
-                      !canListProducts(manufacturer.status);
+                const busy = busyId === product.id;
+                const held =
+                  product.status === "draft" &&
+                  !canListProducts(manufacturer.status);
 
-                    return (
-                      <tr
-                        key={product.id}
-                        className={cn("align-middle", busy && "opacity-50")}
+                return (
+                  <tr
+                    key={product.id}
+                    className={cn("align-middle", busy && "opacity-50")}
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <ProductThumb
+                          productId={product.id}
+                          category={product.category}
+                          className="size-10 shrink-0 rounded-md border border-border"
+                          iconClassName="size-4"
+                          sizes="40px"
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-foreground">
+                            {product.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground text-numeric">
+                            {product.sku}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-3">
+                      <Link
+                        href={`/admin/manufacturers/${manufacturer.id}`}
+                        className="text-muted-foreground hover:text-brand hover:underline"
                       >
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            <ProductThumb
-                              productId={product.id}
-                              category={product.category}
-                              className="size-10 shrink-0 rounded-md border border-border"
-                              iconClassName="size-4"
-                              sizes="40px"
-                            />
-                            <div className="min-w-0">
-                              <p className="truncate font-medium text-foreground">
-                                {product.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground text-numeric">
-                                {product.sku}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-3 py-3">
-                          <Link
-                            href={`/admin/manufacturers/${manufacturer.id}`}
-                            className="text-muted-foreground hover:text-brand hover:underline"
-                          >
-                            {manufacturer.tradingName}
-                          </Link>
-                        </td>
-                        <td className="px-3 py-3 text-muted-foreground">
-                          {product.category}
-                        </td>
-                        <td className="px-3 py-3 text-right">
-                          <Currency value={range.min} />
-                          {range.max !== range.min ? (
-                            <>
-                              <span aria-hidden="true">–</span>
-                              <Currency value={range.max} hideSymbol />
-                            </>
-                          ) : null}
-                        </td>
-                        <td className="px-3 py-3">
-                          <StatusPill tone={PRODUCT_STATUS_TONE[product.status]}>
-                            {PRODUCT_STATUS_LABELS[product.status]}
-                          </StatusPill>
-                          {held ? (
-                            <p className="mt-1 text-xs text-warning">
-                              Waiting on verification
-                            </p>
-                          ) : null}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-end gap-1">
-                            {product.status === "active" ? (
-                              <>
-                                <Button variant="ghost" size="sm" asChild>
-                                  <Link
-                                    href={`/marketplace/product/${product.id}`}
-                                    title="View on the marketplace"
-                                  >
-                                    <ExternalLink aria-hidden="true" />
-                                    <span className="sr-only">
-                                      View {product.name}
-                                    </span>
-                                  </Link>
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setProductStatus(product.id, "archived")}
-                                  title="Unpublish"
-                                >
-                                  <EyeOff aria-hidden="true" />
-                                  <span className="sr-only">
-                                    Unpublish {product.name}
-                                  </span>
-                                </Button>
-                              </>
-                            ) : product.status === "archived" ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setProductStatus(product.id, "active")}
-                                title="Restore"
+                        {manufacturer.tradingName}
+                      </Link>
+                    </td>
+                    <td className="px-3 py-3 text-muted-foreground">
+                      {product.category}
+                    </td>
+                    <td className="px-3 py-3 text-right">
+                      <Currency value={range.min} />
+                      {range.max !== range.min ? (
+                        <>
+                          <span aria-hidden="true">–</span>
+                          <Currency value={range.max} hideSymbol />
+                        </>
+                      ) : null}
+                    </td>
+                    <td className="px-3 py-3">
+                      <StatusPill tone={PRODUCT_STATUS_TONE[product.status]}>
+                        {PRODUCT_STATUS_LABELS[product.status]}
+                      </StatusPill>
+                      {held ? (
+                        <p className="mt-1 text-xs text-warning">
+                          Waiting on verification
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        {product.status === "active" ? (
+                          <>
+                            <Button variant="ghost" size="sm" asChild>
+                              <Link
+                                href={`/marketplace/product/${product.id}`}
+                                title="View on the marketplace"
                               >
-                                <RotateCcw aria-hidden="true" />
-                                <span className="sr-only">Restore {product.name}</span>
-                              </Button>
-                            ) : null}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                                <ExternalLink aria-hidden="true" />
+                                <span className="sr-only">
+                                  View {product.name}
+                                </span>
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setProductStatus(product.id, "archived")}
+                              title="Unpublish"
+                            >
+                              <EyeOff aria-hidden="true" />
+                              <span className="sr-only">
+                                Unpublish {product.name}
+                              </span>
+                            </Button>
+                          </>
+                        ) : product.status === "archived" ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setProductStatus(product.id, "active")}
+                            title="Restore"
+                          >
+                            <RotateCcw aria-hidden="true" />
+                            <span className="sr-only">Restore {product.name}</span>
+                          </Button>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </DataTable>
           )}
         </CardBody>
       </Card>

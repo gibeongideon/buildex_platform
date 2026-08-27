@@ -49,6 +49,7 @@ import { REGIONS, type Region } from "@/lib/schemas/common";
 import { hasRegionalTargeting, packageMeta } from "@/lib/schemas/subscription";
 import { formatDate } from "@/lib/utils";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
+import { DataTable } from "@/components/ui/data-table";
 
 /*
   Regional visibility campaigns.
@@ -402,47 +403,35 @@ export default function CampaignsPage() {
             </p>
           </CardHeader>
           <CardBody className="p-0">
-            <div className="scroll-x">
-              <table className="w-full min-w-[32rem] text-sm">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th scope="col" className="px-5 py-2.5 text-left font-medium text-muted-foreground">
-                      Region
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      Hardware shops
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium text-muted-foreground">
-                      Monthly turnover
-                    </th>
-                    <th scope="col" className="px-5 py-2.5 text-right font-medium text-muted-foreground">
-                      Cost per 1,000
-                    </th>
+            <DataTable
+              minWidth="min-w-[32rem]"
+              columns={[
+                { label: "Region", className: "px-5 py-2.5" },
+                { label: "Hardware shops", align: "right" },
+                { label: "Monthly turnover", align: "right" },
+                { label: "Cost per 1,000", align: "right", className: "px-5 py-2.5" },
+              ]}
+            >
+              {REGIONS.map((region) => {
+                const reach = REGION_REACH[region];
+                return (
+                  <tr key={region}>
+                    <td className="px-5 py-2.5 font-medium text-foreground">
+                      {region}
+                    </td>
+                    <td className="px-3 py-2.5 text-right text-muted-foreground">
+                      <Num value={reach.shops} />
+                    </td>
+                    <td className="px-3 py-2.5 text-right text-muted-foreground">
+                      <Currency value={reach.monthlyTurnoverKsh} compact />
+                    </td>
+                    <td className="px-5 py-2.5 text-right text-foreground">
+                      <Currency value={reach.cpmKsh} />
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {REGIONS.map((region) => {
-                    const reach = REGION_REACH[region];
-                    return (
-                      <tr key={region}>
-                        <td className="px-5 py-2.5 font-medium text-foreground">
-                          {region}
-                        </td>
-                        <td className="px-3 py-2.5 text-right text-muted-foreground">
-                          <Num value={reach.shops} />
-                        </td>
-                        <td className="px-3 py-2.5 text-right text-muted-foreground">
-                          <Currency value={reach.monthlyTurnoverKsh} compact />
-                        </td>
-                        <td className="px-5 py-2.5 text-right text-foreground">
-                          <Currency value={reach.cpmKsh} />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                );
+              })}
+            </DataTable>
           </CardBody>
         </Card>
 

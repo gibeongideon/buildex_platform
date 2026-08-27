@@ -31,6 +31,7 @@ import { packageMeta } from "@/lib/schemas/subscription";
 import { formatDate } from "@/lib/utils";
 import { useCurrentManufacturer } from "../use-current-manufacturer";
 import { QueryError } from "@/components/ui/query-state";
+import { DataTable } from "@/components/ui/data-table";
 
 /*
   Company settings.
@@ -272,41 +273,31 @@ export default function SettingsPage() {
               </Button>
             </CardHeader>
             <CardBody className="p-0">
-              <div className="scroll-x">
-                <table className="w-full min-w-[30rem] text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th scope="col" className="px-5 py-2.5 text-left font-medium text-muted-foreground">
-                        Name
-                      </th>
-                      <th scope="col" className="px-3 py-2.5 text-left font-medium text-muted-foreground">
-                        Role
-                      </th>
-                      <th scope="col" className="px-5 py-2.5 text-right font-medium text-muted-foreground">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {TEAM.map((member) => (
-                      <tr key={member.email}>
-                        <td className="px-5 py-3">
-                          <p className="font-medium text-foreground">{member.name}</p>
-                          <p className="text-xs text-muted-foreground">{member.email}</p>
-                        </td>
-                        <td className="px-3 py-3 text-muted-foreground">{member.role}</td>
-                        <td className="px-5 py-3 text-right">
-                          <StatusPill
-                            tone={member.status === "Active" ? "success" : "info"}
-                          >
-                            {member.status}
-                          </StatusPill>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                minWidth="min-w-[30rem]"
+                columns={[
+                  { label: "Name", className: "px-5 py-2.5" },
+                  { label: "Role" },
+                  { label: "Status", align: "right", className: "px-5 py-2.5" },
+                ]}
+              >
+                {TEAM.map((member) => (
+                  <tr key={member.email}>
+                    <td className="px-5 py-3">
+                      <p className="font-medium text-foreground">{member.name}</p>
+                      <p className="text-xs text-muted-foreground">{member.email}</p>
+                    </td>
+                    <td className="px-3 py-3 text-muted-foreground">{member.role}</td>
+                    <td className="px-5 py-3 text-right">
+                      <StatusPill
+                        tone={member.status === "Active" ? "success" : "info"}
+                      >
+                        {member.status}
+                      </StatusPill>
+                    </td>
+                  </tr>
+                ))}
+              </DataTable>
             </CardBody>
           </Card>
         </div>

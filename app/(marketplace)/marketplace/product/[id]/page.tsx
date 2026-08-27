@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 import { BackLink } from "@/components/shared/back-link";
+import { DataTable } from "@/components/ui/data-table";
 
 /**
  * The enquiry form collects contact details only — the quantity comes from the
@@ -212,61 +213,47 @@ export default function ProductDetailPage() {
               </p>
             </CardHeader>
             <CardBody className="p-0">
-              <div className="scroll-x">
-                <table className="w-full min-w-[26rem] text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th
-                        scope="col"
-                        className="px-5 py-2.5 text-left font-medium text-muted-foreground"
+              <DataTable
+                minWidth="min-w-[26rem]"
+                columns={[
+                  { label: "Order quantity", className: "px-5 py-2.5" },
+                  { label: <>Price per {product.unit}</>, align: "right", className: "px-5 py-2.5" },
+                ]}
+              >
+                {product.priceBands.map((band, index) => (
+                  <tr
+                    key={index}
+                    className={cn(index === activeBandIndex && "bg-brand-soft")}
+                  >
+                    <td className="px-5 py-2.5">
+                      <span
+                        className={cn(
+                          index === activeBandIndex
+                            ? "font-semibold text-foreground"
+                            : "text-muted-foreground",
+                        )}
                       >
-                        Order quantity
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-5 py-2.5 text-right font-medium text-muted-foreground"
-                      >
-                        Price per {product.unit}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {product.priceBands.map((band, index) => (
-                      <tr
-                        key={index}
-                        className={cn(index === activeBandIndex && "bg-brand-soft")}
-                      >
-                        <td className="px-5 py-2.5">
-                          <span
-                            className={cn(
-                              index === activeBandIndex
-                                ? "font-semibold text-foreground"
-                                : "text-muted-foreground",
-                            )}
-                          >
-                            {formatBandRange(band, product.unit)}
-                          </span>
-                          {index === activeBandIndex ? (
-                            <StatusPill tone="info" className="ml-2">
-                              Your band
-                            </StatusPill>
-                          ) : null}
-                        </td>
-                        <td className="px-5 py-2.5 text-right">
-                          <Currency
-                            value={band.unitPrice}
-                            className={cn(
-                              index === activeBandIndex
-                                ? "font-semibold text-foreground"
-                                : "text-foreground",
-                            )}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        {formatBandRange(band, product.unit)}
+                      </span>
+                      {index === activeBandIndex ? (
+                        <StatusPill tone="info" className="ml-2">
+                          Your band
+                        </StatusPill>
+                      ) : null}
+                    </td>
+                    <td className="px-5 py-2.5 text-right">
+                      <Currency
+                        value={band.unitPrice}
+                        className={cn(
+                          index === activeBandIndex
+                            ? "font-semibold text-foreground"
+                            : "text-foreground",
+                        )}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </DataTable>
             </CardBody>
           </Card>
 

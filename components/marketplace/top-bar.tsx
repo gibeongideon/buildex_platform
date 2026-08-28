@@ -45,7 +45,7 @@ export function PromoStrip() {
           Verified suppliers
         </span>
         <p className="text-sm font-medium text-white">
-          Every manufacturer checked against BRS, KRA and IPRS before listing
+          Every manufacturer checked before listing
         </p>
         <Link
           href="/manufacturers"

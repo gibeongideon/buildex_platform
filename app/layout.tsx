@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Montserrat } from "next/font/google";
 import { themeScript } from "@/components/shared/theme";
 import { DemoPanel } from "@/components/shared/demo-panel";
-import { DemoGuide } from "@/components/shared/section-guide";
 import "./globals.css";
 
 /*
@@ -84,7 +83,6 @@ export default function RootLayout({
           Mounted here so removing the scaffolding is one line, not a sweep
           through every route.
         */}
-        <DemoGuide />
         <DemoPanel />
       </body>
     </html>

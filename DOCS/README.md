@@ -87,20 +87,26 @@ shortcut it is.
 
 ### Walking the demo
 
-A **Walk the build** button floats bottom-right on every screen. It opens a panel
-that names the section you are currently on, says what it does and whose screen
-it is, and links to the other four — manufacturer onboarding, the manufacturer
-dashboard, Buildex Admin, the marketplace, and the supplier ledger.
+A **Demo controls** button floats bottom-right on every screen. It opens one
+panel holding everything a presenter needs: the section you are currently on —
+what it does, whose screen it is, and two or three things worth actually
+clicking while you are there — then the other four sections, direct links to
+the screens that are not sections of their own, and the reset control.
+
+This used to be two pills in the same corner. "Walk the build" explained the
+sections; "Demo controls" jumped between them and reset the data. They were the
+same idea split in half, so a presenter had to remember which button held which.
+They are one panel now.
 
 It floats rather than sitting in the pages on purpose. Guidance baked into a
 screen becomes something a reviewer has to mentally subtract before judging the
 design, and something a developer has to remember to delete before launch. The
 panel is brand blue rather than green, because green is the interface's success
-colour and a standing green panel reads as "everything is fine" rather than
+colour and standing green scaffolding reads as "everything is fine" rather than
 "here is what this is".
 
 One definition drives it — `DEMO_SECTIONS` in
-`components/shared/section-guide.tsx`. Adding a section is one array entry, and
+`components/shared/demo-panel.tsx`. Adding a section is one array entry, and
 `NEXT_PUBLIC_DEMO_MODE=false` removes the whole thing.
 
 **As a buyer (hardware shop):**

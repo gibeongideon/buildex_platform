@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { BadgeCheck, Ban, MapPin, RotateCcw, Store } from "lucide-react";
+import { Ban, MapPin, RotateCcw, Store } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import {
 import { cn } from "@/lib/utils";
 import { FilterBar } from "@/components/ui/filter-bar";
 import { DataTable } from "@/components/ui/data-table";
+import { VerifiedMark, verifiedLevel } from "@/components/shared/verified-mark";
 
 /*
   The manufacturer directory — every supplier, whatever their state.
@@ -179,10 +180,10 @@ export default function AdminManufacturersPage() {
                         className="flex items-center gap-1.5 font-medium text-foreground hover:text-brand hover:underline"
                       >
                         {m.tradingName}
-                        {m.status === "approved" ? (
-                          <BadgeCheck
-                            className="size-4 shrink-0 text-success"
-                            aria-label="Verified"
+                        {verifiedLevel(m.status) ? (
+                          <VerifiedMark
+                            level={verifiedLevel(m.status)!}
+                            subject="supplier"
                           />
                         ) : null}
                       </Link>

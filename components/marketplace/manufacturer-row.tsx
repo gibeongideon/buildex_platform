@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { BadgeCheck, Factory, MapPin, MessageSquare, Store } from "lucide-react";
+import { Factory, MapPin, MessageSquare, Store } from "lucide-react";
 import { ProductThumb } from "@/components/shared/product-thumb";
 import { Currency, Num } from "@/components/shared/format";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { priceRange, type Product } from "@/lib/schemas/product";
 import type { Manufacturer } from "@/lib/schemas/manufacturer";
 import { cn } from "@/lib/utils";
 import { hasChosenMainProducts, mainProducts } from "@/lib/rules/catalogue";
+import { VerifiedMark, verifiedLevel } from "@/components/shared/verified-mark";
 
 /*
   One supplier, as the Manufacturers surface lists them.
@@ -41,7 +42,7 @@ export function ManufacturerRow({
   productCount: number;
   className?: string;
 }) {
-  const verified = manufacturer.status === "approved";
+  const level = verifiedLevel(manufacturer.status);
   const credentials = supplierCredentials(manufacturer, products);
   const capabilities = capabilitiesOf(manufacturer, products);
   const cheapest = products.length
@@ -79,11 +80,8 @@ export function ManufacturerRow({
                 className="flex items-center gap-1.5 font-semibold text-foreground hover:text-brand hover:underline"
               >
                 <span className="truncate">{manufacturer.tradingName}</span>
-                {verified ? (
-                  <BadgeCheck
-                    className="size-4 shrink-0 text-success"
-                    aria-label="Verified supplier"
-                  />
+                {level ? (
+                  <VerifiedMark level={level} subject="supplier" />
                 ) : null}
               </Link>
               <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
@@ -158,7 +156,7 @@ export function ManufacturerRow({
                         iconClassName="size-5"
                         sizes="150px"
                       />
-                      <p className="mt-1.5 truncate text-xs font-semibold text-foreground text-numeric">
+                      <p className="mt-1.5 truncate text-xs font-semibold text-price text-numeric">
                         <Currency value={range.min} />
                         {range.max !== range.min ? (
                           <>
@@ -186,7 +184,7 @@ export function ManufacturerRow({
         <div className="flex flex-row items-center gap-2 xl:w-40 xl:flex-col xl:items-stretch xl:justify-center">
           <div className="min-w-0 flex-1 xl:mb-1 xl:flex-none xl:text-center">
             <p className="text-[11px] text-muted-foreground">Listings from</p>
-            <p className="font-display text-lg font-bold text-foreground">
+            <p className="font-display text-lg font-bold text-price">
               {cheapest !== null ? <Currency value={cheapest} /> : "—"}
             </p>
             <p className="text-[11px] text-muted-foreground text-numeric">

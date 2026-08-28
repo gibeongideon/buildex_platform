@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
 import { StatusPill } from "@/components/ui/primitives";
 import { cn, spreadBy } from "@/lib/utils";
+import { VerifiedBadge, verifiedLevel } from "@/components/shared/verified-mark";
 
 /*
   The marketplace home.
@@ -602,13 +603,15 @@ export default function MarketplaceHomePage() {
                   </dl>
 
                   <div className="mt-3">
-                    <StatusPill
-                      tone={manufacturer.status === "approved" ? "success" : "warning"}
-                    >
-                      {manufacturer.status === "approved"
-                        ? "Verified supplier"
-                        : "Verification in progress"}
-                    </StatusPill>
+                    {verifiedLevel(manufacturer.status) ? (
+                      <VerifiedBadge
+                        level={verifiedLevel(manufacturer.status)!}
+                        size="md"
+                        className="text-[13px]"
+                      />
+                    ) : (
+                      <StatusPill tone="warning">Verification in progress</StatusPill>
+                    )}
                   </div>
                 </Link>
               ))}

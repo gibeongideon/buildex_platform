@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { BadgeCheck, Check, MapPin, Minus, Scale, X } from "lucide-react";
+import { Check, MapPin, Minus, Scale, X } from "lucide-react";
 import { marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import { Currency, Num } from "@/components/shared/format";
@@ -27,6 +27,7 @@ import {
 } from "@/lib/schemas/product";
 import { cn } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
+import { VerifiedMark, verifiedLevel } from "@/components/shared/verified-mark";
 
 /*
   Side-by-side comparison, driven by quantity.
@@ -381,8 +382,11 @@ const COMPARISON_ROWS: Row[] = [
           className="flex items-center gap-1.5 font-medium text-foreground hover:text-brand hover:underline"
         >
           <span className="truncate">{listing.manufacturer.tradingName}</span>
-          {listing.manufacturer.status === "approved" ? (
-            <BadgeCheck className="size-3.5 shrink-0 text-success" aria-label="Verified" />
+          {verifiedLevel(listing.manufacturer.status) ? (
+            <VerifiedMark
+              level={verifiedLevel(listing.manufacturer.status)!}
+              subject="supplier"
+            />
           ) : null}
         </Link>
         <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">

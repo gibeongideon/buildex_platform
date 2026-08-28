@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
-  BadgeCheck,
   Building2,
   CalendarDays,
   CheckCircle2,
@@ -32,6 +31,7 @@ import { Select } from "@/components/ui/field";
 import { BackLink } from "@/components/shared/back-link";
 import { SearchField } from "@/components/ui/filter-bar";
 import { chosenMainProducts } from "@/lib/rules/catalogue";
+import { VerifiedMark, verifiedLevel } from "@/components/shared/verified-mark";
 import {
   Alert,
   Card,
@@ -128,7 +128,7 @@ export default function ManufacturerStorefrontPage() {
 
   const { manufacturer, products } = data;
   const { storefront } = manufacturer;
-  const verified = manufacturer.status === "approved";
+  const level = verifiedLevel(manufacturer.status);
   const ordersEnabled = canTransact(manufacturer.status);
 
   const categories = [...new Set(products.map((p) => p.category))].sort();
@@ -184,10 +184,15 @@ export default function ManufacturerStorefrontPage() {
                   <h1 className="font-display text-xl font-extrabold tracking-tight text-white sm:text-2xl">
                     {manufacturer.tradingName}
                   </h1>
-                  {verified ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-success/20 px-2 py-0.5 text-xs font-medium text-white">
-                      <BadgeCheck className="size-3.5" aria-hidden="true" />
+                  {level === "verified" ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold text-white ring-1 ring-white/25">
+                      <VerifiedMark size="md" onDark />
                       Verified supplier
+                    </span>
+                  ) : level === "conditional" ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-2.5 py-1 text-xs font-bold text-primary">
+                      <VerifiedMark level="conditional" size="md" />
+                      Part verified
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">

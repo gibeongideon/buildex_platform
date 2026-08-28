@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BadgeCheck, CheckCircle2, MessageSquare, Package, ShieldCheck, Store } from "lucide-react";
+import { CheckCircle2, MessageSquare, Package, ShieldCheck, Store } from "lucide-react";
 import { browsingRepo, enquiryRepo, marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import {
@@ -36,6 +36,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BackLink } from "@/components/shared/back-link";
 import { DataTable } from "@/components/ui/data-table";
+import { VerifiedMark, verifiedLevel } from "@/components/shared/verified-mark";
 
 /**
  * The enquiry form collects contact details only — the quantity comes from the
@@ -135,7 +136,7 @@ export default function ProductDetailPage() {
   }
 
   const range = priceRange(product.priceBands);
-  const verified = manufacturer.status === "approved";
+  const level = verifiedLevel(manufacturer.status);
   const ordersEnabled = canTransact(manufacturer.status);
   const effectiveQty = quantity ?? product.moq;
   const unitPrice = priceAtQuantity(product.priceBands, effectiveQty);
@@ -415,11 +416,8 @@ export default function ProductDetailPage() {
                     <span className="truncate text-sm font-semibold text-foreground">
                       {manufacturer.tradingName}
                     </span>
-                    {verified ? (
-                      <BadgeCheck
-                        className="size-4 shrink-0 text-success"
-                        aria-label="Verified"
-                      />
+                    {level ? (
+                      <VerifiedMark level={level} subject="supplier" />
                     ) : null}
                   </span>
                   <span className="mt-0.5 block text-xs text-muted-foreground">

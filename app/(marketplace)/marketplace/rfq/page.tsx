@@ -5,21 +5,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  ArrowRight,
-  BadgeCheck,
-  CheckCircle2,
-  ClipboardList,
-  Coins,
-  FileText,
-  MessagesSquare,
-  Send,
-  Sparkles,
-  Store,
-  Timer,
-  Truck,
-  Users,
-} from "lucide-react";
+import { ArrowRight, CheckCircle2, ClipboardList, Coins, FileText, MessagesSquare, Send, Sparkles, Store, Timer, Truck, Users } from "lucide-react";
 import { browsingRepo, enquiryRepo, marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import {
@@ -37,6 +23,11 @@ import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-state";
 import { Field, FieldHint, Input, Label, Select, Textarea } from "@/components/ui/field";
 import { BackLink } from "@/components/shared/back-link";
+import {
+  VerifiedMark,
+  verifiedLevel,
+  type VerifiedLevel,
+} from "@/components/shared/verified-mark";
 import {
   Alert,
   Card,
@@ -251,7 +242,10 @@ export default function RfqPage() {
   const recent = browsed ?? [];
 
   const matched = matches?.listings ?? [];
-  const suppliers = new Map<string, { name: string; verified: boolean; best: number }>();
+  const suppliers = new Map<
+    string,
+    { name: string; level: VerifiedLevel | null; best: number }
+  >();
   for (const { product, manufacturer } of matched) {
     const unit =
       priceAtQuantity(product.priceBands, quantity) ?? priceRange(product.priceBands).min;
@@ -259,7 +253,7 @@ export default function RfqPage() {
     if (!existing || unit < existing.best) {
       suppliers.set(manufacturer.id, {
         name: manufacturer.tradingName,
-        verified: manufacturer.status === "approved",
+        level: verifiedLevel(manufacturer.status),
         best: unit,
       });
     }
@@ -667,10 +661,10 @@ export default function RfqPage() {
                           <span className="truncate text-sm text-foreground">
                             {supplier.name}
                           </span>
-                          {supplier.verified ? (
-                            <BadgeCheck
-                              className="size-3.5 shrink-0 text-success"
-                              aria-label="Verified"
+                          {supplier.level ? (
+                            <VerifiedMark
+                              level={supplier.level}
+                              subject="supplier"
                             />
                           ) : null}
                         </span>

@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { BadgeCheck, ImageIcon, MapPin, Package, Truck } from "lucide-react";
+import { ImageIcon, MapPin, Package, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Currency } from "./format";
+import { VerifiedMark } from "@/components/shared/verified-mark";
 import {
   formatBandRange,
   formatLeadTime,
@@ -67,7 +68,7 @@ export function ProductPreviewCard({
         <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
           {product.manufacturerName}
           {product.verified ? (
-            <BadgeCheck className="size-3.5 text-success" aria-label="Verified manufacturer" />
+            <VerifiedMark subject="manufacturer" />
           ) : null}
         </p>
 

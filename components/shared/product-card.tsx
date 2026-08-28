@@ -2,13 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { BadgeCheck, Store } from "lucide-react";
+import { Store } from "lucide-react";
 import { CompareToggle } from "@/components/marketplace/compare";
 import { cn } from "@/lib/utils";
 import { Currency } from "./format";
 import { ProductThumb } from "./product-thumb";
 import { formatLeadTime, priceRange, type Product } from "@/lib/schemas/product";
 import type { Manufacturer } from "@/lib/schemas/manufacturer";
+import { VerifiedBadge, verifiedLevel } from "@/components/shared/verified-mark";
 
 /*
   The marketplace product card.
@@ -47,7 +48,9 @@ export function ProductCard({
   className?: string;
 }) {
   const range = priceRange(product.priceBands);
-  const verified = manufacturer.status === "approved";
+  // Two levels, not a boolean: a conditionally-approved supplier is on the
+  // marketplace and used to appear here with no mark at all.
+  const level = verifiedLevel(manufacturer.status);
   const years = new Date().getFullYear() - manufacturer.yearEstablished;
 
   return (
@@ -122,13 +125,9 @@ export function ProductCard({
               href={`/marketplace/manufacturer/${manufacturer.id}`}
               className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-brand"
             >
-              {verified ? (
+              {level ? (
                 <>
-                  <BadgeCheck
-                    className="size-4 shrink-0 text-success"
-                    aria-label="Verified manufacturer"
-                  />
-                  <span className="font-bold text-success">Verified</span>
+                  <VerifiedBadge level={level} subject="manufacturer" />
                   <span aria-hidden="true">·</span>
                 </>
               ) : (

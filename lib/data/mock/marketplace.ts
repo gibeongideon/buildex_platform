@@ -9,6 +9,10 @@ import type { Campaign } from "@/lib/schemas/campaign";
 import type {
   BrowsingRepo,
   CampaignRepo,
+  CategoryGap,
+  CountyDemand,
+  DemandFilter,
+  DemandPoint,
   EnquiryFilter,
   EnquiryRepo,
   InsightsRepo,
@@ -18,7 +22,9 @@ import type {
   MarketplaceRepo,
   ProductPerformance,
   RegionDemand,
+  RepeatBuyer,
 } from "@/lib/data/types";
+import { demandEventsFor, type DemandEvent } from "@/lib/data/fixtures/demand";
 import type { Enquiry } from "@/lib/schemas/enquiry";
 import { getSnapshot, mutate } from "./db";
 import { FAST, NORMAL } from "./latency";
@@ -520,6 +526,40 @@ function viewsByProduct(manufacturerId: string): Map<string, number> {
   return map;
 }
 
+/*
+  The delivery history, cached per catalogue revision.
+
+  `demandEventsFor` is pure and deterministic, but it walks every active listing
+  and generates a year of events, so recomputing it for each of the five demand
+  queries on one screen render would be wasteful. The cache key is the product
+  list identity, which `mutate` replaces on every write — so an import or a
+  status change invalidates it exactly when it should.
+*/
+let demandCache: { key: Product[]; events: DemandEvent[] } | null = null;
+
+function demandEvents(): DemandEvent[] {
+  const { products } = getSnapshot();
+  if (demandCache?.key === products) return demandCache.events;
+  const events = demandEventsFor(products);
+  demandCache = { key: products, events };
+  return events;
+}
+
+function matchesFilter(event: DemandEvent, filter?: DemandFilter) {
+  if (filter?.productId && event.productId !== filter.productId) return false;
+  if (filter?.category && event.category !== filter.category) return false;
+  return true;
+}
+
+function ownDemand(manufacturerId: string, filter?: DemandFilter) {
+  return demandEvents().filter(
+    (e) => e.manufacturerId === manufacturerId && matchesFilter(e, filter),
+  );
+}
+
+/** Below this, a category median is the other listing rather than a market. */
+const MIN_PRICE_COMPARATORS = 3;
+
 export const insightsRepo: InsightsRepo = {
   async productPerformance(manufacturerId) {
     await sleep(NORMAL);
@@ -612,6 +652,180 @@ export const insightsRepo: InsightsRepo = {
         ? responseHours.reduce((a, b) => a + b, 0) / responseHours.length
         : 0,
     };
+  },
+
+  async demandByCounty(manufacturerId, filter) {
+    await sleep(NORMAL);
+    const rows = new Map<string, CountyDemand>();
+
+    for (const event of ownDemand(manufacturerId, filter)) {
+      const row = rows.get(event.county) ?? {
+        county: event.county,
+        region: event.region,
+        quantity: 0,
+        valueKsh: 0,
+        deliveries: 0,
+        intensity: 0,
+      };
+      row.quantity += event.quantity;
+      row.valueKsh += event.valueKsh;
+      row.deliveries += 1;
+      rows.set(event.county, row);
+    }
+
+    const list = [...rows.values()].sort((a, b) => b.valueKsh - a.valueKsh);
+    /*
+      Intensity is scaled against the busiest county in *this* result, not a
+      global maximum, so filtering to one product still uses the whole ramp
+      rather than collapsing the map to one faint dot.
+    */
+    const top = list[0]?.valueKsh ?? 0;
+    for (const row of list) row.intensity = top ? row.valueKsh / top : 0;
+    return list;
+  },
+
+  async demandTrend(manufacturerId, filter) {
+    await sleep(FAST);
+    const months = new Map<string, DemandPoint>();
+
+    for (const event of ownDemand(manufacturerId, filter)) {
+      const date = new Date(event.at);
+      const month = new Date(date.getFullYear(), date.getMonth(), 1).toISOString();
+      const point = months.get(month) ?? { month, valueKsh: 0, deliveries: 0 };
+      point.valueKsh += event.valueKsh;
+      point.deliveries += 1;
+      months.set(month, point);
+    }
+
+    return [...months.values()].sort((a, b) => a.month.localeCompare(b.month));
+  },
+
+  async categoryGaps(manufacturerId) {
+    await sleep(NORMAL);
+    const { products } = getSnapshot();
+    const own = products.filter((p) => p.manufacturerId === manufacturerId);
+
+    const ownCategories = new Set(own.map((p) => p.category));
+    const ownRegions = new Set(own.flatMap((p) => p.availableRegions));
+    if (ownRegions.size === 0) return [];
+
+    const gaps = new Map<string, CategoryGap & { suppliers: Set<string> }>();
+    for (const event of demandEvents()) {
+      // Someone else's delivery, in a region this supplier already reaches,
+      // in something they do not sell.
+      if (event.manufacturerId === manufacturerId) continue;
+      if (!ownRegions.has(event.region)) continue;
+      if (ownCategories.has(event.category)) continue;
+
+      const gap =
+        gaps.get(event.category) ??
+        {
+          category: event.category,
+          deliveries: 0,
+          valueKsh: 0,
+          competitors: 0,
+          suppliers: new Set<string>(),
+        };
+      gap.deliveries += 1;
+      gap.valueKsh += event.valueKsh;
+      gap.suppliers.add(event.manufacturerId);
+      gaps.set(event.category, gap);
+    }
+
+    return [...gaps.values()]
+      .map(({ suppliers, ...gap }) => ({ ...gap, competitors: suppliers.size }))
+      .sort((a, b) => b.valueKsh - a.valueKsh);
+  },
+
+  async pricePosition(manufacturerId) {
+    await sleep(NORMAL);
+    const { products, manufacturers } = getSnapshot();
+
+    // Only listings a buyer can actually see count as the market.
+    const live = products.filter((p) => {
+      if (p.status !== "active") return false;
+      const owner = manufacturers.find((m) => m.id === p.manufacturerId);
+      return owner ? canListProducts(owner.status) : false;
+    });
+
+    return live
+      .filter((p) => p.manufacturerId === manufacturerId)
+      .map((product) => {
+        /*
+          Same category *and* same unit. Category alone mixes a cement bag with
+          a concrete block and a square metre of glass, and a median across
+          those is not a price — it reported a block at KSh 82/piece as 88%
+          below a "market" made mostly of KSh 712 bags.
+        */
+        const peers = live.filter(
+          (p) =>
+            p.category === product.category &&
+            p.unit === product.unit &&
+            p.id !== product.id,
+        );
+        const entries = peers
+          .map((p) => priceRange(p.priceBands).min)
+          .sort((a, b) => a - b);
+
+        const median = entries.length
+          ? entries.length % 2
+            ? entries[(entries.length - 1) / 2]
+            : (entries[entries.length / 2 - 1] + entries[entries.length / 2]) / 2
+          : 0;
+
+        const yours = priceRange(product.priceBands).min;
+        return {
+          product,
+          yourEntryKsh: yours,
+          marketMedianKsh: median,
+          differencePercent: median ? ((yours - median) / median) * 100 : 0,
+          listingsCompared: entries.length,
+        };
+      })
+      /*
+        A median needs a market behind it. With one or two comparable listings
+        it is just the other listing, and the arithmetic produces confident
+        nonsense — a 200mm block came out "98% below market" against a single
+        450mm culvert pipe, same category and same unit but not remotely the
+        same product. Three is the smallest sample where the middle value means
+        anything; below that the screen says nothing rather than something
+        untrue.
+      */
+      .filter((row) => row.listingsCompared >= MIN_PRICE_COMPARATORS)
+      .sort((a, b) => a.differencePercent - b.differencePercent);
+  },
+
+  async repeatBuyers(manufacturerId) {
+    await sleep(FAST);
+    const buyers = new Map<string, RepeatBuyer & { countySet: Set<string> }>();
+
+    for (const event of ownDemand(manufacturerId)) {
+      const buyer =
+        buyers.get(event.buyerId) ??
+        {
+          buyerId: event.buyerId,
+          buyerName: event.buyerName,
+          deliveries: 0,
+          valueKsh: 0,
+          lastAt: event.at,
+          counties: [],
+          countySet: new Set<string>(),
+        };
+      buyer.deliveries += 1;
+      buyer.valueKsh += event.valueKsh;
+      if (event.at > buyer.lastAt) buyer.lastAt = event.at;
+      buyer.countySet.add(event.county);
+      buyers.set(event.buyerId, buyer);
+    }
+
+    return [...buyers.values()]
+      // One delivery is a customer, not a repeat buyer.
+      .filter((b) => b.deliveries > 1)
+      .map(({ countySet, ...buyer }) => ({
+        ...buyer,
+        counties: [...countySet].sort(),
+      }))
+      .sort((a, b) => b.valueKsh - a.valueKsh);
   },
 };
 

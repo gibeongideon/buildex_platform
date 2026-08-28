@@ -475,6 +475,66 @@ export type RegionDemand = {
   shareOfEnquiriesPercent: number;
 };
 
+/*
+  Market intelligence, all derived from the delivery history in
+  `lib/data/fixtures/demand.ts`. That module is the seam: it stands in for a
+  fulfilment table, and at the cutover these methods read the real one without
+  the screen changing.
+*/
+
+/** Narrows every demand query to one listing or one category. */
+export type DemandFilter = {
+  productId?: string;
+  category?: string;
+};
+
+export type CountyDemand = {
+  county: string;
+  region: string;
+  /** Units delivered, in each product's own unit — see the note on mixing. */
+  quantity: number;
+  valueKsh: number;
+  deliveries: number;
+  /** 0–1 against the busiest county in the same result, for the map ramp. */
+  intensity: number;
+};
+
+export type DemandPoint = {
+  /** First day of the month, ISO. */
+  month: string;
+  valueKsh: number;
+  deliveries: number;
+};
+
+/** A category buyers in your regions want that you do not list. */
+export type CategoryGap = {
+  category: string;
+  /** Deliveries other suppliers made into the regions you already serve. */
+  deliveries: number;
+  valueKsh: number;
+  /** How many suppliers are already there. */
+  competitors: number;
+};
+
+/** Where a listing's entry price sits against the same category on the market. */
+export type PricePosition = {
+  product: Product;
+  yourEntryKsh: number;
+  marketMedianKsh: number;
+  /** Negative is cheaper than the median. */
+  differencePercent: number;
+  listingsCompared: number;
+};
+
+export type RepeatBuyer = {
+  buyerId: string;
+  buyerName: string;
+  deliveries: number;
+  valueKsh: number;
+  lastAt: string;
+  counties: string[];
+};
+
 export interface InsightsRepo {
   productPerformance(manufacturerId: string): Promise<ProductPerformance[]>;
   regionDemand(manufacturerId: string): Promise<RegionDemand[]>;
@@ -487,4 +547,22 @@ export interface InsightsRepo {
     responseRatePercent: number;
     avgResponseHours: number;
   }>;
+
+  /** Where this supplier's material actually went, county by county. */
+  demandByCounty(
+    manufacturerId: string,
+    filter?: DemandFilter,
+  ): Promise<CountyDemand[]>;
+
+  /** The same history by month, for the trend beside the map. */
+  demandTrend(manufacturerId: string, filter?: DemandFilter): Promise<DemandPoint[]>;
+
+  /** Categories moving in this supplier's regions that it does not sell. */
+  categoryGaps(manufacturerId: string): Promise<CategoryGap[]>;
+
+  /** Entry price against the market median, per listing. */
+  pricePosition(manufacturerId: string): Promise<PricePosition[]>;
+
+  /** Shops that came back, most valuable first. */
+  repeatBuyers(manufacturerId: string): Promise<RepeatBuyer[]>;
 }

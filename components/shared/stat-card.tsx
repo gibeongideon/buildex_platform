@@ -23,6 +23,26 @@ const TONE_CHIP: Record<Tone, string> = {
   danger: "bg-danger-soft text-danger",
 };
 
+/*
+  A wash rather than a fill.
+
+  The tint fades out over the top third of the card, so the colour lands behind
+  the label and the icon and has gone by the time the eye reaches the figure.
+  A row of these reads as colour-coded at a glance without any card becoming a
+  coloured block — and the value keeps the full contrast of plain surface
+  underneath it.
+
+  The rule along the top is the same tone at full strength: two pixels is enough
+  to separate one card from its neighbour when the washes are this quiet.
+*/
+const TONE_WASH: Record<Tone, string> = {
+  neutral: "from-surface-muted border-t-border-strong",
+  info: "from-info-soft border-t-info",
+  success: "from-success-soft border-t-success",
+  warning: "from-warning-soft border-t-warning",
+  danger: "from-danger-soft border-t-danger",
+};
+
 export function StatCard({
   label,
   value,
@@ -42,7 +62,14 @@ export function StatCard({
   className?: string;
 }) {
   return (
-    <div className={cn("rounded-lg border border-border bg-surface p-4", className)}>
+    <div
+      className={cn(
+        "rounded-lg border border-border border-t-2 bg-surface p-4",
+        "bg-gradient-to-b to-surface to-45%",
+        TONE_WASH[tone],
+        className,
+      )}
+    >
       <div className="flex items-start justify-between gap-2">
         {/*
           Uppercase 12px is the least legible text on any of these screens, and

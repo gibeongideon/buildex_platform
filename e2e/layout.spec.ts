@@ -48,6 +48,32 @@ const PATHS = [
   "/connect/settings",
 ];
 
+/*
+  Nothing renders a JSX expression as text.
+
+  `{heading}` shipped as the literal string "{heading}" in a breadcrumb, because
+  a sweep that rewrote hand-rolled markup captured the expression as a label. No
+  spec asserted breadcrumb text, so it survived a full green run and was found by
+  eye in a screenshot. This is the cheap general guard: an expression that leaked
+  into the output is visible as a brace, and braces do not otherwise appear in
+  this interface's copy.
+*/
+test("no page renders a stray JSX expression", async ({ page }) => {
+  test.setTimeout(180_000);
+  const leaks: string[] = [];
+
+  for (const path of PATHS) {
+    await page.goto(path);
+    await page.waitForTimeout(250);
+    const text = await page.locator("body").innerText();
+    for (const match of text.matchAll(/\{\s*[A-Za-z_$][\w$.?[\]]*\s*\}/g)) {
+      leaks.push(`${path}: ${match[0]}`);
+    }
+  }
+
+  expect(leaks, leaks.join("\n")).toEqual([]);
+});
+
 /** Small phone, tablet, small laptop, desktop. */
 const WIDTHS = [360, 768, 1024, 1440];
 

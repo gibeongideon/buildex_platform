@@ -83,9 +83,14 @@ export function ProductCard({
           </Link>
         </h3>
 
-        {/* The price owns the card. A tight hyphen, not a spaced dash — the two
-            figures read as one range rather than two numbers. */}
-        <p className="mt-2 font-display text-lg font-bold leading-none text-foreground">
+        {/*
+          The price owns the card, and now says so in its own colour. Name and
+          price were both set in near-black blue, which left the card with two
+          equally weighted lines and nothing leading it. A tight hyphen, not a
+          spaced dash — the two figures read as one range rather than two
+          numbers.
+        */}
+        <p className="mt-2 font-display text-lg font-bold leading-none text-price">
           <Currency value={range.min} />
           {range.max !== range.min ? (
             <>

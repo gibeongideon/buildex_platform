@@ -144,10 +144,10 @@ function MarketplaceSearchInner() {
   return (
     <div className="mx-auto max-w-[112rem] px-4 py-5 sm:px-6 lg:px-8">
       <Breadcrumbs
-        className="mb-4"
+        className="mb-3"
         items={[
           { label: "Marketplace", href: "/marketplace" },
-          { label: "{heading}" },
+          { label: heading },
         ]}
       />
 

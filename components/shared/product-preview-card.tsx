@@ -75,7 +75,7 @@ export function ProductPreviewCard({
           {range ? (
             <p className="flex items-baseline gap-1.5">
               <span className="text-xs text-muted-foreground">from</span>
-              <Currency value={range.min} className="text-base font-semibold text-foreground" />
+              <Currency value={range.min} className="text-base font-semibold text-price" />
               <span className="text-xs text-muted-foreground">
                 / {product.unit || "unit"}
               </span>

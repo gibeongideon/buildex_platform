@@ -75,6 +75,7 @@
   --color-brand-hover: var(--brand-hover);
   --color-brand-foreground: var(--brand-fg);
   --color-brand-soft: var(--brand-soft);
+  --color-price: var(--price);
 
   /* Yellow — important actions. */
   --color-primary: var(--primary);
@@ -180,6 +181,21 @@
   */
   --brand-soft: #cfd1e0; /* 1.52:1 on white · brand text on it 8.11:1 */
 
+  /*
+    Money.
+
+    The one figure a hardware shop is actually scanning for, and until now it
+    was set in the same near-black blue as the product name beside it — two
+    equally weighted lines, neither leading. This is the brand's own accent
+    yellow taken down to text weight rather than a fourth hue: same family,
+    legible, and unmistakably not the body text.
+
+    Reserved for prices. It is not a semantic state and must not be used for
+    one — warning already owns amber-orange at #b23c0b, and the two are far
+    enough apart in both hue and darkness to stay distinct.
+  */
+  --price: #6b4d00; /* 7.82:1 on white · 7.00 on surface-muted */
+
   /* Yellow: important actions. Blue text, gold boundary. */
   --primary: #ffda03;
   --primary-hover: #e0c003;
@@ -232,6 +248,9 @@
   --brand: #9da1bf;
   --brand-hover: #babcd1;
   --brand-fg: #262e70;
+
+  /* Money, lifted the same way: the accent at its own weight on a dark ground. */
+  --price: #ffd451; /* 13.55:1 on surface */
   --brand-soft: #1e2450;
 
   /* Yellow is unchanged — it reads beautifully on dark and needs no border. */

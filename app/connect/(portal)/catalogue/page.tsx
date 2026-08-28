@@ -288,7 +288,10 @@ export default function CataloguePage() {
                       {product.category}
                     </td>
                     <td className="px-3 py-3 text-right">
-                      <Currency value={priceRange(product.priceBands).min} />
+                      <Currency
+                        value={priceRange(product.priceBands).min}
+                        className="font-semibold text-price"
+                      />
                       <span className="text-xs text-muted-foreground">
                         /{product.unit}
                       </span>

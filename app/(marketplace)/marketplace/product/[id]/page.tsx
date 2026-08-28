@@ -338,7 +338,7 @@ export default function ProductDetailPage() {
               <p className="flex items-baseline gap-1.5">
                 <Currency
                   value={range.min}
-                  className="text-2xl font-semibold tracking-tight text-foreground"
+                  className="text-2xl font-semibold tracking-tight text-price"
                 />
                 <span className="text-sm text-muted-foreground">/{product.unit}</span>
               </p>

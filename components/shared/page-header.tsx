@@ -35,7 +35,14 @@ export function PageHeader({
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{description}</p>
           ) : null}
         </div>
-        {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
+        {/*
+          Wraps below `sm`, holds its width above it. A third action — the
+          catalogue gained an Import button — pushed a 360px viewport 52px wide
+          when this could not wrap.
+        */}
+        {actions ? (
+          <div className="flex flex-wrap items-center gap-2 sm:shrink-0">{actions}</div>
+        ) : null}
       </div>
     </div>
   );

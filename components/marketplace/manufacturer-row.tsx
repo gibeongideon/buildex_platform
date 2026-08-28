@@ -10,7 +10,8 @@ import { Skeleton } from "@/components/ui/primitives";
 import { capabilitiesOf, supplierCredentials } from "@/lib/rules/suppliers";
 import { priceRange, type Product } from "@/lib/schemas/product";
 import type { Manufacturer } from "@/lib/schemas/manufacturer";
-import { cn, spreadBy } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { hasChosenMainProducts, mainProducts } from "@/lib/rules/catalogue";
 
 /*
   One supplier, as the Manufacturers surface lists them.
@@ -51,7 +52,12 @@ export function ManufacturerRow({
     the breadth of what they make; four listings from the same category show
     four near-identical photos and say nothing a buyer can use.
   */
-  const strip = spreadBy(products, 4, (p) => p.category);
+  /*
+    The supplier's own four, where they have chosen them, with the automatic
+    spread filling any slots they have left empty. See `lib/rules/catalogue.ts`.
+  */
+  const strip = mainProducts(products);
+  const supplierChose = hasChosenMainProducts(products);
 
   return (
     <li
@@ -122,8 +128,14 @@ export function ManufacturerRow({
 
         {/* What they actually make. */}
         <div className="min-w-0">
+          {/*
+            Whose selection this is, said plainly. "Main products" is the
+            supplier's own claim about what they are known for; where they have
+            not chosen, this is our spread across their range and should not
+            borrow their voice.
+          */}
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            Main products
+            {supplierChose ? "Main products" : "From their range"}
           </p>
           {products.length === 0 ? (
             <p className="text-xs text-muted-foreground">

@@ -20,7 +20,7 @@ import { seedVendorBills, seedVendors } from "@/lib/data/fixtures/suppliers";
 */
 
 /* Bump when the shape of seeded data changes, or old persisted data wins. */
-const STORAGE_KEY = "buildex.mock.v7";
+const STORAGE_KEY = "buildex.mock.v8";
 
 export type MockDb = {
   manufacturers: Manufacturer[];

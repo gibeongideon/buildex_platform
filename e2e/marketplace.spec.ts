@@ -378,7 +378,14 @@ test("the manufacturers tab lists suppliers with their product strips", async ({
     { timeout: 15_000 },
   );
 
-  const rows = page.locator("ul > li").filter({ hasText: "Main products" });
+  /*
+    Either heading denotes a strip: "Main products" is the supplier's own four,
+    "From their range" is our spread for a supplier who has not chosen. Which
+    label belongs to which case is asserted in catalogue-import.spec.ts.
+  */
+  const rows = page
+    .locator("ul > li")
+    .filter({ hasText: /Main products|From their range/ });
   await expect(rows.first()).toBeVisible({ timeout: 15_000 });
   expect(await rows.count()).toBeGreaterThan(4);
 
@@ -432,7 +439,7 @@ test("the scope tabs switch the home page in place, and navigate elsewhere", asy
   await page.getByRole("tab", { name: /Manufacturers/ }).click();
   const supplier = page.getByRole("listitem").filter({ hasText: /Visit store/ }).first();
   await expect(supplier).toBeVisible({ timeout: 15_000 });
-  await expect(supplier).toContainText("Main products");
+  await expect(supplier).toContainText(/Main products|From their range/);
   await expect(supplier).toContainText(/Min\. order:/);
   await expect(supplier).toContainText(/KSh/);
   await expect(supplier).toContainText("Factory capabilities");

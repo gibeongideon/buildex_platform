@@ -22,6 +22,7 @@ import type {
 } from "@/lib/data/types";
 import { emptyDraft, getSnapshot, mutate } from "./db";
 import { FAST, NORMAL, SLOW } from "./latency";
+import { mainProductBlockedReason } from "@/lib/rules/catalogue";
 
 /*
   Mock implementations of the repository interfaces.
@@ -301,6 +302,21 @@ export const manufacturerRepo: ManufacturerRepo = {
   },
 };
 
+/*
+  The main-product cap, enforced where it actually holds.
+
+  The form disables its checkbox at four, but a form is a courtesy: the import
+  path, a stale tab and any future API client all reach this same write. The
+  rule lives in `lib/rules/catalogue.ts` so the two agree on what counts.
+*/
+function guardMainProduct(product: Product, against?: Product[]) {
+  const siblings = (against ?? getSnapshot().products).filter(
+    (p) => p.manufacturerId === product.manufacturerId,
+  );
+  const reason = mainProductBlockedReason(siblings, product);
+  if (product.isMainProduct && reason) throw new Error(reason);
+}
+
 export const productRepo: ProductRepo = {
   async listByManufacturer(manufacturerId) {
     await sleep(NORMAL);
@@ -320,12 +336,42 @@ export const productRepo: ProductRepo = {
       createdAt: now(),
       updatedAt: now(),
     } as Product;
+    guardMainProduct(product);
     mutate((db) => ({ ...db, products: [product, ...db.products] }));
     return product;
   },
 
+  async createMany(inputs) {
+    await sleep(SLOW);
+    const created: Product[] = inputs.map((input) => ({
+      ...input,
+      id: makeId("prd"),
+      createdAt: now(),
+      updatedAt: now(),
+    }) as Product);
+
+    /*
+      An import is one transaction: if row 40 would exceed the main-product cap,
+      nothing is written. A half-applied spreadsheet is worse than a rejected
+      one — the supplier cannot tell what landed without re-reading the whole
+      catalogue.
+    */
+    let running = getSnapshot().products;
+    for (const product of created) {
+      guardMainProduct(product, running);
+      running = [product, ...running];
+    }
+
+    mutate((db) => ({ ...db, products: [...created, ...db.products] }));
+    return created;
+  },
+
   async update(id, patch) {
     await sleep(FAST);
+    const current = getSnapshot().products.find((p) => p.id === id);
+    if (!current) throw new Error(`Product not found: ${id}`);
+    guardMainProduct({ ...current, ...patch } as Product);
+
     let updated: Product | undefined;
     mutate((db) => ({
       ...db,

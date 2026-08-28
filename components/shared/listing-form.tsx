@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Star, Trash2 } from "lucide-react";
 import {
   Card,
   CardBody,
@@ -28,6 +28,7 @@ import {
   listingDraftSchema,
   type ListingFields,
 } from "@/lib/schemas/product";
+import { MAIN_PRODUCT_LIMIT } from "@/lib/rules/catalogue";
 
 /*
   The create/edit listing form.
@@ -52,6 +53,7 @@ export const EMPTY_LISTING: ListingFields = {
   moq: 50,
   leadTimeDays: 3,
   availableRegions: [],
+  isMainProduct: false,
 };
 
 export function ListingForm({
@@ -63,8 +65,15 @@ export function ListingForm({
   manufacturerName,
   verified,
   banner,
+  mainSlotsLeft,
 }: {
   defaultValues?: Partial<ListingFields>;
+  /**
+   * Free "main product" slots, ignoring this listing. Undefined where the
+   * caller cannot know yet — onboarding's first listing, where the supplier
+   * has no catalogue to compete with.
+   */
+  mainSlotsLeft?: number;
   onSubmit: (values: ListingFields) => Promise<void> | void;
   submitLabel: string;
   submitting?: boolean;
@@ -86,6 +95,18 @@ export function ListingForm({
 
   const values = form.watch();
   const { errors } = form.formState;
+
+  /*
+    A listing already marked stays markable — it is holding its own slot, which
+    `mainSlotsLeft` is computed to exclude. Where the caller cannot know the
+    count yet, the box stays open and the repository is the backstop.
+  */
+  const alreadyMain = Boolean(values.isMainProduct);
+  const canMarkMain = mainSlotsLeft === undefined || mainSlotsLeft > 0 || alreadyMain;
+  const slotsHint =
+    mainSlotsLeft === undefined || alreadyMain
+      ? ""
+      : `${mainSlotsLeft} of ${MAIN_PRODUCT_LIMIT} still free.`;
 
   const handleSubmit = form.handleSubmit(async (listing) => {
     await onSubmit(listing);
@@ -301,6 +322,30 @@ export function ListingForm({
                     columns={2}
                   />
                 </div>
+              </Field>
+
+              <Field>
+                <label className="flex cursor-pointer items-start gap-2.5">
+                  <input
+                    type="checkbox"
+                    {...form.register("isMainProduct")}
+                    disabled={!canMarkMain}
+                    className="mt-0.5 size-4 shrink-0 rounded border-border-strong accent-brand disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                      <Star className="size-3.5 text-brand" aria-hidden="true" />
+                      Show as a main product
+                    </span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      {canMarkMain
+                        ? `Your ${MAIN_PRODUCT_LIMIT} main products lead your storefront and your row in the manufacturer directory.${
+                            slotsHint ? ` ${slotsHint}` : ""
+                          }`
+                        : `You already show ${MAIN_PRODUCT_LIMIT} main products. Unmark one in your catalogue to free a slot.`}
+                    </span>
+                  </span>
+                </label>
               </Field>
             </CardBody>
           </Card>

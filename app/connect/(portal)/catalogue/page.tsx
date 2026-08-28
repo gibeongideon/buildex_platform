@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Archive, ExternalLink, Eye, Package, Pencil, Plus, RotateCcw, Store } from "lucide-react";
+import { Archive, ExternalLink, Eye, Package, Pencil, Plus, RotateCcw, Star, Store, Upload } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Currency } from "@/components/shared/format";
@@ -104,6 +104,12 @@ export default function CataloguePage() {
               <Link href={`/marketplace/manufacturer/${manufacturer.id}`}>
                 <Store aria-hidden="true" />
                 View store
+              </Link>
+            </Button>
+            <Button variant="secondary" asChild>
+              <Link href="/connect/catalogue/import">
+                <Upload aria-hidden="true" />
+                Import
               </Link>
             </Button>
             <Button asChild disabled={atLimit}>
@@ -257,12 +263,20 @@ export default function CataloguePage() {
                           iconClassName="size-4"
                         />
                         <div className="min-w-0">
-                          <Link
-                            href={`/connect/catalogue/${product.id}`}
-                            className="block truncate font-medium text-foreground hover:text-brand hover:underline"
-                          >
-                            {product.name}
-                          </Link>
+                          <span className="flex min-w-0 items-center gap-1.5">
+                            <Link
+                              href={`/connect/catalogue/${product.id}`}
+                              className="truncate font-medium text-foreground hover:text-brand hover:underline"
+                            >
+                              {product.name}
+                            </Link>
+                            {product.isMainProduct ? (
+                              <Star
+                                className="size-3.5 shrink-0 fill-brand text-brand"
+                                aria-label="Main product"
+                              />
+                            ) : null}
+                          </span>
                           <p className="text-xs text-muted-foreground text-numeric">
                             {product.sku}
                             {product.packSize ? ` · ${product.packSize}` : ""}

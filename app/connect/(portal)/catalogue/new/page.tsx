@@ -11,6 +11,7 @@ import { productRepo } from "@/lib/data";
 import { canListProducts } from "@/lib/schemas/verification";
 import { useCurrentManufacturer } from "../../use-current-manufacturer";
 import { QueryError } from "@/components/ui/query-state";
+import { mainSlotsRemaining } from "@/lib/rules/catalogue";
 
 export default function NewListingPage() {
   const { data, loading, error, refetch } = useCurrentManufacturer();
@@ -27,7 +28,7 @@ export default function NewListingPage() {
   }
   if (!data) return null;
 
-  const { manufacturer } = data;
+  const { manufacturer, products } = data;
   const publishable = canListProducts(manufacturer.status);
 
   return (
@@ -45,6 +46,7 @@ export default function NewListingPage() {
       <QueryError error={error} onRetry={refetch} />
 
       <ListingForm
+        mainSlotsLeft={mainSlotsRemaining(products)}
         manufacturerName={manufacturer.tradingName}
         verified={manufacturer.status === "approved"}
         submitting={submitting}

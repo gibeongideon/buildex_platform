@@ -3,7 +3,21 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { BadgeCheck, Building2, CalendarDays, CheckCircle2, Clock, Factory, MapPin, Package, Search, ShieldCheck, Store, Truck } from "lucide-react";
+import {
+  BadgeCheck,
+  Building2,
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  Factory,
+  MapPin,
+  Package,
+  Search,
+  ShieldCheck,
+  Star,
+  Store,
+  Truck,
+} from "lucide-react";
 import { marketplaceRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import { priceRange, type Product } from "@/lib/schemas/product";
@@ -17,6 +31,7 @@ import { QueryError } from "@/components/ui/query-state";
 import { Select } from "@/components/ui/field";
 import { BackLink } from "@/components/shared/back-link";
 import { SearchField } from "@/components/ui/filter-bar";
+import { chosenMainProducts } from "@/lib/rules/catalogue";
 import {
   Alert,
   Card,
@@ -139,6 +154,9 @@ export default function ManufacturerStorefrontPage() {
           return a.name.localeCompare(b.name);
       }
     });
+
+  const mains = chosenMainProducts(products);
+  const showMains = mains.length > 0 && !query.trim() && !category;
 
   const cheapest = products.length
     ? Math.min(...products.map((p) => priceRange(p.priceBands).min))
@@ -288,6 +306,37 @@ export default function ManufacturerStorefrontPage() {
               of {products.length} products
               {category ? ` in ${category}` : ""}
             </p>
+
+            {/*
+              What the supplier puts forward, ahead of their full range. Hidden
+              once a filter is on: the buyer has said what they are looking for,
+              and the supplier's shortlist is no longer the answer.
+            */}
+            {showMains ? (
+              <section className="mt-4" aria-label="Main products">
+                <div className="mb-3 flex items-center gap-2">
+                  <Star className="size-4 text-brand" aria-hidden="true" />
+                  <h3 className="text-sm font-semibold text-foreground">Main products</h3>
+                  <span className="text-xs text-muted-foreground">
+                    What {manufacturer.tradingName} leads with
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+                  {mains.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      manufacturer={manufacturer}
+                      hideSupplier
+                    />
+                  ))}
+                </div>
+                <Separator className="mt-6" />
+                <p className="mb-1 mt-6 text-sm font-semibold text-foreground">
+                  Full range
+                </p>
+              </section>
+            ) : null}
 
             {filtered.length === 0 ? (
               <Card className="mt-4">

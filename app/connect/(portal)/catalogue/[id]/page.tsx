@@ -13,6 +13,7 @@ import { productRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import { canListProducts } from "@/lib/schemas/verification";
 import { useCurrentManufacturer } from "../../use-current-manufacturer";
+import { mainSlotsRemaining } from "@/lib/rules/catalogue";
 
 export default function EditListingPage() {
   const params = useParams<{ id: string }>();
@@ -69,7 +70,7 @@ export default function EditListingPage() {
     );
   }
 
-  const { manufacturer } = current;
+  const { manufacturer, products } = current;
   const publishable = canListProducts(manufacturer.status);
 
   return (
@@ -97,6 +98,7 @@ export default function EditListingPage() {
       <QueryError error={error} onRetry={refetch} />
 
       <ListingForm
+        mainSlotsLeft={mainSlotsRemaining(products, product.id)}
         manufacturerName={manufacturer.tradingName}
         verified={manufacturer.status === "approved"}
         submitting={submitting}
@@ -112,6 +114,7 @@ export default function EditListingPage() {
           moq: product.moq,
           leadTimeDays: product.leadTimeDays,
           availableRegions: product.availableRegions,
+          isMainProduct: product.isMainProduct,
         }}
         secondaryAction={
           <Button variant="ghost" asChild>

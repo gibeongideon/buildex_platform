@@ -134,6 +134,13 @@ export interface ProductRepo {
   create(
     input: Omit<Product, "id" | "createdAt" | "updatedAt">,
   ): Promise<Product>;
+  /**
+   * Bulk import, applied all-or-nothing. A spreadsheet that half-lands leaves
+   * the supplier unable to tell what was written without re-reading everything.
+   */
+  createMany(
+    inputs: Omit<Product, "id" | "createdAt" | "updatedAt">[],
+  ): Promise<Product[]>;
   update(id: string, patch: Partial<Product>): Promise<Product>;
   remove(id: string): Promise<void>;
 }

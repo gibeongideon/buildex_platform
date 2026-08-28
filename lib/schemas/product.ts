@@ -101,6 +101,16 @@ export const listingFieldsSchema = z.object({
     .min(0, "Lead time cannot be negative")
     .max(120, "Lead times over 120 days need an account manager"),
   availableRegions: z.array(regionSchema).min(1, "Select at least one region"),
+  /*
+    One of the four products the supplier puts forward as what they are known
+    for. It drives the "Main products" strip in the manufacturer directory and
+    on the storefront — see `lib/rules/catalogue.ts`, which also owns the cap.
+
+    No .default() here, for the same reason as `description` above: it would
+    make the schema's input and output types diverge and break the react-hook-
+    form resolver generics. The form and the importer supply `false`.
+  */
+  isMainProduct: z.boolean(),
 });
 
 export type ListingFields = z.infer<typeof listingFieldsSchema>;

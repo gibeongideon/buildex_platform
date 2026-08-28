@@ -26,12 +26,14 @@ type Row = {
   lead: number;
   regions: Product["availableRegions"];
   status?: Product["status"];
+  /** One of the four this supplier leads with. See `lib/rules/catalogue.ts`. */
+  main?: true;
   description: string;
 };
 
 const ROWS: Row[] = [
   {
-    id: "prd_sav_opc32",
+    id: "prd_sav_opc32", main: true,
     m: "mfr_savannah",
     name: "Savannah OPC 32.5N Cement",
     category: "Cement & Concrete",
@@ -45,7 +47,7 @@ const ROWS: Row[] = [
     description: "General-purpose ordinary Portland cement for masonry, plaster and standard concrete works.",
   },
   {
-    id: "prd_sav_opc42",
+    id: "prd_sav_opc42", main: true,
     m: "mfr_savannah",
     name: "Savannah OPC 42.5R Rapid Hardening Cement",
     category: "Cement & Concrete",
@@ -59,7 +61,7 @@ const ROWS: Row[] = [
     description: "Higher early strength for structural columns, beams and precast where formwork turns fast.",
   },
   {
-    id: "prd_sav_block",
+    id: "prd_sav_block", main: true,
     m: "mfr_savannah",
     name: "Hollow Concrete Block 200mm",
     category: "Cement & Concrete",
@@ -73,7 +75,7 @@ const ROWS: Row[] = [
     description: "Load-bearing hollow block, cured 28 days before dispatch.",
   },
   {
-    id: "prd_rv_d12",
+    id: "prd_rv_d12", main: true,
     m: "mfr_rift_steel",
     name: "Deformed Reinforcement Bar D12 (12m)",
     category: "Steel & Reinforcement",
@@ -87,7 +89,7 @@ const ROWS: Row[] = [
     description: "BS4449 grade 500 deformed bar, mill test certificate supplied per batch.",
   },
   {
-    id: "prd_rv_d16",
+    id: "prd_rv_d16", main: true,
     m: "mfr_rift_steel",
     name: "Deformed Reinforcement Bar D16 (12m)",
     category: "Steel & Reinforcement",
@@ -101,7 +103,7 @@ const ROWS: Row[] = [
     description: "BS4449 grade 500 deformed bar for beams, columns and slab reinforcement.",
   },
   {
-    id: "prd_rv_bp30",
+    id: "prd_rv_bp30", main: true,
     m: "mfr_rift_steel",
     name: "Box Profile Roofing Sheet 30G",
     category: "Roofing",
@@ -115,7 +117,7 @@ const ROWS: Row[] = [
     description: "Pre-painted galvanised box profile, cut to length on order.",
   },
   {
-    id: "prd_kt_ply18",
+    id: "prd_kt_ply18", main: true,
     m: "mfr_kisumu_timber",
     name: "Marine Plywood 18mm (2440 × 1220)",
     category: "Timber & Boards",
@@ -129,7 +131,7 @@ const ROWS: Row[] = [
     description: "WBP-bonded marine grade plywood for joinery, formwork and cabinetry.",
   },
   {
-    id: "prd_kt_mdf",
+    id: "prd_kt_mdf", main: true,
     m: "mfr_kisumu_timber",
     name: "MDF Board 16mm (2440 × 1220)",
     category: "Timber & Boards",
@@ -213,7 +215,7 @@ const ROWS: Row[] = [
     description: "Neutral-cure silicone for glazing, sanitary joints and general sealing.",
   },
   {
-    id: "prd_mk_ibr",
+    id: "prd_mk_ibr", main: true,
     m: "mfr_mount_kenya_roofing",
     name: "IBR Roofing Sheet 28G Pre-painted",
     category: "Roofing",
@@ -227,7 +229,7 @@ const ROWS: Row[] = [
     description: "Inverted box rib profile in 28 gauge, colour-coated both faces.",
   },
   {
-    id: "prd_mk_ridge",
+    id: "prd_mk_ridge", main: true,
     m: "mfr_mount_kenya_roofing",
     name: "Plain Ridge Cap 1.8m",
     category: "Roofing",
@@ -241,7 +243,7 @@ const ROWS: Row[] = [
     description: "Matching pre-painted ridge cap for IBR and box profile roofs.",
   },
   {
-    id: "prd_cs_wc",
+    id: "prd_cs_wc", main: true,
     m: "mfr_coastal_sanitary",
     name: "Close-Coupled WC Suite",
     category: "Plumbing & Sanitaryware",
@@ -255,7 +257,7 @@ const ROWS: Row[] = [
     description: "Vitreous china close-coupled suite with dual-flush cistern and soft-close seat.",
   },
   {
-    id: "prd_cs_basin",
+    id: "prd_cs_basin", main: true,
     m: "mfr_coastal_sanitary",
     name: "Pedestal Wash Basin 550mm",
     category: "Plumbing & Sanitaryware",
@@ -269,7 +271,7 @@ const ROWS: Row[] = [
     description: "White vitreous china basin with matching full pedestal.",
   },
   {
-    id: "prd_cs_ppr",
+    id: "prd_cs_ppr", main: true,
     m: "mfr_coastal_sanitary",
     name: "PPR Pressure Pipe 25mm PN16",
     category: "Plumbing & Sanitaryware",
@@ -283,7 +285,7 @@ const ROWS: Row[] = [
     description: "Hot and cold water pressure pipe, fusion welded, 50-year design life.",
   },
   {
-    id: "prd_nt_6060",
+    id: "prd_nt_6060", main: true,
     m: "mfr_nyanza_tiles",
     name: "Polished Porcelain Tile 600 × 600",
     category: "Tiles & Flooring",
@@ -297,7 +299,7 @@ const ROWS: Row[] = [
     description: "Rectified polished porcelain for living areas and commercial floors.",
   },
   {
-    id: "prd_nt_wall",
+    id: "prd_nt_wall", main: true,
     m: "mfr_nyanza_tiles",
     name: "Ceramic Wall Tile 300 × 600",
     category: "Tiles & Flooring",
@@ -311,7 +313,7 @@ const ROWS: Row[] = [
     description: "Glazed ceramic wall tile for bathrooms and kitchen splashbacks.",
   },
   {
-    id: "prd_nt_adhesive",
+    id: "prd_nt_adhesive", main: true,
     m: "mfr_nyanza_tiles",
     name: "Tile Adhesive C1T 20kg",
     category: "Adhesives & Sealants",
@@ -325,7 +327,7 @@ const ROWS: Row[] = [
     description: "Cement-based adhesive for ceramic and porcelain on standard substrates.",
   },
   {
-    id: "prd_te_cable15",
+    id: "prd_te_cable15", main: true,
     m: "mfr_thika_electricals",
     name: "Twin & Earth Cable 1.5mm² (100m)",
     category: "Electrical",
@@ -339,7 +341,7 @@ const ROWS: Row[] = [
     description: "KEBS-marked PVC twin and earth for lighting circuits.",
   },
   {
-    id: "prd_te_cable25",
+    id: "prd_te_cable25", main: true,
     m: "mfr_thika_electricals",
     name: "Twin & Earth Cable 2.5mm² (100m)",
     category: "Electrical",
@@ -353,7 +355,7 @@ const ROWS: Row[] = [
     description: "KEBS-marked PVC twin and earth for socket and power circuits.",
   },
   {
-    id: "prd_te_db8",
+    id: "prd_te_db8", main: true,
     m: "mfr_thika_electricals",
     name: "Consumer Unit 8-Way with RCD",
     category: "Electrical",
@@ -368,7 +370,7 @@ const ROWS: Row[] = [
     description: "Surface-mount consumer unit with 63A RCD main switch and busbar.",
   },
   // ---- Savannah Cement (Cement & Concrete) ----
-  { id: "prd_sav_paving", m: "mfr_savannah", name: "Interlocking Paving Block 60mm", category: "Cement & Concrete", sku: "SAV-PAV60", unit: "square metre", packSize: "60 mm thick",
+  { id: "prd_sav_paving", main: true, m: "mfr_savannah", name: "Interlocking Paving Block 60mm", category: "Cement & Concrete", sku: "SAV-PAV60", unit: "square metre", packSize: "60 mm thick",
     bands: [[20, 199, 1420], [200, 999, 1355], [1000, null, 1290]], moq: 20, lead: 5, regions: ["Nairobi Metro", "Eastern"],
     description: "Zig-zag interlocking paver for driveways and yards, rated for light vehicle loading." },
   { id: "prd_sav_lintel", m: "mfr_savannah", name: "Precast Concrete Lintel 150mm", category: "Cement & Concrete", sku: "SAV-LNT150", unit: "linear metre", packSize: "150 × 150 mm",
@@ -391,7 +393,7 @@ const ROWS: Row[] = [
   { id: "prd_rv_d20", m: "mfr_rift_steel", name: "Deformed Reinforcement Bar D20 (12m)", category: "Steel & Reinforcement", sku: "RVS-D20-12M", unit: "piece", packSize: "12 m length",
     bands: [[20, 99, 3260], [100, 399, 3170], [400, null, 3080]], moq: 20, lead: 4, regions: ["Rift Valley", "Western", "Nyanza"],
     description: "Heavy gauge BS4449 grade 500 bar for columns, pile caps and transfer beams." },
-  { id: "prd_rv_mesh", m: "mfr_rift_steel", name: "Welded Steel Mesh A142 (4.8 × 2.4m)", category: "Steel & Reinforcement", sku: "RVS-MESH-A142", unit: "sheet", packSize: "4.8 × 2.4 m",
+  { id: "prd_rv_mesh", main: true, m: "mfr_rift_steel", name: "Welded Steel Mesh A142 (4.8 × 2.4m)", category: "Steel & Reinforcement", sku: "RVS-MESH-A142", unit: "sheet", packSize: "4.8 × 2.4 m",
     bands: [[10, 49, 4180], [50, 199, 4020], [200, null, 3860]], moq: 10, lead: 4, regions: ["Rift Valley", "Western", "Nyanza"],
     description: "Factory-welded slab reinforcement mesh; faster to fix than loose bar." },
   { id: "prd_rv_shs", m: "mfr_rift_steel", name: "Square Hollow Section 50 × 50 × 2mm", category: "Steel & Reinforcement", sku: "RVS-SHS50", unit: "linear metre", packSize: "6 m length",
@@ -405,10 +407,10 @@ const ROWS: Row[] = [
     description: "Half-round gutter in matched roof colours, with brackets available." },
 
   // ---- Kisumu Timber (Timber & Boards, Doors & Windows) ----
-  { id: "prd_kt_ply12", m: "mfr_kisumu_timber", name: "Marine Plywood 12mm (2440 × 1220)", category: "Timber & Boards", sku: "KTB-MPLY12", unit: "sheet", packSize: "2440 × 1220 × 12 mm",
+  { id: "prd_kt_ply12", main: true, m: "mfr_kisumu_timber", name: "Marine Plywood 12mm (2440 × 1220)", category: "Timber & Boards", sku: "KTB-MPLY12", unit: "sheet", packSize: "2440 × 1220 × 12 mm",
     bands: [[10, 49, 2780], [50, 199, 2680], [200, null, 2590]], moq: 10, lead: 4, regions: ["Nyanza", "Western"],
     description: "WBP-bonded marine plywood for panelling, ceilings and light joinery." },
-  { id: "prd_kt_blockboard", m: "mfr_kisumu_timber", name: "Blockboard 18mm (2440 × 1220)", category: "Timber & Boards", sku: "KTB-BLK18", unit: "sheet", packSize: "2440 × 1220 × 18 mm",
+  { id: "prd_kt_blockboard", main: true, m: "mfr_kisumu_timber", name: "Blockboard 18mm (2440 × 1220)", category: "Timber & Boards", sku: "KTB-BLK18", unit: "sheet", packSize: "2440 × 1220 × 18 mm",
     bands: [[10, 49, 3240], [50, 199, 3120], [200, null, 3010]], moq: 10, lead: 5, regions: ["Nyanza", "Western"],
     description: "Softwood core blockboard for shelving, doors and wardrobe carcasses." },
   { id: "prd_kt_cypress", m: "mfr_kisumu_timber", name: "Cypress Timber 100 × 50 (Planed)", category: "Timber & Boards", sku: "KTB-CYP10050", unit: "linear metre", packSize: "100 × 50 mm",
@@ -445,10 +447,10 @@ const ROWS: Row[] = [
     description: "Interior-grade PVA for joinery, laminating and board assembly." },
 
   // ---- MK Roofing (Roofing, Insulation) ----
-  { id: "prd_mk_tile", m: "mfr_mount_kenya_roofing", name: "Stone-Coated Roof Tile Sheet", category: "Roofing", sku: "MKR-STC01", unit: "square metre", packSize: "1.34 m² per sheet",
+  { id: "prd_mk_tile", main: true, m: "mfr_mount_kenya_roofing", name: "Stone-Coated Roof Tile Sheet", category: "Roofing", sku: "MKR-STC01", unit: "square metre", packSize: "1.34 m² per sheet",
     bands: [[30, 199, 1480], [200, 799, 1420], [800, null, 1360]], moq: 30, lead: 8, regions: ["Central", "Eastern"],
     description: "Stone-chip coated steel tile profile; tile appearance at sheet weight." },
-  { id: "prd_mk_flashing", m: "mfr_mount_kenya_roofing", name: "Valley Flashing 2m", category: "Roofing", sku: "MKR-VFL20", unit: "piece", packSize: "2 m",
+  { id: "prd_mk_flashing", main: true, m: "mfr_mount_kenya_roofing", name: "Valley Flashing 2m", category: "Roofing", sku: "MKR-VFL20", unit: "piece", packSize: "2 m",
     bands: [[20, 99, 960], [100, null, 915]], moq: 20, lead: 6, regions: ["Central", "Eastern"],
     description: "Pre-painted valley gutter flashing for roof intersections." },
   { id: "prd_mk_underlay", m: "mfr_mount_kenya_roofing", name: "Roof Insulation Underlay 50m Roll", category: "Insulation", sku: "MKR-INS50", unit: "roll", packSize: "50 m × 1.2 m",
@@ -459,7 +461,7 @@ const ROWS: Row[] = [
     description: "Self-drilling roofing screw with bonded washer, colour-matched heads." },
 
   // ---- Coastal Sanitaryware (Plumbing, Tiles) ----
-  { id: "prd_cs_shower", m: "mfr_coastal_sanitary", name: "Shower Mixer Set with Rail", category: "Plumbing & Sanitaryware", sku: "CSW-SHM-RL", unit: "piece", packSize: "Mixer, rail and handset",
+  { id: "prd_cs_shower", main: true, m: "mfr_coastal_sanitary", name: "Shower Mixer Set with Rail", category: "Plumbing & Sanitaryware", sku: "CSW-SHM-RL", unit: "piece", packSize: "Mixer, rail and handset",
     bands: [[5, 24, 7850], [25, 99, 7500], [100, null, 7160]], moq: 5, lead: 6, regions: ["Coast", "Nairobi Metro"],
     description: "Chrome thermostatic shower mixer with adjustable rail and handset." },
   { id: "prd_cs_sink", m: "mfr_coastal_sanitary", name: "Stainless Kitchen Sink Double Bowl", category: "Plumbing & Sanitaryware", sku: "CSW-SNK-DB", unit: "piece", packSize: "1000 × 500 mm",
@@ -476,7 +478,7 @@ const ROWS: Row[] = [
     description: "R10-rated anti-slip tile for bathrooms, kitchens and walkways." },
 
   // ---- Nyanza Tiles (Tiles, Interior Finishes, Adhesives) ----
-  { id: "prd_nt_8080", m: "mfr_nyanza_tiles", name: "Glazed Porcelain Tile 800 × 800", category: "Tiles & Flooring", sku: "NYT-GP8080", unit: "square metre", packSize: "3 pcs / 1.92 m² box",
+  { id: "prd_nt_8080", main: true, m: "mfr_nyanza_tiles", name: "Glazed Porcelain Tile 800 × 800", category: "Tiles & Flooring", sku: "NYT-GP8080", unit: "square metre", packSize: "3 pcs / 1.92 m² box",
     bands: [[50, 299, 1780], [300, 999, 1695], [1000, null, 1615]], moq: 50, lead: 5, regions: ["Nyanza", "Rift Valley", "Western"],
     description: "Large-format glazed porcelain for showrooms and open-plan living." },
   { id: "prd_nt_wood", m: "mfr_nyanza_tiles", name: "Wood-Effect Plank Tile 200 × 1200", category: "Tiles & Flooring", sku: "NYT-WD2012", unit: "square metre", packSize: "5 pcs / 1.2 m² box",
@@ -493,7 +495,7 @@ const ROWS: Row[] = [
     description: "Anodised edge trim for tile terminations and external corners." },
 
   // ---- Thika Electricals (Electrical) ----
-  { id: "prd_te_cable4", m: "mfr_thika_electricals", name: "Single Core Cable 4mm² (100m)", category: "Electrical", sku: "THE-SC40-100", unit: "roll", packSize: "100 m coil",
+  { id: "prd_te_cable4", main: true, m: "mfr_thika_electricals", name: "Single Core Cable 4mm² (100m)", category: "Electrical", sku: "THE-SC40-100", unit: "roll", packSize: "100 m coil",
     bands: [[5, 24, 7450], [25, 99, 7160], [100, null, 6880]], moq: 5, lead: 3, regions: ["Nairobi Metro", "Central", "Eastern"],
     description: "KEBS-marked single core PVC cable for sub-mains and cooker circuits." },
   { id: "prd_te_socket", m: "mfr_thika_electricals", name: "Twin Switched Socket 13A", category: "Electrical", sku: "THE-SKT13-2G", unit: "piece", packSize: "Two gang",
@@ -545,6 +547,7 @@ export function seedProducts(): Product[] {
     leadTimeDays: r.lead,
     availableRegions: r.regions,
     imageUrls: [],
+    isMainProduct: r.main ?? false,
     status: r.status ?? "active",
     createdAt: daysAgo(90 - i),
     updatedAt: daysAgo(Math.max(30 - i, 1)),

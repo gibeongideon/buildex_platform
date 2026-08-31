@@ -256,20 +256,29 @@ export function MarketplaceShell({
                 <h1 className="font-display text-xl font-bold uppercase tracking-tight text-foreground sm:text-2xl">
                   Africa&rsquo;s home of construction materials
                 </h1>
-                <p className="mt-2 font-display text-sm font-bold uppercase tracking-[0.18em] text-brand dark:text-white">
+                {/*
+                  A wrapping flex row, not a paragraph with margins between the
+                  separators. Written the obvious way — `{verb}` next to a
+                  `<span className="mx-1.5">·</span>` — it renders with *no
+                  whitespace characters at all*: the margin only looks like
+                  spacing, so the browser sees one unbreakable 576px token and a
+                  360px phone gets a horizontally scrolling page. Each verb is
+                  its own flex item here, so the line breaks where it should.
+                */}
+                <ul className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-0.5 font-display text-sm font-bold uppercase tracking-[0.18em] text-brand dark:text-white">
                   {["Search", "Compare", "Discover", "Connect", "Shop", "Save"].map(
                     (verb, index) => (
                       <React.Fragment key={verb}>
                         {index > 0 ? (
-                          <span aria-hidden="true" className="mx-1.5 text-primary">
+                          <li aria-hidden="true" className="text-primary">
                             &middot;
-                          </span>
+                          </li>
                         ) : null}
-                        {verb}
+                        <li>{verb}</li>
                       </React.Fragment>
                     ),
                   )}
-                </p>
+                </ul>
                 <p className="mx-auto mt-2.5 max-w-xl text-sm text-muted-foreground">
                   Find trusted materials. Connect with trusted suppliers. Build with
                   confidence.

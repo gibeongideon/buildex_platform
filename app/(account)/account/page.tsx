@@ -61,6 +61,27 @@ import { useCurrentCustomer } from "./use-current-customer";
   open nothing, teaches a reviewer to distrust every other number on the page.
 */
 
+/*
+  The post-registration banner, isolated behind its own Suspense boundary.
+
+  `useSearchParams()` opts a component out of static prerendering, and the build
+  refuses to prerender a page that calls it unwrapped. Keeping it in a leaf of
+  its own means only this banner is dynamic while the rest of the dashboard
+  still prerenders — the same reason `home-scope.tsx` keeps the marketplace's
+  scope selection out of the URL.
+*/
+function WelcomeBanner({ membershipName }: { membershipName: string }) {
+  const searchParams = useSearchParams();
+  if (searchParams.get("welcome") !== "1") return null;
+
+  return (
+    <Alert tone="success" className="mb-6" title="Your account is ready">
+      You are on {membershipName}. Search is free — the next thing worth doing is finding
+      a material and asking two suppliers what they would charge for your quantity.
+    </Alert>
+  );
+}
+
 function SignedOut() {
   return (
     <Card>
@@ -84,9 +105,6 @@ function SignedOut() {
 }
 
 export default function AccountOverviewPage() {
-  const searchParams = useSearchParams();
-  const justJoined = searchParams.get("welcome") === "1";
-
   const { data: customer, loading, error, refetch } = useCurrentCustomer();
   const region = customer?.region;
 
@@ -175,13 +193,9 @@ export default function AccountOverviewPage() {
         }
       />
 
-      {justJoined ? (
-        <Alert tone="success" className="mb-6" title="Your account is ready">
-          You are on {membership.name}. Search is free — the next thing worth doing is
-          finding a material and asking two suppliers what they would charge for your
-          quantity.
-        </Alert>
-      ) : null}
+      <React.Suspense fallback={null}>
+        <WelcomeBanner membershipName={membership.name} />
+      </React.Suspense>
 
       <Alert tone="info" className="mb-6" title="Demo build — no authentication">
         This account is a demo session held in your browser, not a signed-in user. There

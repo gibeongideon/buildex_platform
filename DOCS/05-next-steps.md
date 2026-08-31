@@ -63,22 +63,6 @@ one `Customer` record — see [01 — Implementation Plan](./01-implementation-p
 
 ---
 
-## Then
-
-| Phase | Scope | Depends on |
-| --- | --- | --- |
-| 4 | Hardware shop accounts, cart, ordering, fulfilment, inventory | Phase 2 marketplace (done — there is now something to buy) |
-| 5 | Wallet, credit eligibility, application, loan tracker, repayment | Phase 4 (transaction history to score on) |
-| 6 | Credit scoring engine, underwriting queue, portfolio, collections | Phase 5 |
-| 7 | Remaining marketing pages (Buildex, Capital, hardware acquisition) | Independent — can be pulled forward any time |
-| 8 | Consumer segments, campaign builder, attribution | Phase 4 POS data |
-| 9 | Backend cutover | Can start per-entity as soon as a schema is agreed |
-
-Phase 7 is the one piece with no dependencies. If an external-facing demo is needed sooner
-than the portals, pull it forward.
-
----
-
 ## Blockers
 
 These are not engineering blockers — they are decisions and engagements the requirements
@@ -152,10 +136,10 @@ Small items worth picking up alongside feature work.
 
 | Item | Why |
 | --- | --- |
-| Move the onboarding draft server-side at cutover | "Save & exit" should survive a device change. `OnboardingRepo` already has the right shape |
-| Fold the overflow sweep into CI | Phase 3 ran it as a one-off script across 13 routes × 4 widths × both themes. It belongs in the suite, not in a scratch file |
+| Move the onboarding and registration drafts server-side at cutover | "Save & exit" should survive a device change. `OnboardingRepo` and `RegistrationRepo` both already have the right shape |
+| The layout sweep is load-sensitive in dev | It navigates 32 routes × 4 widths × both themes. It now goes via `about:blank` between routes, which stopped the goto-wedge that burned the whole budget on one navigation — 9.3 minutes down to 1.3. It can still flake under eight parallel workers on one dev server; CI's `retries: 2` absorbs that |
 | Add one Playwright spec per journey as each phase lands | Journey A has four specs; keep that ratio |
 | Keep the contrast spec in CI | It measures text and border ratios in both themes, and was verified to fail on the previous token values. Cheap insurance against a token tune that quietly makes the product faint again |
-| Revisit React Hook Form compiler compatibility | 6 lint warnings today. Harmless, but worth re-checking when RHF ships compiler support |
+| Revisit React Hook Form compiler compatibility | 8 lint warnings today (C1's two registration forms added two). Harmless, but worth re-checking when RHF ships compiler support |
 | Bump `buildex.mock.v9` when fixture shape changes | Otherwise stale persisted data wins over new seeds. v9 added customers, offers, the registration draft and the search history |
 | Keep the seam greps in CI | `grep -rn "fixtures" app/ components/` returning anything means the cutover is no longer a one-file change |

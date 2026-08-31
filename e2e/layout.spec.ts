@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
 /*
   Nothing pushes the page sideways.
@@ -61,12 +61,30 @@ const PATHS = [
   into the output is visible as a brace, and braces do not otherwise appear in
   this interface's copy.
 */
+/*
+  Navigate via `about:blank` between routes.
+
+  Thirty-odd back-to-back same-origin navigations in Next dev wedge: a goto is
+  aborted by the page it is leaving — `net::ERR_ABORTED; maybe frame was
+  detached?` — and the sweep then burns its whole budget on one navigation that
+  never settles. The marketplace is the reliable trigger, because its scroll
+  handler and sticky header are still measuring when the next goto starts.
+
+  Dropping to a blank page first ends the outgoing page cleanly. It costs a few
+  milliseconds per route and it is the difference between a sweep that takes 16
+  seconds and one that times out at three minutes.
+*/
+async function visit(page: Page, path: string) {
+  await page.goto("about:blank");
+  await page.goto(path, { waitUntil: "domcontentloaded" });
+}
+
 test("no page renders a stray JSX expression", async ({ page }) => {
   test.setTimeout(180_000);
   const leaks: string[] = [];
 
   for (const path of PATHS) {
-    await page.goto(path);
+    await visit(page, path);
     await page.waitForTimeout(250);
     const text = await page.locator("body").innerText();
     for (const match of text.matchAll(/\{\s*[A-Za-z_$][\w$.?[\]]*\s*\}/g)) {
@@ -89,7 +107,7 @@ for (const theme of ["light", "dark"] as const) {
 
       const overflowing: string[] = [];
       for (const path of PATHS) {
-        await page.goto(path);
+        await visit(page, path);
         /*
           Longer than SLOW (420ms) in lib/data/mock/latency.ts, deliberately.
           Sampling before the repositories resolve would measure a page of

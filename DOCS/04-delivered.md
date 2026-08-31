@@ -1,14 +1,15 @@
 # 04 — Delivered
 
 Covers Phase 0 (Foundation), Phase 1 (manufacturer onboarding), Phase 2
-(the marketplace and manufacturer portal) and Phase 3 (Buildex Admin).
+(the marketplace and manufacturer portal), Phase 3 (Buildex Admin) and
+C1 (the Chapter 9 customer front end).
 
 ## Summary
 
 | Metric | Value |
 | --- | --- |
-| Source files | 107 (`app/`, `components/`, `lib/`, `e2e/`) |
-| Routes | 43 (plus `/_not-found`) |
+| Source files | 179 (`app/`, `components/`, `lib/`, `e2e/`) |
+| Routes | 54 (plus `/_not-found`) |
 | Onboarding steps | 9, all resumable and deep-linkable |
 | Seeded manufacturers / products | 16 / 72 |
 | Seeded enquiries / campaigns | 50 / 12 |
@@ -359,6 +360,128 @@ spec now covers both behaviours, and that the strip spreads across categories ra
 repeating one photo.
 
 ---
+
+## C1 — the Chapter 9 customer front end
+
+Chapter 9 specifies the *buying* side of Buildex Connect as a trust engine behind a
+search-first front door. Phases 0–3 built the selling side well and left the buyer
+anonymous — no account, no membership, no wallet, no order, no trust profile. C1 adds the
+identity everything else in the chapter hangs off.
+
+### What shipped
+
+| Surface | Scope |
+| --- | --- |
+| `/join` | Four steps — account, phone OTP, where you buy and what kind of buyer you are, membership. Resumable, deep-link clamped |
+| `/account` | §9.16's dashboard: membership, the verification level earned, what would move it, the trust ladder, offers at your tier, suppliers who actually reach your region, recent searches |
+| `/marketplace` | §9.2's customer promise and six verbs, §9.3's three-step entry journey (signed-out only), and the public offers rail |
+| `/marketplace/services` | The fifth search scope, scaffolded — see below |
+
+### One `Customer`, typed
+
+§9.4 makes customer type a *field*, not a product, so one record covers a homeowner, a
+fundi, a contractor, a hardware shop, a developer and an institution. This supersedes the
+old Phase 4 plan for a separate `/shop/*` hardware portal: two account types would have
+meant two registrations, two wallets and two dashboards to keep in step, and the first
+thing to drift would have been the entitlements.
+
+Business information is **progressive**, exactly as §9.4 describes it — required for
+business tiers, not for everyone. The rule lives in one place, a `superRefine` on
+`customerProfileStepSchema`, so the form and the record cannot disagree about when a KRA
+PIN is mandatory. Choose "Homeowner" and the fields never appear; choose "Hardware shop"
+and they do, and the step will not pass without them.
+
+### The verification level is derived, never bought
+
+§9.42 is blunt: *"Membership does not equal trust; trust is earned."*
+`deriveVerificationLevel()` computes §9.6's four levels from what has actually been
+verified and how much the account has traded. A Build Business subscriber who has verified
+nothing reads **Registered** — asserted in the suite, because it is the single most
+tempting thing to get wrong.
+
+`strategic` is the one exception: it means a contractual relationship and enhanced due
+diligence carried out by people, so it is an administrative grant that outranks derivation
+— the same shape as `isAdministrativeHold()` on the supplier side, and for the same
+reason. Recomputing would silently demote a negotiated enterprise account.
+
+The thresholds for `trusted_business` sit in one named constant rather than as literals
+inside a condition, because they are a policy decision rather than an engineering one, and
+§9.21 requires the methodology to be understandable and reviewable.
+
+### Customers are seeded from history that already existed
+
+`lib/data/fixtures/demand.ts` has generated a deterministic year of deliveries against a
+fixed pool of buying shops since Phase 2. C1 seeds customer accounts from that same pool
+through an exported `buyerIdFor()`, so the ids line up by construction.
+
+Three things follow. A seeded customer has genuine commercial history the day the account
+screens ship, so C5's Trust Score can be *derived* rather than decorated. The shop a
+supplier already sees in their repeat-buyer table is the same record as the customer who
+placed the orders — one history, two sides, no way for them to disagree. And the join a
+real orders table will need is already `customer.buyerId`.
+
+Four consumer accounts carry **no** history on purpose. A homeowner who registered last
+week has no orders, and every screen has to read correctly for them too — that is the
+state every real new user starts in.
+
+### Entitlements are one table, read three ways
+
+`ACCESS_MATRIX` in `lib/schemas/membership.ts` is §9.12's access matrix as data. The
+comparison table shown while choosing a membership is a mapping of it, and C2's `can()`
+will read the same rows. The classic failure in a tiered product is a pricing page
+promising what the gate does not grant, and that happens the moment the marketing table
+and the entitlement check are two lists.
+
+The tiers are declared in C1 rather than C2 because registration needs a real comparison
+to show. Nothing reads them as an entitlement yet — that is C2.
+
+### Free discovery stayed free
+
+§9.40: *"Do not charge simply for basic discovery."* Nothing that was public before C1 is
+gated now. The access matrix marks which surfaces will be, and every one of them is new —
+detailed supplier and product intelligence, supplier contact, advanced comparison, market
+price intelligence, premium quotation. Gating search, categories or price bands would have
+been a regression dressed up as a feature.
+
+### Three components extracted rather than copied
+
+The second wizard is what forced the question, and copying would have been the cheaper
+mistake:
+
+| Component | Was |
+| --- | --- |
+| `components/shared/step-frame.tsx` | Inside the onboarding folder, taking a typed `OnboardingStepId` for its back link. Now takes `backHref` as a plain string, which was the only thing tying it to one wizard |
+| `components/shared/otp-field.tsx` | Inline in the manufacturer's verify-phone step — the field, the resend timer and the demo hint |
+| `components/shared/plan-picker.tsx` | `package-picker.tsx`, importing `SUBSCRIPTION_PACKAGES` directly. Now takes any tier set, so supplier packages and customer memberships share one price card and one comparison table |
+
+### The customer level is a pill, not a new seal
+
+The scalloped mark in `verified-mark.tsx` means one specific thing here: Buildex checked a
+company against BRS, KRA and IPRS. Minting three more seal variants for customer levels
+would either dilute that or be mistaken for it, on a marketplace whose whole product is
+knowing what a badge actually attests to. So a level reads as a `StatusPill`, and the seal
+appears beside it only from `verified_member` up, where a real check has happened.
+
+### Services is scaffolded, not faked
+
+§9.17 lists a service and a FundiSmart professional among the eight things a customer
+searches for, and the platform holds no professional data at all. The tab is present with
+a "soon" marker and leads to a page describing what it will hold.
+
+That beat both alternatives. Leaving it out means retrofitting a whole category of thing
+into the marketplace's top-level navigation after customers have learned its shape.
+Filling it with invented fundis would put fabricated ratings beside the counted numbers
+everywhere else — exactly what `lib/rules/suppliers.ts` refuses to do for suppliers.
+
+### Honest about what is not built
+
+The dashboard names the four things Chapter 9 puts on it that later phases build — wallet
+and tokens, quotations, orders, and the Trust Score and Business Passport — rather than
+showing them as empty widgets. A wallet you cannot put money into is worse than no wallet:
+it teaches a reviewer to distrust every other number on the page.
+
+Every account screen also states that this is a demo session held in the browser and not
+authentication, the way the admin console already does.
 
 ## Verification
 

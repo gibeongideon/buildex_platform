@@ -55,7 +55,7 @@ function demandByProduct(): Map<string, number> {
   return map;
 }
 
-function publicListings(): MarketplaceListing[] {
+export function publicListings(): MarketplaceListing[] {
   const { manufacturers, products } = getSnapshot();
   const byId = new Map(manufacturers.map((m) => [m.id, m]));
   const demand = demandByProduct();
@@ -325,6 +325,7 @@ export const marketplaceRepo: MarketplaceRepo = {
 // ---------------------------------------------------------------------------
 
 const RECENT_LIMIT = 24;
+const RECENT_SEARCH_LIMIT = 12;
 
 export const browsingRepo: BrowsingRepo = {
   async recent(limit = 8) {
@@ -348,8 +349,32 @@ export const browsingRepo: BrowsingRepo = {
     }));
   },
 
+  async recentSearches(limit = 6) {
+    await sleep(FAST);
+    return getSnapshot().recentSearches.slice(0, limit);
+  },
+
+  async recordSearch(term) {
+    const cleaned = term.trim();
+    // A blank submit is not a search, and neither is one character. Recording
+    // them would fill the rail with noise the customer never meant to keep.
+    if (cleaned.length < 2) return;
+
+    mutate((db) => ({
+      ...db,
+      recentSearches: [
+        cleaned,
+        // Case-insensitive de-duplication: "cement" and "Cement" are the same
+        // search, and showing both makes the list look broken.
+        ...db.recentSearches.filter(
+          (existing) => existing.toLowerCase() !== cleaned.toLowerCase(),
+        ),
+      ].slice(0, RECENT_SEARCH_LIMIT),
+    }));
+  },
+
   async clear() {
-    mutate((db) => ({ ...db, recentProductIds: [] }));
+    mutate((db) => ({ ...db, recentProductIds: [], recentSearches: [] }));
   },
 };
 

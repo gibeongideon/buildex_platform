@@ -40,6 +40,10 @@ already separated means that never has to be untangled later.
 ```text
 app/
   (public)/               Corporate site — platform overview, supplier acquisition
+  (account)/              The buying side — Chapter 9
+    join/                 Customer registration, four steps, its own focused layout
+    account/              The customer's own area — overview, and the sections
+                          C2–C6 fill in
   (marketplace)/          Buyer-facing marketplace, with its own storefront chrome
     marketplace/          Home: search hero, category rail, panel row, demand grid
       ask/                Ask AI — plain-language sourcing (see below)
@@ -63,6 +67,17 @@ app/
 components/
   ui/                     Primitives — button, form fields, cards, pills, chips
   shared/                 Composed, product-aware components
+
+  Two of these are shared by *both* wizards, and were extracted the moment the
+  second one needed them rather than copied:
+
+  shared/step-frame.tsx   StepShell + StepSkeleton. Takes `backHref` as a plain
+                          string, which is the one thing that used to tie it to
+                          manufacturer onboarding
+  shared/otp-field.tsx    The six-digit field, resend timer and demo hint
+  shared/plan-picker.tsx  PlanCards / PlanComparison / BillingCycleToggle, over
+                          any tier set — supplier packages or customer
+                          memberships. See the note in the file
 
   Reach for these before writing a list screen — each replaced between five and
   sixty-six hand-written copies, and a new copy is how they drift apart again:
@@ -151,6 +166,9 @@ Component  ──►  lib/data (repository interface)  ──►  mock implement
 | `SessionRepo` | Which demo role and manufacturer is "signed in" — four internal roles, each owning a console section |
 | `ActivityRepo` | The platform-wide timeline, filterable by kind, actor, supplier, date and text — derived, see below |
 | `AdminRepo` | Cross-entity counts, the exceptions list, and the joined rows the console's tables need |
+| `CustomerRepo` | The buying side: current customer, fetch, list, create from a registration draft, update, membership, demo sign-in |
+| `RegistrationRepo` | Load, save and clear the in-progress registration — same functional-patch shape as `OnboardingRepo`, for the same reason |
+| `OfferRepo` | Offers and member deals, resolved to live listings at the customer's own tier |
 
 ### Two rules the marketplace depends on
 
@@ -251,6 +269,51 @@ own decision, and reinstating a suspended supplier never pushes anything live.
 **Suspension outranks the pipeline.** `deriveStatus()` reads only the checks, so a later
 check movement would silently un-suspend a suspended manufacturer. `isAdministrativeHold()`
 is asked first by anything that writes status.
+
+**Customers are seeded from the delivery history that already existed.**
+`lib/data/fixtures/demand.ts` has generated a deterministic year of deliveries against a
+fixed pool of buying shops since Phase 2 — county, quantity, value and date, priced
+through each product's own bands. `lib/data/fixtures/customers.ts` seeds accounts from
+that same `BUYERS` list, using the exported `buyerIdFor()` so the ids line up by
+construction.
+
+Three things fall out of that. A seeded customer has genuine commercial history on the day
+the account screens ship, so the Trust Profile and spend analytics can be *derived* rather
+than decorated. The shop a supplier sees in their existing repeat-buyer table is the same
+record as the customer who placed the orders — one history, two sides, no way for them to
+disagree. And when a real orders table arrives at the cutover the join is already
+`customer.buyerId`.
+
+The four consumer accounts after the trade buyers deliberately carry **no** history. A
+homeowner who registered last week has no orders, and every account screen has to read
+correctly for them too — that is the state every real new user starts in.
+
+**Entitlements are one table, read three ways.** `ACCESS_MATRIX` in
+`lib/schemas/membership.ts` is Chapter 9 §9.12 as data. The public pricing page, the
+in-app upgrade screen and (from C2) `can()` all read it, and `MEMBERSHIP_PLAN_FEATURES`
+maps it into the shape `PlanComparison` renders. The classic failure in a tiered product
+is a pricing page promising what the gate does not grant, which happens the moment the
+marketing table and the entitlement check are two lists. Here a row *is* the entitlement.
+
+**A verification level is derived; membership is bought.** §9.42 is explicit that
+"membership does not equal trust; trust is earned", so `deriveVerificationLevel()` in
+`lib/rules/customers.ts` computes the level from what has actually been verified and how
+much the account has traded. A Build Business subscriber who has verified nothing is still
+`registered`. `strategic` is the one exception — it means a contractual relationship and
+enhanced due diligence carried out by people, so it is an administrative grant that
+outranks derivation, the same shape as `isAdministrativeHold()` on the supplier side.
+
+**Offers resolve through `publicListings()`.** An offer names a category and optionally a
+region rather than carrying its own prices, and `offerRepo.list()` drops any offer whose
+category has nothing live behind it. So the rail can never advertise an empty shelf, and
+suspending a supplier empties the offer along with the search results. A promotions table
+with its own prices would be a second source of truth about what things cost.
+
+**The customer level is a pill, not a new seal.** The scalloped mark in
+`components/shared/verified-mark.tsx` means one specific thing here — Buildex checked a
+company against BRS, KRA and IPRS. Minting three more seal variants for customer levels
+would either dilute that or be mistaken for it. So a level reads as a `StatusPill`, and
+the seal appears beside it only from `verified_member` up, where a real check has happened.
 
 ### Enforcement
 
@@ -595,5 +658,11 @@ The status spread is intentional: the ops verification queue (Phase 3) and the m
 existing KRA PIN (`P051234567M`, Savannah Cement Works) for the duplicate-detection path
 to be walkable.
 
-Data is persisted to `localStorage` under `buildex.mock.v2`. Bump that key when the shape
+Data is persisted to `localStorage` under `buildex.mock.v9`. Bump that key when the shape
 of seeded data changes, or old persisted data will win.
+
+One thing worth knowing about that store: **the seed is only written to `localStorage` on
+the first mutation.** A visit that reads but never writes leaves nothing persisted, so
+anything trying to *patch* stored state has to write a partial object instead and let
+`hydrate()` merge it over a fresh seed — which is what `signOut()` in
+`e2e/customer-account.spec.ts` does.

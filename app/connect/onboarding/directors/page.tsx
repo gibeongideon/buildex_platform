@@ -21,7 +21,8 @@ import {
   type DirectorsStep,
 } from "@/lib/schemas/manufacturer";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
-import { StepShell, StepSkeleton } from "../step-frame";
+import { StepShell, StepSkeleton } from "@/components/shared/step-frame";
+import { stepHref } from "../steps";
 
 /*
   Directors and shareholding.
@@ -106,7 +107,7 @@ export default function DirectorsStepPage() {
     <StepShell
       title="Directors & ownership"
       description="List everyone who appears on your CR12. Shareholding must add up to 100% — a company search that doesn't reconcile is the single most common sign of a fabricated structure, so Buildex checks it before anything else."
-      back="company"
+      backHref={stepHref("company")}
       onSubmit={onSubmit}
       submitting={saving || form.formState.isSubmitting}
     >

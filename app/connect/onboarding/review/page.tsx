@@ -20,7 +20,7 @@ import { manufacturerRepo } from "@/lib/data";
 import { formatDate } from "@/lib/utils";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
 import { stepHref } from "../steps";
-import { StepShell, StepSkeleton } from "../step-frame";
+import { StepShell, StepSkeleton } from "@/components/shared/step-frame";
 import { DataTable } from "@/components/ui/data-table";
 
 function SectionCard({
@@ -89,7 +89,7 @@ export default function ReviewStepPage() {
     <StepShell
       title="Review and submit"
       description="Check everything below before it goes to Buildex Operations. You can still edit any section — once submitted, changes need to go through your account manager."
-      back="documents"
+      backHref={stepHref("documents")}
       onSubmit={onSubmit}
       submitting={submitting}
       primaryLabel="Submit application"

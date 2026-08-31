@@ -33,6 +33,12 @@ export {
   insightsRepo,
 } from "./mock/marketplace";
 
+export {
+  customerRepo,
+  registrationRepo,
+  offerRepo,
+} from "./mock/customers";
+
 export { activityRepo } from "./mock/activity";
 export { supplierRepo } from "./mock/suppliers";
 export { adminRepo } from "./mock/admin";
@@ -56,6 +62,8 @@ export type {
   CampaignRepo,
   CategoryGap,
   CountyDemand,
+  CustomerFilter,
+  CustomerRepo,
   DemandFilter,
   DemandPoint,
   DemoSession,
@@ -71,6 +79,7 @@ export type {
   MarketplaceListing,
   MarketplaceRepo,
   MarketplaceSort,
+  OfferRepo,
   OnboardingDraft,
   OnboardingRepo,
   OnboardingStepId,
@@ -78,6 +87,10 @@ export type {
   ProductPerformance,
   ProductRepo,
   RegionDemand,
+  RegistrationDraft,
+  RegistrationPatch,
+  RegistrationRepo,
+  RegistrationStepId,
   RepeatBuyer,
   Role,
   SessionRepo,

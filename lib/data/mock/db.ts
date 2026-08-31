@@ -3,12 +3,20 @@ import type { Product } from "@/lib/schemas/product";
 import type { Enquiry } from "@/lib/schemas/enquiry";
 import type { Campaign } from "@/lib/schemas/campaign";
 import type { Vendor, VendorBill } from "@/lib/schemas/supplier";
-import type { DemoSession, OnboardingDraft } from "@/lib/data/types";
+import type { Customer } from "@/lib/schemas/customer";
+import type { Offer } from "@/lib/schemas/offer";
+import type {
+  DemoSession,
+  OnboardingDraft,
+  RegistrationDraft,
+} from "@/lib/data/types";
 import { seedManufacturers } from "@/lib/data/fixtures/manufacturers";
 import { seedProducts } from "@/lib/data/fixtures/products";
 import { seedEnquiries } from "@/lib/data/fixtures/enquiries";
 import { seedCampaigns } from "@/lib/data/fixtures/campaigns";
 import { seedVendorBills, seedVendors } from "@/lib/data/fixtures/suppliers";
+import { DEMO_CUSTOMER_ID, seedCustomers } from "@/lib/data/fixtures/customers";
+import { seedOffers } from "@/lib/data/fixtures/offers";
 
 /*
   In-memory database for the mockup, persisted to localStorage so a demo
@@ -20,7 +28,7 @@ import { seedVendorBills, seedVendors } from "@/lib/data/fixtures/suppliers";
 */
 
 /* Bump when the shape of seeded data changes, or old persisted data wins. */
-const STORAGE_KEY = "buildex.mock.v8";
+const STORAGE_KEY = "buildex.mock.v9";
 
 export type MockDb = {
   manufacturers: Manufacturer[];
@@ -30,10 +38,16 @@ export type MockDb = {
   /** Buildex Interiors' own purchase ledger. */
   vendors: Vendor[];
   vendorBills: VendorBill[];
+  /** The buying side of the marketplace — Chapter 9. */
+  customers: Customer[];
+  offers: Offer[];
   draft: OnboardingDraft | null;
+  registration: RegistrationDraft | null;
   session: DemoSession;
   /** Product ids, most recent first. Powers the browsing-history rail. */
   recentProductIds: string[];
+  /** Search terms, most recent first — §9.16, §9.26. */
+  recentSearches: string[];
 };
 
 export function emptyDraft(): OnboardingDraft {
@@ -52,6 +66,19 @@ export function emptyDraft(): OnboardingDraft {
   };
 }
 
+export function emptyRegistration(): RegistrationDraft {
+  return {
+    customerId: null,
+    currentStep: "account",
+    completedSteps: [],
+    account: null,
+    phoneVerified: false,
+    profile: null,
+    membership: null,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
 function seed(): MockDb {
   return {
     manufacturers: seedManufacturers(),
@@ -60,9 +87,25 @@ function seed(): MockDb {
     campaigns: seedCampaigns(),
     vendors: seedVendors(),
     vendorBills: seedVendorBills(),
+    customers: seedCustomers(),
+    offers: seedOffers(),
     draft: null,
-    session: { role: "guest", manufacturerId: null },
+    registration: null,
+    /*
+      The demo starts signed in as a seeded trade buyer.
+
+      A signed-out first load would make every account screen an empty state,
+      and the point of seeding customers from the delivery history is that the
+      screens have something true to show on the first click. Registering
+      through `/join` replaces this, and the demo panel can sign out.
+    */
+    session: {
+      role: "guest",
+      manufacturerId: null,
+      customerId: DEMO_CUSTOMER_ID,
+    },
     recentProductIds: [],
+    recentSearches: [],
   };
 }
 

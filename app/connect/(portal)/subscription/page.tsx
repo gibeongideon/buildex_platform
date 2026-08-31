@@ -4,15 +4,18 @@ import * as React from "react";
 import { PageHeader } from "@/components/shared/page-header";
 import {
   BillingCycleToggle,
-  PackageCards,
-  PackageComparison,
-} from "@/components/shared/package-picker";
+  PlanCards,
+  PlanComparison,
+} from "@/components/shared/plan-picker";
 import { Alert, Card, CardBody, CardHeader, CardTitle, Skeleton } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/button";
 import { Currency, DetailRow } from "@/components/shared/format";
 import { manufacturerRepo } from "@/lib/data";
 import { formatDate } from "@/lib/utils";
 import {
+  PACKAGE_PLAN_FEATURES,
+  SUBSCRIPTION_PACKAGES,
+  annualSavingMonths,
   packageMeta,
   packagePrice,
   productLimit,
@@ -90,20 +93,28 @@ export default function SubscriptionPage() {
             <BillingCycleToggle
               cycle={cycle}
               onChange={(nextCycle) => {
-                setChoice({ pkg: selected, cycle: nextCycle });
+                setChoice({ pkg: selected, cycle: nextCycle as BillingCycle });
                 setConfirmed(false);
               }}
+              savingMonths={annualSavingMonths("premium")}
             />
-            <PackageCards
+            <PlanCards
+              tiers={SUBSCRIPTION_PACKAGES}
               selected={selected}
               cycle={cycle}
               onSelect={(pkg) => {
-                setChoice({ pkg, cycle });
+                setChoice({ pkg: pkg as PackageKey, cycle });
                 setConfirmed(false);
               }}
-              currentPackage={current?.package}
+              currentKey={current?.package}
+              label="Subscription package"
             />
-            <PackageComparison highlight={selected} />
+            <PlanComparison
+              tiers={SUBSCRIPTION_PACKAGES}
+              features={PACKAGE_PLAN_FEATURES}
+              highlight={selected}
+              title="Compare packages"
+            />
           </div>
 
           <div className="space-y-6">

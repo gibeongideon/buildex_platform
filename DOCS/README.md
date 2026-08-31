@@ -16,7 +16,7 @@ copy says "the Buildex Connect marketplace".
 
 | Document | What it covers |
 | --- | --- |
-| [01 — Implementation Plan](./01-implementation-plan.md) | Phases 0–9, scope of each, decisions taken, requirements traceability |
+| [01 — Implementation Plan](./01-implementation-plan.md) | Phases 0–9 and the Chapter 9 phases C1–C7, scope of each, decisions taken, requirements traceability |
 | [02 — User Journeys](./02-user-journeys.md) | Step-by-step journeys A–G across all three businesses |
 | [03 — Architecture](./03-architecture.md) | Stack, the data seam, design system, conventions, backend cutover guide |
 | [04 — Delivered](./04-delivered.md) | What Phases 0–3 actually shipped, verification evidence, defects found and fixed |
@@ -39,16 +39,39 @@ Source requirements live in [`requirements_reference/`](../requirements_referenc
 | 1 | Buildex Connect — manufacturer onboarding | **Done** |
 | 2 | Buildex Connect — marketplace & manufacturer portal | **Done** |
 | 3 | Buildex Admin — ops, verification queue, platform activity | **Done** |
-| 4 | Buildex Interiors — hardware shop portal & supply | Not started |
+| 4 | Buildex Interiors — hardware shop supply | Superseded by C4 |
 | 5 | Buildex Capital — hardware-facing credit | Not started |
 | 6 | Buildex Capital — internal credit & risk console | Not started |
 | 7 | Public marketing site (entry pages already exist) | Partial |
 | 8 | Consumer intelligence | Not started |
 | 9 | Backend integration cutover | Not started |
 
+### Chapter 9 — the Trust Engine and the customer front end
+
+`requirements_reference/BUILDEX CONNECT FRONT END CHAPTER 9.docx` specifies the *buying*
+side of Buildex Connect, which Phases 0–3 left almost entirely unbuilt: the marketplace
+could be browsed and enquired against, but the buyer was anonymous — no account, no
+membership, no wallet, no order, no trust profile.
+
+| Phase | Scope | Status |
+| --- | --- | --- |
+| C1 | Customer identity — the `Customer` record, registration, verification levels, the account area, the Chapter 9 front door | **Done** |
+| C2 | Membership and the access gate — Build Free/Member/Pro/Business, the §9.12 access matrix, `can()` | Not started |
+| C3 | Wallet and the KES 25 membership-token engine | Not started |
+| C4 | Commerce — buyer quote inbox, cart, checkout, per-supplier orders, delivery, authorized users | Not started |
+| C5 | Trust — the composed Trust Score, Prestige Profile, Buildex Supplier Score | Not started |
+| C6 | Intelligence — personalisation, alternatives, procurement analytics, Business Passport, the §9.35 KPIs | Not started |
+| C7 | FundiSmart — the services directory and service enquiries | Not started |
+
+**C4 supersedes the old Phase 4 plan.** There is no separate `/shop/*` hardware portal: a
+hardware shop is a `Customer` whose `customerType` says so, trading on the Build Business
+tier. One registration, one wallet, one dashboard, entitlements varying by membership and
+verification level rather than by which portal you signed into.
+
 **This build is a mockup.** There is no database, no authentication, no M-Pesa and no
 Odoo. All data is held in the browser behind repository interfaces designed to be
-swapped for a real backend — see [03 — Architecture](./03-architecture.md).
+swapped for a real backend — see [03 — Architecture](./03-architecture.md). A "signed-in
+customer" is a demo session in `localStorage`, and every account screen says so.
 
 ---
 
@@ -108,6 +131,20 @@ colour and standing green scaffolding reads as "everything is fine" rather than
 One definition drives it — `DEMO_SECTIONS` in
 `components/shared/demo-panel.tsx`. Adding a section is one array entry, and
 `NEXT_PUBLIC_DEMO_MODE=false` removes the whole thing.
+
+**As a customer (Chapter 9):**
+
+1. `/marketplace` — the front door carries the customer promise, the six verbs, and the
+   three-step entry journey (which stands down once you are signed in).
+2. `/join` — four steps: account, phone OTP, where you buy and what kind of buyer you
+   are, membership. Pick "Hardware shop" or "Contractor" on the third step and the
+   business fields appear; pick "Homeowner" and they never do.
+3. `/account` — membership, the verification level you have *earned* rather than bought,
+   what would move it, offers at your tier, suppliers who actually reach your region, and
+   your recent searches. The four things Chapter 9 puts here that later phases build are
+   named rather than mocked up with invented figures.
+4. The account control in the marketplace header names the account. Sign out by clearing
+   `session.customerId` and it offers registration instead.
 
 **As a buyer (hardware shop):**
 

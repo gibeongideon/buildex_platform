@@ -25,7 +25,7 @@ import {
 } from "@/lib/schemas/verification";
 import type { DocumentTypeKey } from "@/lib/schemas/document";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
-import { StepShell, StepSkeleton } from "../step-frame";
+import { StepShell, StepSkeleton } from "@/components/shared/step-frame";
 import { OpsReviewNote } from "@/components/shared/ops-review-note";
 import { QueryError } from "@/components/ui/query-state";
 

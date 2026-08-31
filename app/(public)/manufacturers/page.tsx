@@ -3,8 +3,11 @@ import Link from "next/link";
 import { ArrowRight, BadgeCheck, MapPin, ShieldCheck, Store, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BuildexMark } from "@/components/shared/brand";
-import { PackageComparison } from "@/components/shared/package-picker";
-import { SUBSCRIPTION_PACKAGES } from "@/lib/schemas/subscription";
+import { PlanComparison } from "@/components/shared/plan-picker";
+import {
+  PACKAGE_PLAN_FEATURES,
+  SUBSCRIPTION_PACKAGES,
+} from "@/lib/schemas/subscription";
 import { STEPS } from "@/app/connect/onboarding/steps";
 
 export const metadata: Metadata = {
@@ -151,7 +154,11 @@ export default function ManufacturersPage() {
           </div>
 
           <div className="mt-6">
-            <PackageComparison />
+            <PlanComparison
+              tiers={SUBSCRIPTION_PACKAGES}
+              features={PACKAGE_PLAN_FEATURES}
+              title="Compare packages"
+            />
           </div>
         </div>
       </section>

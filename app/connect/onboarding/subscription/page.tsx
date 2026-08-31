@@ -4,13 +4,19 @@ import * as React from "react";
 import { Alert } from "@/components/ui/primitives";
 import {
   BillingCycleToggle,
-  PackageCards,
-  PackageComparison,
-} from "@/components/shared/package-picker";
+  PlanCards,
+  PlanComparison,
+} from "@/components/shared/plan-picker";
 import { manufacturerRepo } from "@/lib/data";
-import type { BillingCycle, PackageKey } from "@/lib/schemas/subscription";
+import {
+  PACKAGE_PLAN_FEATURES,
+  SUBSCRIPTION_PACKAGES,
+  annualSavingMonths,
+  type BillingCycle,
+  type PackageKey,
+} from "@/lib/schemas/subscription";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
-import { StepShell, StepSkeleton } from "../step-frame";
+import { StepShell, StepSkeleton } from "@/components/shared/step-frame";
 
 export default function SubscriptionStepPage() {
   const { ready, draft } = useStepGuard("subscription");
@@ -53,14 +59,24 @@ export default function SubscriptionStepPage() {
       <div className="space-y-6">
         <BillingCycleToggle
           cycle={cycle}
-          onChange={(nextCycle) => setChoice({ pkg: selected, cycle: nextCycle })}
+          onChange={(nextCycle) =>
+            setChoice({ pkg: selected, cycle: nextCycle as BillingCycle })
+          }
+          savingMonths={annualSavingMonths("premium")}
         />
-        <PackageCards
+        <PlanCards
+          tiers={SUBSCRIPTION_PACKAGES}
           selected={selected}
           cycle={cycle}
-          onSelect={(pkg) => setChoice({ pkg, cycle })}
+          onSelect={(pkg) => setChoice({ pkg: pkg as PackageKey, cycle })}
+          label="Subscription package"
         />
-        <PackageComparison highlight={selected} />
+        <PlanComparison
+          tiers={SUBSCRIPTION_PACKAGES}
+          features={PACKAGE_PLAN_FEATURES}
+          highlight={selected}
+          title="Compare packages"
+        />
 
         <Alert tone="info" title="Pricing shown is indicative">
           Package pricing is still with Management and Commercial for approval (Action register:

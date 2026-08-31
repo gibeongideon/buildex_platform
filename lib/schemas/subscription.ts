@@ -78,6 +78,23 @@ export const PACKAGE_FEATURES: PackageFeature[] = [
   { label: "Support", free: "Email", basic: "Email", premium: "Priority", vip: "Named contact" },
 ];
 
+/**
+ * `PACKAGE_FEATURES` in the shape the shared plan components read.
+ *
+ * A mapping rather than a second list: the features are still declared once
+ * above, and `PlanComparison` stays ignorant of whether it is comparing
+ * supplier packages or customer memberships.
+ */
+export const PACKAGE_PLAN_FEATURES = PACKAGE_FEATURES.map((feature) => ({
+  label: feature.label,
+  values: {
+    free: feature.free,
+    basic: feature.basic,
+    premium: feature.premium,
+    vip: feature.vip,
+  },
+}));
+
 export const subscriptionSchema = z.object({
   package: packageKeySchema,
   billingCycle: billingCycleSchema,

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutGrid, Search, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { browsingRepo } from "@/lib/data";
 import { PRODUCT_CATEGORIES } from "@/lib/schemas/common";
 import { useHomeScope, type SearchScope } from "./home-scope";
 
@@ -16,9 +17,17 @@ import { useHomeScope, type SearchScope } from "./home-scope";
   — a product, a supplier, a place to buy from — and the second is the term.
 
   The reference site's tabs are AI Mode / Products / Manufacturers / Worldwide.
-  Ours are Ask AI / Products / Manufacturers / Regions — "Worldwide" becomes
-  "Regions" because Buildex trades inside one country, where the useful question
-  is which region a supplier delivers to.
+  Ours are Ask AI / Products / Manufacturers / Regions / Services — "Worldwide"
+  becomes "Regions" because Buildex trades inside one country, where the useful
+  question is which region a supplier delivers to, and Services is the fifth
+  because Chapter 9 §9.17 lists a service and a FundiSmart professional as two
+  of the eight things a customer searches for.
+
+  Services carries a "soon" marker and leads to a page that says what it will
+  hold. It is here now rather than added later on purpose: the tab row is the
+  marketplace's top-level information architecture, and retrofitting a category
+  of thing into it after customers have learned the shape is a worse change than
+  showing an honest placeholder.
 
   The tabs behave in the two ways the reference site's do, depending on where
   they are:
@@ -35,30 +44,51 @@ import { useHomeScope, type SearchScope } from "./home-scope";
 
 export type { SearchScope };
 
-const TABS: { value: SearchScope; label: string; href: string; hint: string }[] = [
+const TABS: {
+  value: SearchScope;
+  label: string;
+  href: string;
+  hint: string;
+  /** The line under the field, where no category control takes its place. */
+  subhint: string;
+  /** Scaffolded, not yet carrying data — the shell's `upcoming` convention. */
+  soon?: boolean;
+}[] = [
   {
     value: "ask",
     label: "Ask AI",
     href: "/marketplace/ask",
     hint: "Describe what you need — “400 bags of cement to Machakos”…",
+    subhint: "Plain language — quantity, material, destination",
   },
   {
     value: "products",
     label: "Products",
     href: "/marketplace/search",
     hint: "Search cement, rebar, tiles, cable…",
+    subhint: "Search the whole catalogue",
   },
   {
     value: "manufacturers",
     label: "Manufacturers",
     href: "/marketplace/manufacturers",
     hint: "Search suppliers by name, county or category…",
+    subhint: "Search verified suppliers",
   },
   {
     value: "regions",
     label: "Regions",
     href: "/marketplace/regions",
     hint: "Find suppliers who deliver to…",
+    subhint: "Find who delivers where you build",
+  },
+  {
+    value: "services",
+    label: "Services",
+    href: "/marketplace/services",
+    hint: "Find a fundi — gypsum installer, mason, plumber…",
+    subhint: "Trades and FundiSmart professionals — arriving soon",
+    soon: true,
   },
 ];
 
@@ -76,6 +106,7 @@ export function scopeForPath(pathname: string): SearchScope {
   if (pathname.startsWith("/marketplace/ask")) return "ask";
   if (pathname.startsWith("/marketplace/manufacturers")) return "manufacturers";
   if (pathname.startsWith("/marketplace/regions")) return "regions";
+  if (pathname.startsWith("/marketplace/services")) return "services";
   return "products";
 }
 
@@ -180,6 +211,17 @@ export function SearchScopeTabs({
                 AI
               </sup>
             ) : null}
+            {tab.soon ? (
+              <>
+                <sup
+                  className="ml-1 font-display text-[0.5em] font-bold uppercase tracking-wide text-subtle-foreground"
+                  aria-hidden="true"
+                >
+                  Soon
+                </sup>
+                <span className="sr-only"> — coming soon</span>
+              </>
+            ) : null}
             {isActive ? (
               <span
                 aria-hidden="true"
@@ -218,8 +260,19 @@ export function SearchHero({
 
   const active = TABS.find((t) => t.value === scope) ?? TABS[1];
 
+  /*
+    Recorded here, where a customer actually performs a search, rather than on
+    the results page when a `?q=` appears. Those are different events: arriving
+    on a link someone sent you is not one of your searches, and remembering it
+    as one would fill the dashboard's list with other people's terms.
+  */
+  function remember(term: string) {
+    void browsingRepo.recordSearch(term);
+  }
+
   function submit(event: React.FormEvent) {
     event.preventDefault();
+    remember(query);
     const base = hrefFor(scope, query);
     if (scope === "products" && category) {
       const sep = base.includes("?") ? "&" : "?";
@@ -307,11 +360,7 @@ export function SearchHero({
                 </label>
               ) : (
                 <p className="min-w-0 truncate text-sm text-muted-foreground">
-                  {scope === "ask"
-                    ? "Plain language — quantity, material, destination"
-                    : scope === "manufacturers"
-                      ? "Search verified suppliers"
-                      : "Find who delivers where you build"}
+                  {active.subhint}
                 </p>
               )}
 
@@ -333,6 +382,7 @@ export function SearchHero({
             <Link
               key={suggestion}
               href={`/marketplace/search?q=${encodeURIComponent(suggestion)}`}
+              onClick={() => remember(suggestion)}
               className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-brand hover:text-brand"
             >
               {suggestion}

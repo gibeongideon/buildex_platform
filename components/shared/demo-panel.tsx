@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Store,
   Truck,
+  UserPlus,
   X,
 } from "lucide-react";
 import { resetDemoData } from "@/lib/data";
@@ -92,6 +93,18 @@ export const DEMO_SECTIONS: DemoSection[] = [
     ],
   },
   {
+    key: "customer",
+    title: "Customer account",
+    href: "/account",
+    icon: UserPlus,
+    what: "The buying side of the marketplace: who a customer is, what their membership opens up, and the verification level they have earned rather than bought.",
+    who: "Anyone buying materials — a homeowner, a fundi, a contractor or a hardware shop",
+    tryThis: [
+      "Join at /join — four steps, and business details are only asked for if you say you are a business",
+      "Verification level is derived, so it moves when you complete your profile",
+    ],
+  },
+  {
     key: "marketplace",
     title: "The marketplace",
     href: "/marketplace",
@@ -101,6 +114,7 @@ export const DEMO_SECTIONS: DemoSection[] = [
     tryThis: [
       "Request a quote reads one sentence and fills the form in",
       "Compare up to four listings side by side at your own order quantity",
+      "The offers rail shows more once an account is on a paid membership",
     ],
   },
   {

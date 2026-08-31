@@ -9,7 +9,7 @@ import { manufacturerRepo, productRepo } from "@/lib/data";
 import { useQuery } from "@/lib/data/hooks";
 import { canListProducts, canTransact } from "@/lib/schemas/verification";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
-import { StepShell, StepSkeleton } from "../step-frame";
+import { StepShell, StepSkeleton } from "@/components/shared/step-frame";
 
 export default function FirstListingStepPage() {
   const { ready, draft } = useStepGuard("first-listing");

@@ -8,7 +8,7 @@ import { Card, CardBody, CheckboxRow, Separator } from "@/components/ui/primitiv
 import { Field, FieldHint, Input, Label } from "@/components/ui/field";
 import { accountStepSchema, type AccountStep } from "@/lib/schemas/manufacturer";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
-import { StepShell, StepSkeleton } from "../step-frame";
+import { StepShell, StepSkeleton } from "@/components/shared/step-frame";
 
 export default function AccountStepPage() {
   const { ready, draft } = useStepGuard("account");

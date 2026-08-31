@@ -5,20 +5,24 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, Skeleton } from "@/components/ui/primitives";
-import { stepHref } from "./steps";
-import type { OnboardingStepId } from "@/lib/data";
 
 /*
-  Common frame for every wizard step: heading, a single card of content, and
-  one row of actions. Keeping the frame in one place is what stops the nine
-  steps drifting apart in spacing, button order and back-link behaviour.
+  Common frame for a wizard step: heading, a single card of content, and one
+  row of actions. Keeping the frame in one place is what stops the steps
+  drifting apart in spacing, button order and back-link behaviour.
+
+  Shared by both wizards in the product — manufacturer onboarding and customer
+  registration. It used to live inside the onboarding folder and take a typed
+  `OnboardingStepId` for its back link, which is the one thing that stopped the
+  customer wizard using it. `backHref` is a plain string instead, so the frame
+  no longer needs to know which wizard it is framing.
 */
 
 export function StepShell({
   title,
   description,
   children,
-  back,
+  backHref,
   primaryLabel = "Continue",
   primaryDisabled,
   submitting,
@@ -29,7 +33,7 @@ export function StepShell({
   title: string;
   description?: React.ReactNode;
   children: React.ReactNode;
-  back?: OnboardingStepId;
+  backHref?: string;
   primaryLabel?: string;
   primaryDisabled?: boolean;
   submitting?: boolean;
@@ -51,9 +55,9 @@ export function StepShell({
 
       {onSubmit ? (
         <div className="mt-6 flex items-center justify-between gap-3">
-          {back ? (
+          {backHref ? (
             <Button variant="ghost" size="md" asChild>
-              <Link href={stepHref(back)}>
+              <Link href={backHref}>
                 <ArrowLeft aria-hidden="true" />
                 Back
               </Link>

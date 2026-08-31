@@ -110,11 +110,16 @@ Phases 5–6, and the console says so on its overview rather than showing an emp
 The hardware-shop directory also waits: hardware shops are Phase 4, so there is nothing
 to direct yet.
 
-### Phase 4 — Buildex Interiors: Hardware Shop Portal & Supply
+### Phase 4 — Buildex Interiors: Hardware Shop Portal & Supply — **superseded by C4**
 
-Hardware onboarding (KYB plus owner ID verification), marketplace browse/search/filter by
-region and category, product detail with tiered pricing, cart and order placement, order
-tracking, delivery notes, inventory and stock-movement views.
+This phase planned a separate `/shop/*` portal for hardware shops. Chapter 9 replaced that
+premise: a hardware shop is a **customer** with a business type and a business membership,
+not a different species of user. Its scope — cart, order placement, order tracking,
+delivery notes — now lands in **C4** against the one `Customer` record. Inventory and
+stock-movement views stay out until Phase 8 needs them.
+
+Two account types would have meant two registrations, two wallets and two dashboards to
+keep in step, and the first thing to drift would have been the entitlements.
 
 ### Phase 5 — Buildex Capital: Hardware-Facing Credit
 
@@ -154,6 +159,62 @@ Flip `lib/data/index.ts` one repository at a time — see
 
 ---
 
+## Chapter 9 — the Trust Engine & the customer front end
+
+`requirements_reference/BUILDEX CONNECT FRONT END CHAPTER 9.docx` specifies the buying
+side of Buildex Connect as a **trust engine** behind a search-first front door:
+
+```text
+IDENTIFY → VERIFY → PARTICIPATE → TRANSACT → LEARN → BUILD TRUST → UNLOCK VALUE
+```
+
+Phases 0–3 built the selling side. Every verb after `PARTICIPATE` needs an identified
+customer, and there was none — so almost the whole chapter was unbuilt. These phases add
+it, each independently demo-able, each behind the existing seam.
+
+### Decisions taken
+
+| Decision | Choice | Rationale |
+| --- | --- | --- |
+| Customer identity | One typed `Customer` carrying `customerType` | §9.4 makes customer type a *field*, not a product. A hardware shop is a customer with business verification and a business membership |
+| Commerce depth | Full — cart, checkout, per-supplier orders, delivery | §9.32's chain ends `QUOTE → ORDER → TRANSACTION → TRUST`; trust needs transaction history to be real rather than asserted |
+| FundiSmart | Its own late phase (C7), with the data shape and search scope designed in C1 | The tab row is the marketplace's top-level IA; retrofitting a category of thing into it later is worse than an honest placeholder |
+| Trust Score | Composed from held signals and always itemised | `lib/rules/suppliers.ts` refuses invented ratings because the platform has no reviews. §9.21 also requires the methodology to be "understandable and reviewable" |
+| Free discovery | Stays free | §9.40: "Do not charge simply for basic discovery." The gate applies only to *new* premium surfaces, never to what is public today |
+
+### Phases
+
+| Phase | Scope | §9.39 |
+| --- | --- | --- |
+| **C1 — Identity ✅ Done** | The `Customer` record and registration; four verification levels derived, never bought; the account area; the Chapter 9 front door with the customer promise, the three-step entry journey and the offers rail; recent searches; the Services scope scaffolded | 1 |
+| C2 — Membership & the gate | `MEMBERSHIP_TIERS` and `ACCESS_MATRIX` (§9.12), `can()` in `lib/rules/access.ts`, the access-gate component, member pricing (§9.27), member deals | 2a |
+| C3 — Wallet & tokens | Wallet (cash, tokens, ledger, statements), the KES 25 token engine — purchase, allocation, consumption, expiry, grants, refunds, audit | 2b |
+| C4 — Commerce | The buyer quote inbox the RFQ page already promises, cart, checkout, one `Order` per supplier, delivery tracking, authorized users and purchasing controls (§9.5) | 3 |
+| C5 — Trust | `lib/rules/trust.ts`, the customer Trust Profile and Prestige Profile (§9.20–9.21), the Buildex Supplier Score (§9.19) | 4 |
+| C6 — Intelligence | Personalisation (§9.26), "alternative to 18mm MDF" (§9.17), procurement analytics, the Business Passport (§9.22), the §9.35 KPI set | 5 |
+| C7 — FundiSmart | The professionals directory, service search and service enquiries | 5 |
+
+**Financial enablement (§9.39 phase 6) is not a new phase.** Credit-readiness and
+financing are Phases 5–6 above, and they stay blocked on the regulatory review recorded in
+[05 — Next Steps](./05-next-steps.md#blockers). C5 and C6 feed them; nothing here unblocks
+them, and the Business Passport must not imply a credit decision.
+
+### What C1 shipped
+
+| Requirement | Where it lives |
+| --- | --- |
+| §9.3 three-step entry journey | `components/marketplace/entry-steps.tsx` |
+| §9.4 account fields — email, phone OTP, physical address, county/town, customer type | `lib/schemas/customer.ts`, `app/(account)/join/**` |
+| §9.4 business information "progressive / required for business tiers" | `customerProfileStepSchema`'s `superRefine`, one place |
+| §9.6 four verification levels | `deriveVerificationLevel()` in `lib/rules/customers.ts`, shown by `components/shared/account-level.tsx` |
+| §9.2 customer promise, six verbs, public offers | `app/(marketplace)/marketplace-shell.tsx`, `lib/schemas/offer.ts`, `OfferRepo` |
+| §9.16 customer dashboard | `app/(account)/account/page.tsx` |
+| §9.17 service search scope | `components/marketplace/search-hero.tsx`, `ServicesSurface` |
+| §9.26 recent searches | `BrowsingRepo.recordSearch` / `recentSearches` |
+| §9.7–9.12 tier definitions and the access matrix | `lib/schemas/membership.ts` — declared in C1 because registration needs a real comparison; the gate that reads it is C2 |
+
+---
+
 ## Sequencing rationale
 
 The requirements set out an operating principle for the next phase:
@@ -182,7 +243,7 @@ Where each prioritised module from the requirements lands in this build.
 | P0 | Loan Tracker | 5–6 | Not started |
 | P0 | Wallet & Payments | 5 | Not started |
 | P0 | POS / Transaction Data | 4–5 | Not started |
-| P1 | Hardware Portal | 4 | Not started |
+| P1 | Hardware Portal | C4 | Not started — superseded, see Chapter 9 above |
 | P1 | Manufacturer Portal | 1–2 | **Done** — onboarding, marketplace, catalogue, enquiries, campaigns, insights |
 | P1 | Admin / Risk Dashboard | 3, 6 | Not started |
 | P2 | Consumer Intelligence | 8 | Not started |

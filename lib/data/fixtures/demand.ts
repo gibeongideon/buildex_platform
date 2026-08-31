@@ -109,7 +109,7 @@ const COUNTY_WEIGHT: Record<string, number> = {
   random put Mombasa Marine Hardware on a delivery into Embu, which reads as
   nonsense the moment anyone looks at the repeat-buyer table.
 */
-const BUYERS: { name: string; region: Region }[] = [
+export const BUYERS: { name: string; region: Region }[] = [
   { name: "Mwangi Hardware & Timber", region: "Nairobi Metro" },
   { name: "Thika Road Hardware", region: "Nairobi Metro" },
   { name: "Karen Building Merchants", region: "Nairobi Metro" },
@@ -130,6 +130,19 @@ const BUYERS: { name: string; region: Region }[] = [
   { name: "Western Depot Supplies", region: "Western" },
   { name: "Kakamega Builders Yard", region: "Western" },
 ];
+
+/**
+ * The id a delivery event carries for a buying shop.
+ *
+ * Exported because the customer fixture seeds accounts from `BUYERS` and needs
+ * the *same* ids: that is what makes a seeded customer's order history, spend
+ * and Trust Score the very events a supplier already sees in their repeat-buyer
+ * table. Derive it here rather than copying the expression, or the two sides
+ * drift apart the first time this changes.
+ */
+export function buyerIdFor(name: string) {
+  return `shop_${hash(name)}`;
+}
 
 /** Deterministic PRNG — same catalogue in, same history out. */
 function mulberry32(seed: number) {
@@ -237,7 +250,7 @@ export function demandEventsFor(products: Product[]): DemandEvent[] {
         quantity,
         valueKsh: Math.round(unitPrice * quantity),
         at: new Date(now - daysAgo * DAY).toISOString(),
-        buyerId: `shop_${hash(buyer.name)}`,
+        buyerId: buyerIdFor(buyer.name),
         buyerName: buyer.name,
       });
     }

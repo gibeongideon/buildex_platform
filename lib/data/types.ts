@@ -6,6 +6,14 @@ import type { BillingCycle, PackageKey } from "@/lib/schemas/subscription";
 import type { Enquiry } from "@/lib/schemas/enquiry";
 import type { Campaign } from "@/lib/schemas/campaign";
 import type { Vendor, VendorBill } from "@/lib/schemas/supplier";
+import type {
+  Customer,
+  CustomerAccountStep,
+  CustomerProfileStep,
+  VerificationLevel,
+} from "@/lib/schemas/customer";
+import type { MembershipCycle, MembershipTier } from "@/lib/schemas/membership";
+import type { OfferWithReach } from "@/lib/schemas/offer";
 import type { OpsException } from "@/lib/rules/ops";
 
 /*
@@ -51,6 +59,15 @@ export type DemoSession = {
   role: Role;
   /** Which manufacturer the "manufacturer" role is signed in as. */
   manufacturerId: string | null;
+  /**
+   * Which customer is signed in on the buying side.
+   *
+   * This is a demo session, not authentication — there is none in this build,
+   * and the account screens say so. It is separate from `manufacturerId`
+   * because a demo is routinely walked from both sides at once: approving a
+   * supplier in one tab and buying from them in another.
+   */
+  customerId: string | null;
 };
 
 export type OnboardingStepId =
@@ -165,6 +182,84 @@ export interface OnboardingRepo {
 export interface SessionRepo {
   get(): Promise<DemoSession>;
   set(patch: Partial<DemoSession>): Promise<DemoSession>;
+}
+
+// ---------------------------------------------------------------------------
+// Customers — the buying side (Chapter 9)
+// ---------------------------------------------------------------------------
+
+export type RegistrationStepId =
+  | "account"
+  | "verify-phone"
+  | "profile"
+  | "membership";
+
+/**
+ * A part-finished registration.
+ *
+ * Same shape and same reasoning as `OnboardingDraft`: browser-local in the
+ * mockup, a server-side row in production, so leaving halfway and coming back
+ * on another device resumes where it left off. Deliberately shorter — a
+ * customer is not applying for anything, and §9.40 warns against making
+ * ordinary access feel punitive.
+ */
+export type RegistrationDraft = {
+  /** Set once the account has been created. */
+  customerId: string | null;
+  currentStep: RegistrationStepId;
+  completedSteps: RegistrationStepId[];
+  /** The password is validated and then dropped — there is no auth to hold it. */
+  account: Omit<CustomerAccountStep, "password" | "confirmPassword"> | null;
+  phoneVerified: boolean;
+  profile: CustomerProfileStep | null;
+  membership: { tier: MembershipTier; cycle: MembershipCycle } | null;
+  updatedAt: string;
+};
+
+export type RegistrationPatch =
+  | Partial<RegistrationDraft>
+  | ((current: RegistrationDraft) => Partial<RegistrationDraft>);
+
+export interface RegistrationRepo {
+  load(): Promise<RegistrationDraft>;
+  save(patch: RegistrationPatch): Promise<RegistrationDraft>;
+  clear(): Promise<void>;
+}
+
+export type CustomerFilter = {
+  query?: string;
+  membership?: MembershipTier[];
+  verificationLevel?: VerificationLevel[];
+  region?: string;
+};
+
+export interface CustomerRepo {
+  /** The signed-in customer, or null when nobody is. */
+  current(): Promise<Customer | null>;
+  getById(id: string): Promise<Customer | null>;
+  list(filter?: CustomerFilter): Promise<Customer[]>;
+  /** Materialises a finished registration into a customer record. */
+  createFromDraft(draft: RegistrationDraft): Promise<Customer>;
+  update(id: string, patch: Partial<Customer>): Promise<Customer>;
+  setMembership(
+    id: string,
+    tier: MembershipTier,
+    cycle: MembershipCycle,
+  ): Promise<Customer>;
+  /** Switches the demo session to this account. */
+  signIn(id: string | null): Promise<Customer | null>;
+}
+
+/**
+ * Offers and member deals.
+ *
+ * One method rather than `public()` and `forMember()`: what a customer can see
+ * is a function of their tier, and a signed-out visitor is simply the `null`
+ * case. Two methods would put the "which am I allowed" decision in the caller,
+ * where it would eventually be made differently on two screens.
+ */
+export interface OfferRepo {
+  list(tier: MembershipTier | null): Promise<OfferWithReach[]>;
 }
 
 // ---------------------------------------------------------------------------
@@ -422,6 +517,17 @@ export interface AdminRepo {
 export interface BrowsingRepo {
   recent(limit?: number): Promise<Product[]>;
   record(productId: string): Promise<void>;
+  /**
+   * Recent search terms — §9.16 and §9.26 both list them on the dashboard.
+   *
+   * Kept here rather than on `CustomerRepo` because this repository already
+   * owns "what this browser did", and a search is worth remembering whether or
+   * not anyone has signed in. In production it becomes the same per-user store
+   * as the view history.
+   */
+  recentSearches(limit?: number): Promise<string[]>;
+  recordSearch(term: string): Promise<void>;
+  /** Clears both the view history and the search history. */
   clear(): Promise<void>;
 }
 

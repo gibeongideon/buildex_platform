@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { furthestReachableStep } from "@/lib/rules/onboarding";
 import { useOnboarding } from "./onboarding-context";
 import { stepHref } from "./steps";
-import { StepSkeleton } from "./step-frame";
+import { StepSkeleton } from "@/components/shared/step-frame";
 
 /**
  * `/connect/onboarding` is a resume link: it sends the applicant to the

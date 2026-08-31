@@ -4,11 +4,18 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BadgeCheck, FileText, Flame, Sparkles, Truck } from "lucide-react";
-import { PromoStrip, UtilityBar, UtilityLinks } from "@/components/marketplace/top-bar";
+import {
+  AccountLink,
+  PromoStrip,
+  UtilityBar,
+  UtilityLinks,
+  useMarketplaceCustomer,
+} from "@/components/marketplace/top-bar";
 import { CategoryMegaMenu } from "@/components/marketplace/mega-menu";
 import { SearchHero, SearchScopeTabs } from "@/components/marketplace/search-hero";
 import { HomeScopeProvider } from "@/components/marketplace/home-scope";
 import { CompareProvider, CompareTray } from "@/components/marketplace/compare";
+import { EntrySteps } from "@/components/marketplace/entry-steps";
 import { Wordmark } from "@/components/shared/brand";
 import { TooltipProvider } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
@@ -38,6 +45,7 @@ export function MarketplaceShell({
 }) {
   const pathname = usePathname();
   const isHome = pathname === "/marketplace";
+  const customer = useMarketplaceCustomer();
   /*
     Exactly one search input per page.
 
@@ -195,13 +203,7 @@ export function MarketplaceShell({
             >
               Request a quote
             </Link>
-            <Link
-              href="/connect/dashboard"
-              tabIndex={stuck ? 0 : -1}
-              className="shrink-0 rounded-md px-2 py-2 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted"
-            >
-              Sign in
-            </Link>
+            <AccountLink customer={customer} tabIndex={stuck ? 0 : -1} />
           </div>
         </div>
 
@@ -243,7 +245,38 @@ export function MarketplaceShell({
         {isHome ? (
           <section className="border-b border-border bg-surface-muted">
             <div className="mx-auto max-w-[112rem] px-4 sm:px-6 lg:px-8">
+              {/*
+                Chapter 9 §9.2's customer promise, and the six verbs it opens
+                with. It sits above the search field rather than below it
+                because the field is the answer to the promise: the chapter's
+                whole argument is that search is the front door, so the words
+                that frame it have to arrive first.
+              */}
+              <div className="pt-8 text-center sm:pt-10">
+                <h1 className="font-display text-xl font-bold uppercase tracking-tight text-foreground sm:text-2xl">
+                  Africa&rsquo;s home of construction materials
+                </h1>
+                <p className="mt-2 font-display text-sm font-bold uppercase tracking-[0.18em] text-brand dark:text-white">
+                  {["Search", "Compare", "Discover", "Connect", "Shop", "Save"].map(
+                    (verb, index) => (
+                      <React.Fragment key={verb}>
+                        {index > 0 ? (
+                          <span aria-hidden="true" className="mx-1.5 text-primary">
+                            &middot;
+                          </span>
+                        ) : null}
+                        {verb}
+                      </React.Fragment>
+                    ),
+                  )}
+                </p>
+                <p className="mx-auto mt-2.5 max-w-xl text-sm text-muted-foreground">
+                  Find trusted materials. Connect with trusted suppliers. Build with
+                  confidence.
+                </p>
+              </div>
               <SearchHero />
+              <EntrySteps signedIn={Boolean(customer)} />
             </div>
           </section>
         ) : (
@@ -294,6 +327,7 @@ export function MarketplaceShell({
                     { label: "Top ranking", href: "/marketplace/top-ranking" },
                     { label: "Request a quote", href: "/marketplace/rfq" },
                     { label: "Delivery regions", href: "/marketplace/regions" },
+                    { label: "My account", href: "/account" },
                   ],
                 },
                 {

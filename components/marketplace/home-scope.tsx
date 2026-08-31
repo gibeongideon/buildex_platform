@@ -18,7 +18,12 @@ import * as React from "react";
   it from the URL is what keeps it correct on a deep link.
 */
 
-export type SearchScope = "ask" | "products" | "manufacturers" | "regions";
+export type SearchScope =
+  | "ask"
+  | "products"
+  | "manufacturers"
+  | "regions"
+  | "services";
 
 type HomeScopeValue = {
   scope: SearchScope;

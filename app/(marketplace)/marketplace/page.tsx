@@ -14,12 +14,15 @@ import {
   Store,
   Truck,
 } from "lucide-react";
-import { browsingRepo, marketplaceRepo } from "@/lib/data";
+import { browsingRepo, marketplaceRepo, offerRepo } from "@/lib/data";
+import { useMarketplaceCustomer } from "@/components/marketplace/top-bar";
+import { membershipMeta } from "@/lib/schemas/membership";
 import { useHomeScope } from "@/components/marketplace/home-scope";
 import {
   AskSurface,
   ManufacturersSurface,
   RegionsSurface,
+  ServicesSurface,
 } from "@/components/marketplace/home-surfaces";
 import { useQuery } from "@/lib/data/hooks";
 import { PRODUCT_CATEGORIES, REGIONS } from "@/lib/schemas/common";
@@ -251,6 +254,19 @@ export default function MarketplaceHomePage() {
   const { data: storefronts } = useQuery(() => marketplaceRepo.listStorefronts(), []);
   const { data: recent } = useQuery(() => browsingRepo.recent(6), []);
 
+  /*
+    §9.2: "See selected public offers and categories."
+
+    Read at the customer's own tier, so a member sees their deals and a visitor
+    sees only the public ones. `offerRepo` drops any offer whose category has
+    nothing live behind it, so this rail can never advertise an empty shelf.
+  */
+  const customer = useMarketplaceCustomer();
+  const { data: offers } = useQuery(
+    () => offerRepo.list(customer?.membership ?? null),
+    [customer?.membership ?? ""],
+  );
+
   const listings = search?.listings ?? [];
   const facets = search?.facets;
 
@@ -412,8 +428,74 @@ export default function MarketplaceHomePage() {
         <RegionsSurface />
       ) : scope === "ask" ? (
         <AskSurface />
+      ) : scope === "services" ? (
+        <ServicesSurface />
       ) : (
         <>
+
+      {offers && offers.length > 0 ? (
+        <section className="mb-4">
+          <div className="mb-2 flex items-end justify-between gap-3">
+            <h2 className="text-base font-semibold tracking-tight text-foreground">
+              {customer ? "Offers and member deals" : "Offers open to everyone"}
+            </h2>
+            {!customer ? (
+              <Link
+                href="/join"
+                className="shrink-0 text-sm font-medium text-brand hover:underline"
+              >
+                More with a membership
+              </Link>
+            ) : null}
+          </div>
+          <ul className="scroll-x flex snap-x gap-3 pb-1">
+            {offers.slice(0, 6).map(({ offer, listings: count, fromKsh }) => (
+              <li key={offer.id} className="w-64 shrink-0 snap-start">
+                <Link
+                  href={`/marketplace/search?category=${encodeURIComponent(offer.category)}${
+                    offer.region ? `&region=${encodeURIComponent(offer.region)}` : ""
+                  }`}
+                  className="flex h-full flex-col rounded-lg border border-border bg-surface p-4 transition-colors hover:border-brand"
+                >
+                  <span className="flex items-start justify-between gap-2">
+                    <span className="text-sm font-semibold text-foreground">
+                      {offer.title}
+                    </span>
+                    <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground text-numeric">
+                      -{offer.savingPercent}%
+                    </span>
+                  </span>
+                  <span className="mt-1 flex-1 text-xs leading-relaxed text-muted-foreground">
+                    {offer.description}
+                  </span>
+                  <span className="mt-2.5 text-xs text-subtle-foreground">
+                    {count} listing{count === 1 ? "" : "s"}
+                    {fromKsh !== null ? (
+                      <>
+                        {" · from "}
+                        <Currency value={fromKsh} />
+                      </>
+                    ) : null}
+                  </span>
+                  {offer.minimumTier ? (
+                    <span className="mt-1.5 text-[11px] font-semibold uppercase tracking-wide text-brand">
+                      {membershipMeta(offer.minimumTier).name}
+                    </span>
+                  ) : (
+                    <span className="mt-1.5 text-[11px] font-semibold uppercase tracking-wide text-subtle-foreground">
+                      Open to all
+                    </span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-1.5 text-xs text-subtle-foreground">
+            Savings are indicative. Actual pricing depends on the supplier agreement
+            behind each listing.
+          </p>
+        </section>
+      ) : null}
 
       <section className="grid items-stretch gap-4 lg:grid-cols-[17rem_minmax(0,1fr)]">
         <div className="flex max-h-[26rem] flex-col rounded-lg border border-border bg-surface">

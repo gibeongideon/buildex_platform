@@ -7,13 +7,15 @@ import {
   ClipboardList,
   Globe,
   MapPin,
-  MessageSquare,
   ShoppingCart,
   User,
 } from "lucide-react";
 import { Wordmark } from "@/components/shared/brand";
 import { ThemeToggle } from "@/components/shared/theme";
+import { customerRepo } from "@/lib/data";
+import { useQuery } from "@/lib/data/hooks";
 import { REGIONS } from "@/lib/schemas/common";
+import type { Customer } from "@/lib/schemas/customer";
 import { cn } from "@/lib/utils";
 
 /*
@@ -66,6 +68,49 @@ const UTILITY_LINKS = [
   { label: "Sell on Buildex Connect", href: "/manufacturers" },
 ];
 
+/**
+ * The account control.
+ *
+ * The one place a visitor learns they have an identity here, so it names the
+ * account rather than saying a generic "Account" — and when nobody is signed
+ * in it offers the thing that fixes that, instead of the dead link into the
+ * supplier portal it used to be.
+ *
+ * Exported because it appears twice: in the utility bar and again in the
+ * collapsed scroll header. Two copies is how one of them ends up still
+ * pointing at the supplier dashboard.
+ */
+export function AccountLink({
+  customer,
+  tabIndex,
+  className,
+}: {
+  customer: Customer | null | undefined;
+  tabIndex?: number;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={customer ? "/account" : "/join"}
+      tabIndex={tabIndex}
+      className={cn(
+        "flex shrink-0 items-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted",
+        className,
+      )}
+    >
+      <User className="size-5" aria-hidden="true" />
+      <span className="hidden max-w-32 truncate sm:inline">
+        {customer ? customer.name.split(" ")[0] : "Sign in"}
+      </span>
+    </Link>
+  );
+}
+
+/** Who is signed in on the buying side, for the chrome that names them. */
+export function useMarketplaceCustomer() {
+  return useQuery(() => customerRepo.current(), []).data;
+}
+
 export function UtilityBar({
   region,
   onRegionChange,
@@ -73,6 +118,8 @@ export function UtilityBar({
   region: string;
   onRegionChange: (region: string) => void;
 }) {
+  const customer = useMarketplaceCustomer();
+
   return (
     <div className="border-b border-border bg-surface">
       <div className="mx-auto flex h-14 max-w-[112rem] items-center gap-4 px-4 sm:px-6 lg:px-8">
@@ -108,9 +155,16 @@ export function UtilityBar({
           <ThemeToggle className="hidden lg:inline-flex" />
 
           {[
-            { icon: MessageSquare, label: "Messages", href: "/marketplace" },
-            { icon: ClipboardList, label: "Saved lists", href: "/marketplace/rfq" },
-            { icon: ShoppingCart, label: "Enquiry basket", href: "/marketplace/rfq" },
+            {
+              icon: ClipboardList,
+              label: "Quotations",
+              href: customer ? "/account/quotations" : "/marketplace/rfq",
+            },
+            {
+              icon: ShoppingCart,
+              label: "Enquiry basket",
+              href: "/marketplace/rfq",
+            },
           ].map(({ icon: Icon, label, href }) => (
             <Link
               key={label}
@@ -123,13 +177,7 @@ export function UtilityBar({
             </Link>
           ))}
 
-          <Link
-            href="/connect/dashboard"
-            className="flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted"
-          >
-            <User className="size-5" aria-hidden="true" />
-            <span className="hidden sm:inline">Sign in</span>
-          </Link>
+          <AccountLink customer={customer} />
         </div>
       </div>
     </div>

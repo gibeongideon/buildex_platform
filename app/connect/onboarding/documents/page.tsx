@@ -14,7 +14,8 @@ import {
 import { buildUploadedDocument } from "@/lib/rules/documents";
 import { outstandingDocuments } from "@/lib/rules/onboarding";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
-import { StepShell, StepSkeleton } from "../step-frame";
+import { StepShell, StepSkeleton } from "@/components/shared/step-frame";
+import { stepHref } from "../steps";
 
 const REQUIRED = DOCUMENT_TYPES.filter((d) => d.required);
 const OPTIONAL = DOCUMENT_TYPES.filter((d) => !d.required);
@@ -60,7 +61,7 @@ export default function DocumentsStepPage() {
     <StepShell
       title="Upload your documents"
       description="Buildex Operations reviews these against BRS, KRA and IPRS records. Clear scans or phone photos are fine, as long as every field is legible."
-      back="directors"
+      backHref={stepHref("directors")}
       onSubmit={onSubmit}
       submitting={saving}
       primaryDisabled={!complete}

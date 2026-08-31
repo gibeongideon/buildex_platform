@@ -456,3 +456,90 @@ export function AskSurface() {
     </>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Services — FundiSmart
+// ---------------------------------------------------------------------------
+
+/*
+  Chapter 9 §9.2 and §9.17 both put services and FundiSmart professionals in the
+  search box: "a gypsum installer" is one of the eight things the chapter says a
+  customer searches for.
+
+  The platform holds no professional data at all yet, so this surface says so
+  plainly and describes what it will hold. That is a deliberate choice over two
+  alternatives, both worse: leaving the tab out means retrofitting a whole
+  category of thing into the marketplace's top-level navigation later, after
+  customers have learned its shape; and filling it with invented fundis would
+  put fabricated ratings next to the real, counted numbers everywhere else —
+  exactly what `lib/rules/suppliers.ts` refuses to do for suppliers.
+*/
+
+/** What a professional record will carry, stated so the tab is not a blank. */
+const FUNDISMART_TRADES = [
+  "Masonry & plastering",
+  "Gypsum & ceilings",
+  "Plumbing",
+  "Electrical",
+  "Tiling",
+  "Painting & decorating",
+  "Roofing & waterproofing",
+  "Carpentry & joinery",
+];
+
+export function ServicesSurface() {
+  return (
+    <>
+      <SurfaceHeadline
+        headline="Find a fundi, not just the materials"
+        points={[
+          "Verified trades, county by county",
+          "The same trust record as a supplier",
+          "Quote a job, not a product",
+        ]}
+      />
+
+      <div className="mx-auto max-w-3xl">
+        <div className="rounded-lg border border-border bg-surface p-6">
+          <p className="text-sm font-semibold text-foreground">
+            FundiSmart is not open yet
+          </p>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Materials are only half of a build. FundiSmart will list the trades that
+            install them — verified, rated on work they have actually done, and
+            searchable by county the same way suppliers are. It is deliberately not
+            here yet: a directory of professionals with invented ratings would
+            undermine every counted number beside it.
+          </p>
+
+          <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-subtle-foreground">
+            Trades it will cover
+          </p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {FUNDISMART_TRADES.map((trade) => (
+              <li
+                key={trade}
+                className="rounded-full border border-border bg-surface-muted px-2.5 py-1 text-xs text-muted-foreground"
+              >
+                {trade}
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-6 border-t border-border pt-5">
+            <p className="text-sm text-muted-foreground">
+              In the meantime, suppliers on the marketplace list their own delivery and
+              installation terms on their storefronts.
+            </p>
+            <Button variant="secondary" size="sm" className="mt-3" asChild>
+              <Link href="/marketplace/manufacturers">
+                <Factory aria-hidden="true" />
+                Browse verified suppliers
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

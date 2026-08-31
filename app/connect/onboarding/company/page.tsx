@@ -24,7 +24,8 @@ import {
 } from "@/lib/schemas/common";
 import { companyStepSchema, type CompanyStep } from "@/lib/schemas/manufacturer";
 import { useOnboarding, useStepGuard } from "../onboarding-context";
-import { StepShell, StepSkeleton } from "../step-frame";
+import { StepShell, StepSkeleton } from "@/components/shared/step-frame";
+import { stepHref } from "../steps";
 
 type PinCheck =
   | { state: "idle" }
@@ -94,7 +95,7 @@ export default function CompanyStepPage() {
     <StepShell
       title="Company details"
       description="Enter these exactly as they appear on your registration documents. Buildex verifies them against BRS and KRA records, and mismatches are the most common reason an application stalls."
-      back="verify-phone"
+      backHref={stepHref("verify-phone")}
       onSubmit={onSubmit}
       submitting={saving || form.formState.isSubmitting}
       primaryDisabled={pinCheck.state === "duplicate"}

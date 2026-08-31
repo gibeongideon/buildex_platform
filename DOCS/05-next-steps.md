@@ -1,45 +1,65 @@
 # 05 — Next Steps
 
-## Recommended next slice: Phase 4
+## Recommended next slice: C2 — membership and the access gate
 
-Phase 3 closed the Connect loop: a manufacturer signs up, **Buildex Operations verifies
-them in `/admin`**, the listings they were holding go live, and a buyer can find them. The
-console also gave the platform its first internal view — one activity timeline, one
-exceptions list, one place where suspension, listing moderation and package overrides
-happen.
+Phase 3 closed the Connect loop on the *selling* side: a manufacturer signs up, Buildex
+Operations verifies them in `/admin`, the listings they were holding go live, and a buyer
+can find them.
 
-What is still missing is the *other* side of the counter. The marketplace can be browsed and
-enquired against, but a hardware shop has no account, no cart and no order. Everything
-downstream depends on that: Buildex Capital cannot score credit without transaction
-history, and consumer intelligence has no POS data to read.
+**C1 closed the identity gap on the buying side.** There is now a `Customer` — one typed
+record covering a homeowner, a fundi, a contractor, a hardware shop, a developer and an
+institution — with registration at `/join`, four derived verification levels, and an
+account area at `/account`. The marketplace front door carries Chapter 9's promise and the
+three-step entry journey, and the header knows who is signed in.
 
-### Phase 4 — Buildex Interiors: hardware shop portal & supply
+What is still missing is everything that identity was *for*. The membership tiers and the
+§9.12 access matrix are declared in `lib/schemas/membership.ts` because registration needs
+a real comparison to show — but nothing reads them as an entitlement yet. That is C2.
 
-| Screen | Scope |
+### C2 — membership and the access gate
+
+| Piece | Scope |
 | --- | --- |
-| `/shop/onboarding` | Hardware KYB plus owner ID verification — the same five-check pipeline shape, different document pack |
-| `/shop/dashboard` | Orders in flight, spend to date, credit eligibility progress (read-only until Phase 5) |
-| `/shop/cart` | Multi-supplier basket. Quantity bands already price per line; the open question is whether one order can span suppliers |
-| `/shop/orders/[id]` | Order tracking, delivery notes, dispute path |
-| `/shop/inventory` | Stock and movement records — the data Phase 6's scoring model needs |
-| `/admin/shops` | The hardware directory in the console, alongside the manufacturer one |
+| `lib/rules/access.ts` | `can(customer, capability)` → allowed, or what is needed: membership, tokens, verification, trust. §9.33's decision logic in one pure function |
+| `components/shared/access-gate.tsx` | One component for every withheld value: what is behind it, why, and the one action that opens it |
+| `/account/membership` | Current tier, entitlements, upgrade — reusing `PlanCards` / `PlanComparison` |
+| A public pricing page | The same `ACCESS_MATRIX`, so it cannot promise what the gate will not grant |
+| `lib/rules/pricing.ts` | Member price over the band price (§9.27), on product, search and compare — marked indicative |
+| Member deals | Already seeded; C2 makes the tier actually gate them |
 
-Most of the seam is already shaped for it: `EnquiryRepo` proves the buyer→supplier round
-trip, `publicListings()` already governs what a shop can see, and the console's table and
-exception patterns transfer directly. What is genuinely new is an `OrderRepo` and a
-`WalletRepo` stub — and the decision above about multi-supplier orders, which changes the
-schema.
+**The one change that can make the product worse.** §9.40: *"Do not charge simply for basic
+discovery."* Everything public today — search, categories, price bands, MOQ, lead times,
+verification status — stays public. The gate applies only to *new* premium surfaces:
+detailed supplier and product intelligence, supplier contact, advanced comparison, market
+price intelligence, premium quotation. Gating what is free today would be a regression
+dressed up as a feature.
 
-**Rough order:** `OrderRepo` interface → hardware onboarding → cart and checkout → order
-tracking → the console's hardware directory → inventory.
+**Rough order:** `can()` → the gate component → `/account/membership` → the public pricing
+page → member pricing → gating the new premium surfaces.
+
+### Then
+
+| Phase | Scope | Depends on |
+| --- | --- | --- |
+| C3 | Wallet, the KES 25 token engine, statements | C2 (the gate is what a token opens) |
+| C4 | Buyer quote inbox, cart, checkout, per-supplier orders, delivery, authorized users | C3 (checkout draws on the wallet) |
+| C5 | Trust Score, Prestige Profile, Buildex Supplier Score | C4 for the commercial dimensions — though seeded customers already carry delivery history, so it is not empty before then |
+| C6 | Personalisation, alternatives, procurement analytics, Business Passport, the §9.35 KPIs | C4, C5 |
+| C7 | FundiSmart — professionals directory and service enquiries | Independent; the search scope and IA are already in place |
+| 5–6 | Buildex Capital — wallet-backed credit, scoring, collections | **Blocked on the regulatory review below**, not on software |
+| 8 | Consumer segments, campaign builder, attribution | C4 transaction data |
+| 9 | Backend cutover | Can start per-entity as soon as a schema is agreed |
+
+**The old Phase 4 (`/shop/*` hardware portal) is gone.** Its scope lives in C4 against the
+one `Customer` record — see [01 — Implementation Plan](./01-implementation-plan.md).
 
 ### Also outstanding from earlier phases
 
 | Item | Note |
 | --- | --- |
-| Bulk CSV price-list import (`/connect/catalogue/import`) | A preview table with a per-row error report. Self-contained addition to a page that already works |
 | Four-eyes on rejection | A rejection costs a supplier days. The decision path already records what happened; what it needs is a second reviewer, which needs authentication first |
-| Hardware-facing exceptions in the console | Shops that stop ordering, disputes ageing. Nothing to show until Phase 4 |
+| Customer-facing exceptions in the console | Customers who stop ordering, disputes ageing, tokens bought but never spent. Nothing to show until C3 and C4 |
+| A customer directory in `/admin` | The console has a manufacturer register and a vendor ledger; it has no view of the customer base. Worth pulling forward alongside C2, since membership run-rate is a commercial question |
 
 ---
 
@@ -137,5 +157,5 @@ Small items worth picking up alongside feature work.
 | Add one Playwright spec per journey as each phase lands | Journey A has four specs; keep that ratio |
 | Keep the contrast spec in CI | It measures text and border ratios in both themes, and was verified to fail on the previous token values. Cheap insurance against a token tune that quietly makes the product faint again |
 | Revisit React Hook Form compiler compatibility | 6 lint warnings today. Harmless, but worth re-checking when RHF ships compiler support |
-| Bump `buildex.mock.v6` when fixture shape changes | Otherwise stale persisted data wins over new seeds. v5 added four in-flight suppliers, v6 corrected the seeded check and response timestamps |
+| Bump `buildex.mock.v9` when fixture shape changes | Otherwise stale persisted data wins over new seeds. v9 added customers, offers, the registration draft and the search history |
 | Keep the seam greps in CI | `grep -rn "fixtures" app/ components/` returning anything means the cutover is no longer a one-file change |

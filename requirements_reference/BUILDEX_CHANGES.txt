@@ -1,3 +1,11 @@
 Compare feature should Compare same product fro different manufactures
 
 We can also have Suggest feature to sugest alternative product
+
+
+OLP 86
+Documentations has been Done/Need Documentations for lates changes
+
+Buildex_
+BIB 154 -Claudpepper Migrations
+

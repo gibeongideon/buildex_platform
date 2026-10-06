@@ -1,0 +1,121 @@
+Error when resoring one DB
+File "/usr/lib/python3/dist-packages/odoo/modules/loading.py", line 427, in load_modules
+    loaded_modules, processed_modules = load_module_graph(
+  File "/usr/lib/python3/dist-packages/odoo/modules/loading.py", line 187, in load_module_graph
+    load_openerp_module(package.name)
+  File "/usr/lib/python3/dist-packages/odoo/modules/module.py", line 424, in load_openerp_module
+    __import__(qualname)
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/__init__.py", line 5, in <module>
+    from . import models
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/models/__init__.py", line 21, in <module>
+    from . import ir_mail_server
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/models/ir_mail_server.py", line 20, in <module>
+    import OpenSSL
+  File "/usr/lib/python3/dist-packages/OpenSSL/__init__.py", line 8, in <module>
+    from OpenSSL import crypto, SSL
+  File "/usr/lib/python3/dist-packages/OpenSSL/crypto.py", line 740, in <module>
+    class X509Extension(object):
+  File "/usr/lib/python3/dist-packages/OpenSSL/crypto.py", line 813, in X509Extension
+    _lib.GEN_EMAIL: "email",
+AttributeError: module 'lib' has no attribute 'GEN_EMAIL'
+2026-09-01 14:09:49,826 2304 CRITICAL ? odoo.modules.module: Couldn't load module base 
+2026-09-01 14:09:49,826 2304 ERROR ? odoo.service.server: Failed to load server-wide module `base`. 
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/odoo/service/server.py", line 1349, in load_server_wide_modules
+    odoo.modules.module.load_openerp_module(m)
+  File "/usr/lib/python3/dist-packages/odoo/modules/module.py", line 424, in load_openerp_module
+    __import__(qualname)
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/__init__.py", line 5, in <module>
+    from . import models
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/models/__init__.py", line 21, in <module>
+    from . import ir_mail_server
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/models/ir_mail_server.py", line 20, in <module>
+    import OpenSSL
+  File "/usr/lib/python3/dist-packages/OpenSSL/__init__.py", line 8, in <module>
+    from OpenSSL import crypto, SSL
+  File "/usr/lib/python3/dist-packages/OpenSSL/crypto.py", line 740, in <module>
+    class X509Extension(object):
+  File "/usr/lib/python3/dist-packages/OpenSSL/crypto.py", line 813, in X509Extension
+    _lib.GEN_EMAIL: "email",
+AttributeError: module 'lib' has no attribute 'GEN_EMAIL'
+2026-09-01 14:09:49,831 2304 CRITICAL ? odoo.modules.module: Couldn't load module web 
+2026-09-01 14:09:49,831 2304 ERROR ? odoo.service.server: Failed to load server-wide module `web`.
+The `web` module is provided by the addons found in the `openerp-web` project.
+Maybe you forgot to add those addons in your addons_path configuration. 
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/odoo/service/server.py", line 1349, in load_server_wide_modules
+    odoo.modules.module.load_openerp_module(m)
+  File "/usr/lib/python3/dist-packages/odoo/modules/module.py", line 424, in load_openerp_module
+    __import__(qualname)
+  File "/usr/lib/python3/dist-packages/odoo/addons/web/__init__.py", line 4, in <module>
+    from . import controllers
+  File "/usr/lib/python3/dist-packages/odoo/addons/web/controllers/__init__.py", line 5, in <module>
+    from . import database
+  File "/usr/lib/python3/dist-packages/odoo/addons/web/controllers/database.py", line 19, in <module>
+    from odoo.addons.base.models.ir_qweb import render as qweb_render
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/__init__.py", line 5, in <module>
+    from . import models
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/models/__init__.py", line 21, in <module>
+    from . import ir_mail_server
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/models/ir_mail_server.py", line 20, in <module>
+    import OpenSSL
+  File "/usr/lib/python3/dist-packages/OpenSSL/__init__.py", line 8, in <module>
+    from OpenSSL import crypto, SSL
+  File "/usr/lib/python3/dist-packages/OpenSSL/crypto.py", line 740, in <module>
+    class X509Extension(object):
+  File "/usr/lib/python3/dist-packages/OpenSSL/crypto.py", line 813, in X509Extension
+    _lib.GEN_EMAIL: "email",
+AttributeError: module 'lib' has no attribute 'GEN_EMAIL'
+2026-09-01 14:09:49,850 2304 CRITICAL trinityee123412_135012 odoo.modules.module: Couldn't load module base 
+2026-09-01 14:09:49,852 2304 WARNING trinityee123412_135012 odoo.modules.loading: Transient module states were reset 
+2026-09-01 14:09:49,852 2304 ERROR trinityee123412_135012 odoo.modules.registry: Failed to load registry 
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/odoo/modules/registry.py", line 99, in new
+    odoo.modules.load_modules(registry, force_demo, status, update_module)
+  File "/usr/lib/python3/dist-packages/odoo/modules/loading.py", line 427, in load_modules
+    loaded_modules, processed_modules = load_module_graph(
+  File "/usr/lib/python3/dist-packages/odoo/modules/loading.py", line 187, in load_module_graph
+    load_openerp_module(package.name)
+  File "/usr/lib/python3/dist-packages/odoo/modules/module.py", line 424, in load_openerp_module
+    __import__(qualname)
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/__init__.py", line 5, in <module>
+    from . import models
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/models/__init__.py", line 21, in <module>
+    from . import ir_mail_server
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/models/ir_mail_server.py", line 20, in <module>
+    import OpenSSL
+  File "/usr/lib/python3/dist-packages/OpenSSL/__init__.py", line 8, in <module>
+    from OpenSSL import crypto, SSL
+  File "/usr/lib/python3/dist-packages/OpenSSL/crypto.py", line 740, in <module>
+    class X509Extension(object):
+  File "/usr/lib/python3/dist-packages/OpenSSL/crypto.py", line 813, in X509Extension
+    _lib.GEN_EMAIL: "email",
+AttributeError: module 'lib' has no attribute 'GEN_EMAIL'
+2026-09-01 14:09:49,853 2304 CRITICAL trinityee123412_135012 odoo.service.server: Failed to initialize database `trinityee123412_135012`. 
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/odoo/service/server.py", line 1422, in preload_registries
+    registry = Registry.new(dbname, update_module=update_module)
+  File "<decorator-gen-16>", line 2, in new
+  File "/usr/lib/python3/dist-packages/odoo/tools/func.py", line 87, in locked
+    return func(inst, *args, **kwargs)
+  File "/usr/lib/python3/dist-packages/odoo/modules/registry.py", line 99, in new
+    odoo.modules.load_modules(registry, force_demo, status, update_module)
+  File "/usr/lib/python3/dist-packages/odoo/modules/loading.py", line 427, in load_modules
+    loaded_modules, processed_modules = load_module_graph(
+  File "/usr/lib/python3/dist-packages/odoo/modules/loading.py", line 187, in load_module_graph
+    load_openerp_module(package.name)
+  File "/usr/lib/python3/dist-packages/odoo/modules/module.py", line 424, in load_openerp_module
+    __import__(qualname)
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/__init__.py", line 5, in <module>
+    from . import models
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/models/__init__.py", line 21, in <module>
+    from . import ir_mail_server
+  File "/usr/lib/python3/dist-packages/odoo/addons/base/models/ir_mail_server.py", line 20, in <module>
+    import OpenSSL
+  File "/usr/lib/python3/dist-packages/OpenSSL/__init__.py", line 8, in <module>
+    from OpenSSL import crypto, SSL
+  File "/usr/lib/python3/dist-packages/OpenSSL/crypto.py", line 740, in <module>
+    class X509Extension(object):
+  File "/usr/lib/python3/dist-packages/OpenSSL/crypto.py", line 813, in X509Extension
+    _lib.GEN_EMAIL: "email",
+AttributeError: module 'lib' has no attribute 'GEN_EMAIL'

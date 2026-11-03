@@ -55,16 +55,19 @@ const CHAIN = [
 export default function HomePage() {
   return (
     <>
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+      <section className="hero-glow border-b border-border">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <div className="min-w-0">
-              <p className="text-sm font-medium text-brand">The Buildex Connect platform</p>
-              <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              <p className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3 py-1 text-xs font-semibold text-brand shadow-card backdrop-blur">
+                <span aria-hidden="true" className="size-1.5 rounded-full bg-primary ring-2 ring-primary/30" />
+                The Buildex Connect platform
+              </p>
+              <h1 className="mt-5 text-2xl font-bold leading-tight text-foreground sm:text-[2.75rem] sm:leading-[1.12]">
                 One platform connecting manufacturers, hardware shops and the capital that
                 moves between them.
               </h1>
-              <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
                 Buildex Connect is the platform Buildex Interiors is building to move from product supply to infrastructure for
                 Kenya&apos;s construction material market — connecting what a manufacturer
                 produces to what a builder buys at a local hardware, and financing the stock in
@@ -88,7 +91,7 @@ export default function HomePage() {
               The chain is the whole strategic argument, so it sits beside the
               headline rather than further down the page.
             */}
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-xl border border-border bg-surface/90 p-5 shadow-card backdrop-blur">
               <p className="text-[11px] font-semibold uppercase tracking-wider text-subtle-foreground">
                 How the chain connects
               </p>
@@ -99,7 +102,7 @@ export default function HomePage() {
                   return (
                     <li key={link.label} className="flex gap-3">
                       <div className="flex flex-col items-center self-stretch">
-                        <span className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground">
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand text-brand-foreground">
                           <Icon className="size-4" aria-hidden="true" />
                         </span>
                         {!isLast ? (
@@ -129,8 +132,8 @@ export default function HomePage() {
 
 
       <section className="border-b border-border bg-surface">
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+          <h2 className="text-xl font-bold text-foreground sm:text-2xl">
             Three businesses, one chain of data
           </h2>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -145,7 +148,7 @@ export default function HomePage() {
               const card = (
                 <>
                   <div className="flex items-start justify-between gap-3">
-                    <span className="rounded-md border border-border bg-background p-2 text-brand">
+                    <span className="rounded-lg bg-brand p-2.5 text-brand-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                       <Icon className="size-5" aria-hidden="true" />
                     </span>
                     <span className="rounded-full border border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
@@ -171,7 +174,7 @@ export default function HomePage() {
                   {product.href ? (
                     <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-brand">
                       Get started
-                      <ArrowRight className="size-3.5" aria-hidden="true" />
+                      <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                     </span>
                   ) : null}
                 </>
@@ -181,14 +184,14 @@ export default function HomePage() {
                 <Link
                   key={product.key}
                   href={product.href}
-                  className="flex flex-col rounded-lg border border-border bg-background p-5 transition-colors hover:border-border-strong"
+                  className="lift group flex flex-col rounded-xl border border-border bg-background p-6 shadow-card"
                 >
                   {card}
                 </Link>
               ) : (
                 <div
                   key={product.key}
-                  className="flex flex-col rounded-lg border border-border bg-background p-5"
+                  className="group flex flex-col rounded-xl border border-border bg-background p-6 shadow-card"
                 >
                   {card}
                 </div>
@@ -203,7 +206,7 @@ export default function HomePage() {
           <div className="flex gap-4">
             <BuildexMark className="mt-1 h-8 shrink-0" />
             <div>
-              <h2 className="text-lg font-semibold tracking-tight text-foreground">
+              <h2 className="text-lg font-bold text-foreground sm:text-xl">
                 Manufacturers: get in front of the hardware network
               </h2>
               <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">

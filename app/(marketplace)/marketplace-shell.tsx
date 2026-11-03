@@ -243,7 +243,7 @@ export function MarketplaceShell({
         </div>
 
         {isHome ? (
-          <section className="border-b border-border bg-surface-muted">
+          <section className="hero-glow border-b border-border">
             <div className="mx-auto max-w-[112rem] px-4 sm:px-6 lg:px-8">
               {/*
                 Chapter 9 §9.2's customer promise, and the six verbs it opens
@@ -253,7 +253,7 @@ export function MarketplaceShell({
                 that frame it have to arrive first.
               */}
               <div className="pt-8 text-center sm:pt-10">
-                <h1 className="font-display text-xl font-bold uppercase tracking-tight text-foreground sm:text-2xl">
+                <h1 className="font-display text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-3xl">
                   Africa&rsquo;s home of construction materials
                 </h1>
                 {/*

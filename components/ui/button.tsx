@@ -18,14 +18,14 @@ import { cn } from "@/lib/utils";
   the single most important thing on the page.
 */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         primary:
-          "border border-primary-border bg-primary text-primary-foreground hover:bg-primary-hover font-semibold shadow-none",
+          "border border-primary-border bg-primary text-primary-foreground hover:bg-primary-hover font-semibold shadow-none hover:-translate-y-px hover:shadow-card-hover",
         brand:
-          "bg-brand text-brand-foreground hover:bg-brand-hover shadow-none",
+          "bg-brand text-brand-foreground hover:bg-brand-hover shadow-none hover:-translate-y-px hover:shadow-card-hover",
         secondary:
           "border border-border-strong bg-surface text-foreground hover:bg-surface-muted",
         ghost: "text-muted-foreground hover:bg-surface-muted hover:text-foreground",

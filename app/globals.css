@@ -128,10 +128,18 @@
 
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 
-  /* Overlays only. Surfaces are separated by 1px borders, not shadows. */
+  /*
+    Surfaces are still separated by 1px borders; the card shadow only adds a
+    soft lift beneath them, tinted with brand blue rather than grey so it reads
+    as part of the palette. Overlays keep the stronger shadow.
+  */
+  --shadow-card: 0 1px 2px rgb(38 46 112 / 0.04),
+    0 12px 32px -18px rgb(38 46 112 / 0.18);
+  --shadow-card-hover: 0 1px 2px rgb(38 46 112 / 0.06),
+    0 20px 44px -18px rgb(38 46 112 / 0.28);
   --shadow-overlay: 0 16px 40px -12px rgb(31 38 92 / 0.28),
     0 4px 12px -4px rgb(31 38 92 / 0.16);
 }
@@ -301,6 +309,12 @@
     letter-spacing: -0.011em;
   }
 
+  /* Large display type reads better set tight. */
+  h1,
+  h2 {
+    letter-spacing: -0.025em;
+  }
+
   /*
     Every figure in this product is money, a percentage or a count, and they
     are read in vertical columns. Proportional digits make those columns
@@ -359,6 +373,39 @@
   .on-brand {
     background-color: var(--buildex-blue);
     color: #ffffff;
+  }
+
+  /*
+    Hero ground: a faint yellow glow top-right and a blue one bottom-left over
+    the page colour. Both are the brand colours at low alpha, so the hero gains
+    depth without adding a colour the palette does not have.
+  */
+  .hero-glow {
+    background:
+      radial-gradient(55% 70% at 88% 0%, rgb(255 218 3 / 0.16), transparent 70%),
+      radial-gradient(50% 80% at 5% 100%, rgb(38 46 112 / 0.10), transparent 70%),
+      var(--bg);
+  }
+
+  [data-theme="dark"] .hero-glow {
+    background:
+      radial-gradient(55% 70% at 88% 0%, rgb(255 218 3 / 0.07), transparent 70%),
+      radial-gradient(50% 80% at 5% 100%, rgb(157 161 191 / 0.10), transparent 70%),
+      var(--bg);
+  }
+
+  /* Interactive cards rise slightly on hover. Reduced motion drops the move. */
+  .lift {
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .lift:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+    @apply shadow-card-hover;
   }
 
   [data-theme="dark"] .on-brand {
